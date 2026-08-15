@@ -1,69 +1,53 @@
-/* =====================================================
+/* =========================================================
    BACKGROUND MUSIC
-===================================================== */
+========================================================= */
 
-const music =
-    document.getElementById("bgMusic");
-
-const musicBtn =
-    document.getElementById("musicBtn");
-
-const musicText =
-    document.getElementById("musicText");
+const music = document.getElementById("bgMusic");
+const musicBtn = document.getElementById("musicBtn");
+const musicText = document.getElementById("musicText");
 
 let isPlaying = false;
 
+musicBtn.addEventListener("click", async () => {
 
-musicBtn.addEventListener(
-    "click",
-    async () => {
+    try {
 
-        try {
+        if (!isPlaying) {
 
-            if (!isPlaying) {
+            await music.play();
 
-                await music.play();
+            isPlaying = true;
 
-                isPlaying = true;
+            musicText.textContent = "Pause";
 
-                musicText.textContent =
-                    "Pause";
+            musicBtn.classList.add("playing");
 
-                musicBtn.classList.add(
-                    "playing"
-                );
+        } else {
 
-            } else {
+            music.pause();
 
-                music.pause();
+            isPlaying = false;
 
-                isPlaying = false;
+            musicText.textContent = "Tap for music";
 
-                musicText.textContent =
-                    "Music";
-
-                musicBtn.classList.remove(
-                    "playing"
-                );
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Music could not be played:",
-                error
-            );
-
+            musicBtn.classList.remove("playing");
         }
 
+    } catch (error) {
+
+        console.error(
+            "Music could not be played:",
+            error
+        );
+
     }
-);
+
+});
 
 
-/* =====================================================
-   GUEST DATA
-===================================================== */
+/* =========================================================
+   GUEST MESSAGE
+========================================================= */
 
 const guestName =
     document.getElementById("guestName");
@@ -77,9 +61,9 @@ const guestMessage =
 let guests = [];
 
 
-/* =====================================================
-   LOAD GUESTS.JSON
-===================================================== */
+/* =========================================================
+   LOAD GUESTS
+========================================================= */
 
 async function loadGuests() {
 
@@ -116,9 +100,9 @@ async function loadGuests() {
 }
 
 
-/* =====================================================
+/* =========================================================
    NORMALIZE NAME
-===================================================== */
+========================================================= */
 
 function normalizeName(name) {
 
@@ -130,43 +114,55 @@ function normalizeName(name) {
 }
 
 
-/* =====================================================
-   FIND MATCHING GUESTS
-===================================================== */
+/* =========================================================
+   FIND GUESTS
+========================================================= */
 
 function findGuests(searchName) {
 
     const search =
         normalizeName(searchName);
 
-    return guests.filter(
-        guest => {
+    return guests.filter(guest => {
 
-            const fullName =
-                normalizeName(
-                    guest.name
-                );
+        const fullName =
+            normalizeName(guest.name);
 
-            if (fullName === search) {
+        if (fullName === search) {
 
-                return true;
-
-            }
-
-            const firstName =
-                fullName.split(" ")[0];
-
-            return firstName === search;
+            return true;
 
         }
-    );
+
+        const firstName =
+            fullName.split(" ")[0];
+
+        return firstName === search;
+
+    });
 
 }
 
 
-/* =====================================================
-   SHOW MESSAGE
-===================================================== */
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(text) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+
+}
+
+
+/* =========================================================
+   SHOW GUEST MESSAGE
+========================================================= */
 
 function showGuestMessage(guest) {
 
@@ -189,46 +185,42 @@ function showGuestMessage(guest) {
 
     `;
 
-    guestMessage.classList.add(
-        "show"
-    );
+    guestMessage.classList.add("show");
 
 }
 
 
-/* =====================================================
-   SHOW NAME CHOICES
-===================================================== */
+/* =========================================================
+   SHOW GUEST CHOICES
+========================================================= */
 
 function showGuestChoices(matches) {
 
     let buttons = "";
 
+    matches.forEach((guest, index) => {
 
-    matches.forEach(
-        (guest, index) => {
+        buttons += `
 
-            buttons += `
+            <button
+                class="guest-choice"
+                data-index="${index}"
+                type="button">
 
-                <button
-                    class="guest-choice"
-                    data-index="${index}"
-                    type="button"
-                >
-                    ${escapeHTML(guest.name)}
-                </button>
+                ${escapeHTML(guest.name)}
 
-            `;
+            </button>
 
-        }
-    );
+        `;
+
+    });
 
 
     guestMessage.innerHTML = `
 
         <div class="message-divider"></div>
 
-        <p class="message-text choice-title">
+        <p class="message-text">
 
             We found a few guests with that name.
 
@@ -247,9 +239,7 @@ function showGuestChoices(matches) {
     `;
 
 
-    guestMessage.classList.add(
-        "show"
-    );
+    guestMessage.classList.add("show");
 
 
     const choiceButtons =
@@ -258,35 +248,33 @@ function showGuestChoices(matches) {
         );
 
 
-    choiceButtons.forEach(
-        button => {
+    choiceButtons.forEach(button => {
 
-            button.addEventListener(
-                "click",
-                () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-                    const index =
-                        button.dataset.index;
+                const index =
+                    button.dataset.index;
 
-                    const selectedGuest =
-                        matches[index];
+                const selectedGuest =
+                    matches[index];
 
-                    showGuestMessage(
-                        selectedGuest
-                    );
+                showGuestMessage(
+                    selectedGuest
+                );
 
-                }
-            );
+            }
+        );
 
-        }
-    );
+    });
 
 }
 
 
-/* =====================================================
+/* =========================================================
    REVEAL GUEST MESSAGE
-===================================================== */
+========================================================= */
 
 function revealGuestMessage() {
 
@@ -294,15 +282,20 @@ function revealGuestMessage() {
         guestName.value.trim();
 
 
+    /* =====================================================
+       EMPTY NAME
+    ===================================================== */
+
     if (!input) {
 
         guestName.focus();
+
 
         guestMessage.innerHTML = `
 
             <div class="message-divider"></div>
 
-            <p class="message-text">
+            <p class="message-text validation-message">
 
                 Please enter your name first.
 
@@ -310,18 +303,46 @@ function revealGuestMessage() {
 
         `;
 
+
         guestMessage.classList.add(
             "show"
         );
 
-        return;
 
+        /*
+         * Restart the red shake animation.
+         */
+
+        guestName.classList.remove(
+            "name-required"
+        );
+
+        void guestName.offsetWidth;
+
+        guestName.classList.add(
+            "name-required"
+        );
+
+        return;
     }
+
+
+    /* =====================================================
+       NAME ENTERED
+    ===================================================== */
+
+    guestName.classList.remove(
+        "name-required"
+    );
 
 
     const matches =
         findGuests(input);
 
+
+    /* =====================================================
+       NAME NOT FOUND
+    ===================================================== */
 
     if (matches.length === 0) {
 
@@ -336,21 +357,25 @@ function revealGuestMessage() {
 
                 <br><br>
 
-                Please try typing your first name
-                or full name.
+                Please try typing your first
+                name or full name.
 
             </p>
 
         `;
+
 
         guestMessage.classList.add(
             "show"
         );
 
         return;
-
     }
 
+
+    /* =====================================================
+       ONE MATCH
+    ===================================================== */
 
     if (matches.length === 1) {
 
@@ -359,9 +384,12 @@ function revealGuestMessage() {
         );
 
         return;
-
     }
 
+
+    /* =====================================================
+       MULTIPLE MATCHES
+    ===================================================== */
 
     showGuestChoices(
         matches
@@ -370,9 +398,9 @@ function revealGuestMessage() {
 }
 
 
-/* =====================================================
+/* =========================================================
    ENTER KEY
-===================================================== */
+========================================================= */
 
 guestName.addEventListener(
     "keydown",
@@ -388,9 +416,9 @@ guestName.addEventListener(
 );
 
 
-/* =====================================================
+/* =========================================================
    REVEAL BUTTON
-===================================================== */
+========================================================= */
 
 revealBtn.addEventListener(
     "click",
@@ -398,33 +426,50 @@ revealBtn.addEventListener(
 );
 
 
-/* =====================================================
-   ESCAPE HTML
-===================================================== */
+/* =========================================================
+   NAME INPUT INTERACTION
+========================================================= */
 
-function escapeHTML(text) {
+guestName.addEventListener(
+    "input",
+    () => {
 
-    const div =
-        document.createElement("div");
-
-    div.textContent =
-        text;
-
-    return div.innerHTML;
-
-}
+        const hasName =
+            guestName.value.trim().length > 0;
 
 
-/* =====================================================
-   LOAD GUESTS
-===================================================== */
+        if (hasName) {
+
+            guestName.classList.remove(
+                "name-required"
+            );
+
+            guestMessage.classList.remove(
+                "show"
+            );
+
+            revealBtn.classList.add(
+                "ready"
+            );
+
+        } else {
+
+            revealBtn.classList.remove(
+                "ready"
+            );
+
+        }
+
+    }
+);
+
 
 loadGuests();
 
 
-/* =====================================================
-   BACKGROUND SCROLL SYSTEM
-===================================================== */
+/* =========================================================
+   BACKGROUND SCROLL EFFECT
+========================================================= */
 
 const bgVideo =
     document.querySelector(".bg-video");
@@ -434,25 +479,15 @@ const colorBackground =
         ".color-background"
     );
 
-
 let currentScroll = 0;
-
 let targetScroll = 0;
 
-
-/* =====================================================
-   SCROLL STATE
-===================================================== */
 
 function updateBackgroundScroll() {
 
     targetScroll =
         window.scrollY;
 
-    /*
-        After even a small scroll,
-        reveal the hidden hero text.
-    */
 
     if (window.scrollY > 35) {
 
@@ -471,21 +506,11 @@ function updateBackgroundScroll() {
 }
 
 
-/* =====================================================
-   LIQUID BACKGROUND ANIMATION
-===================================================== */
-
 function animateBackground() {
 
-    /*
-        Smooth scrolling movement.
-    */
-
     currentScroll +=
-        (
-            targetScroll -
-            currentScroll
-        ) * 0.055;
+        (targetScroll - currentScroll) *
+        0.055;
 
 
     const maxScroll =
@@ -499,34 +524,24 @@ function animateBackground() {
     const scrollProgress =
         Math.min(
             Math.max(
-                currentScroll /
-                maxScroll,
+                currentScroll / maxScroll,
                 0
             ),
             1
         );
 
 
-    /* =================================================
+    /* =====================================================
        VIDEO FADE
-    ================================================= */
+    ===================================================== */
 
-    const fadeStart =
-        0.015;
-
-    const fadeEnd =
-        0.24;
+    const fadeStart = 0.015;
+    const fadeEnd = 0.24;
 
 
     let videoProgress =
-        (
-            scrollProgress -
-            fadeStart
-        ) /
-        (
-            fadeEnd -
-            fadeStart
-        );
+        (scrollProgress - fadeStart) /
+        (fadeEnd - fadeStart);
 
 
     videoProgress =
@@ -539,31 +554,19 @@ function animateBackground() {
         );
 
 
-    /*
-        Smooth fade.
-    */
-
     const smoothFade =
         videoProgress *
         videoProgress *
-        (
-            3 -
-            2 * videoProgress
-        );
+        (3 - 2 * videoProgress);
 
 
     bgVideo.style.opacity =
         1 - smoothFade;
 
 
-    /* =================================================
-       WHOLE BACKGROUND MOVEMENT
-    ================================================= */
-
-    /*
-        The complete color field moves together.
-        No individual color panels.
-    */
+    /* =====================================================
+       SUBTLE BACKGROUND MOVEMENT
+    ===================================================== */
 
     const moveX =
         Math.sin(
@@ -571,6 +574,7 @@ function animateBackground() {
             Math.PI *
             1.15
         ) * 4;
+
 
     const moveY =
         Math.cos(
@@ -581,19 +585,12 @@ function animateBackground() {
 
 
     colorBackground.style.transform =
-        `
-        translate3d(
+        `translate3d(
             ${moveX}px,
             ${moveY}px,
             0
-        )
-        scale(1.08)
-        `;
+        ) scale(1.08)`;
 
-
-    /* =================================================
-       BACKGROUND POSITION
-    ================================================= */
 
     const positionX =
         42 +
@@ -617,35 +614,12 @@ function animateBackground() {
         `${positionX}% ${positionY}%`;
 
 
-    /* =================================================
-       SUBTLE LIQUID EFFECT
-    ================================================= */
-
-    const liquidWave =
-        Math.sin(
-            scrollProgress *
-            Math.PI *
-            2
-        ) * 0.8;
-
-
-    colorBackground.style.filter =
-        `
-        blur(${28 + liquidWave}px)
-        saturate(1.06)
-        `;
-
-
     requestAnimationFrame(
         animateBackground
     );
 
 }
 
-
-/* =====================================================
-   SCROLL LISTENER
-===================================================== */
 
 window.addEventListener(
     "scroll",
@@ -656,10 +630,374 @@ window.addEventListener(
 );
 
 
-/* =====================================================
-   INITIALIZE
-===================================================== */
-
 updateBackgroundScroll();
 
 animateBackground();
+
+
+/* =========================================================
+   CINEMATIC HERO SEQUENCE
+   TIMINGS PRESERVED
+========================================================= */
+
+(function startCinematicHero() {
+
+    const eyebrow =
+        document.querySelector(
+            ".eyebrow-reveal"
+        );
+
+    const line =
+        document.querySelector(
+            ".line-reveal"
+        );
+
+    const intro =
+        document.querySelector(
+            ".intro-reveal"
+        );
+
+    const name =
+        document.querySelector(
+            ".cinematic-name"
+        );
+
+    const underline =
+        document.querySelector(
+            ".underline-reveal"
+        );
+
+    const label =
+        document.querySelector(
+            ".label-reveal"
+        );
+
+    const title =
+        document.querySelector(
+            ".cinematic-title"
+        );
+
+    const hosted =
+        document.querySelector(
+            ".hosted-reveal"
+        );
+
+    const scrollIndicator =
+        document.querySelector(
+            ".scroll-reveal"
+        );
+
+
+    let started = false;
+
+
+    function reveal(element) {
+
+        if (element) {
+
+            element.classList.add(
+                "show"
+            );
+
+        }
+
+    }
+
+
+    function startSequence() {
+
+        if (started) {
+
+            return;
+
+        }
+
+
+        started = true;
+
+
+        /* =================================================
+           EXISTING TIMINGS — PRESERVED
+        ================================================= */
+
+
+        setTimeout(() => {
+
+            reveal(eyebrow);
+            reveal(line);
+
+        }, 500);
+
+
+        setTimeout(() => {
+
+            reveal(intro);
+
+        }, 600);
+
+
+        setTimeout(() => {
+
+            reveal(name);
+            reveal(underline);
+
+        }, 1500);
+
+
+        setTimeout(() => {
+
+            reveal(label);
+
+        }, 3000);
+
+
+        setTimeout(() => {
+
+            reveal(title);
+
+        }, 4200);
+
+
+        setTimeout(() => {
+
+            reveal(hosted);
+
+        }, 7000);
+
+
+        setTimeout(() => {
+
+            reveal(scrollIndicator);
+
+
+            if (scrollIndicator) {
+
+                scrollIndicator.classList.add(
+                    "scroll-ready"
+                );
+
+            }
+
+        }, 7000);
+
+
+        /* =================================================
+           AUTOMATIC SMOOTH SCROLL
+        ================================================= */
+
+        setTimeout(() => {
+
+            if (window.scrollY <= 10) {
+
+                const eventDetails =
+                    document.querySelector(
+                        ".event-details"
+                    );
+
+
+                if (!eventDetails) {
+
+                    return;
+
+                }
+
+
+                const sectionTop =
+                    eventDetails.getBoundingClientRect().top +
+                    window.scrollY;
+
+
+                const viewportHeight =
+                    window.innerHeight;
+
+
+                let targetPosition =
+                    sectionTop -
+                    (viewportHeight * 0.52);
+
+
+                const maxScroll =
+                    document.documentElement.scrollHeight -
+                    window.innerHeight;
+
+
+                targetPosition =
+                    Math.max(
+                        0,
+                        Math.min(
+                            targetPosition,
+                            maxScroll
+                        )
+                    );
+
+
+                smoothScrollTo(
+                    targetPosition,
+                    2400
+                );
+
+
+                /* =================================================
+                   INPUT PULSE
+                   
+                   The automatic scroll finishes after
+                   approximately 2400ms.
+
+                   Then the guest input gets a visible
+                   gold pulse so the user notices it.
+                ================================================= */
+
+                setTimeout(() => {
+
+                    const nameInput =
+                        document.getElementById(
+                            "guestName"
+                        );
+
+
+                    if (!nameInput) {
+
+                        return;
+
+                    }
+
+
+                    nameInput.classList.remove(
+                        "input-pulse"
+                    );
+
+
+                    void nameInput.offsetWidth;
+
+
+                    nameInput.classList.add(
+                        "input-pulse"
+                    );
+
+
+                }, 2600);
+
+            }
+
+        }, 7000);
+
+    }
+
+
+    /* =====================================================
+       ULTRA-SMOOTH SCROLL
+    ===================================================== */
+
+    function smoothScrollTo(
+        target,
+        duration
+    ) {
+
+        const start =
+            window.scrollY;
+
+
+        const distance =
+            target - start;
+
+
+        const startTime =
+            performance.now();
+
+
+        function easeInOutCubic(t) {
+
+            return t < 0.5
+
+                ? 4 * t * t * t
+
+                : 1 -
+                    Math.pow(
+                        -2 * t + 2,
+                        3
+                    ) / 2;
+
+        }
+
+
+        function animateScroll(
+            currentTime
+        ) {
+
+            const elapsed =
+                currentTime -
+                startTime;
+
+
+            const progress =
+                Math.min(
+                    elapsed / duration,
+                    1
+                );
+
+
+            const eased =
+                easeInOutCubic(
+                    progress
+                );
+
+
+            window.scrollTo(
+                0,
+                start +
+                distance * eased
+            );
+
+
+            if (progress < 1) {
+
+                requestAnimationFrame(
+                    animateScroll
+                );
+
+            }
+
+        }
+
+
+        requestAnimationFrame(
+            animateScroll
+        );
+
+    }
+
+
+    /* =====================================================
+       START WHEN VIDEO PLAYS
+    ===================================================== */
+
+    const video =
+        document.querySelector(
+            ".bg-video"
+        );
+
+
+    if (video) {
+
+        video.addEventListener(
+            "play",
+            startSequence,
+            {
+                once: true
+            }
+        );
+
+
+        if (!video.paused) {
+
+            startSequence();
+
+        }
+
+    } else {
+
+        startSequence();
+
+    }
+
+})();

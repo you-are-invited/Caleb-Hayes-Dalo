@@ -7,10 +7,6 @@
 
     <title>Caleb Hayes | 1st Birthday & Dedication</title>
 
-    <!-- =====================================================
-         GOOGLE FONTS
-    ====================================================== -->
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
@@ -23,101 +19,65 @@
 
 <body>
 
-    <!-- =====================================================
-         BACKGROUND COLOR
-    ====================================================== -->
-
     <div class="color-background"></div>
-
-
-    <!-- =====================================================
-         VIDEO BACKGROUND
-    ====================================================== -->
 
     <video class="bg-video" autoplay muted loop playsinline>
         <source src="./backgroudVideo.mp4" type="video/mp4">
         Your browser does not support the video background.
     </video>
 
-
-    <!-- =====================================================
-         RADIANT OVERLAY
-    ====================================================== -->
-
     <div class="ocean-overlay"></div>
     <div class="ocean-glow"></div>
 
-
-    <!-- =====================================================
-         BACKGROUND MUSIC
-    ====================================================== -->
-
     <audio id="bgMusic" loop>
-        <source src="./music_1.mp4" type="audio/mpeg">
+        <source src="./music.mp4" type="audio/mpeg">
     </audio>
-
-
-    <!-- =====================================================
-         MUSIC BUTTON
-    ====================================================== -->
 
     <button
         class="music-button"
         id="musicBtn"
-        aria-label="Play music"
+        aria-label="Play background music"
         type="button">
 
         <span class="music-icon">♪</span>
 
         <span id="musicText">
-            Music
+            Tap for music
         </span>
 
     </button>
 
-
-    <!-- =====================================================
-         MAIN INVITATION
-    ====================================================== -->
-
     <main class="invitation">
-
-
-        <!-- =================================================
-             HERO
-        ================================================== -->
 
         <section class="hero reveal">
 
-            <div class="eyebrow">
+            <div class="eyebrow cinematic eyebrow-reveal">
                 YOU ARE INVITED TO
             </div>
 
-            <div class="small-line"></div>
+            <div class="small-line cinematic line-reveal"></div>
 
-            <p class="celebration-intro">
+            <p class="celebration-intro cinematic intro-reveal">
                 A Special Celebration of
             </p>
 
-            <!-- DO NOT CHANGE CALEB HAYES -->
-
-            <h1>
+            <h1 class="cinematic-name">
                 Caleb Hayes
             </h1>
 
-            <div class="name-underline"></div>
+            <div class="name-underline cinematic underline-reveal"></div>
 
-            <p class="celebration-label">
+            <p class="celebration-label cinematic label-reveal">
                 AS HE CELEBRATES HIS
             </p>
 
-            <h2>
+            <h2 class="cinematic-title">
                 <span class="one">1</span>st Birthday
                 <span>&</span>
                 Dedication
             </h2>
 
-            <p class="hosted">
+            <p class="hosted cinematic hosted-reveal">
                 Hosted with love by
                 <br>
                 <strong>
@@ -125,13 +85,8 @@
                 </strong>
             </p>
 
-
-            <!-- =================================================
-                 SCROLL INDICATOR
-            ================================================== -->
-
             <div
-                class="scroll-indicator"
+                class="scroll-indicator cinematic scroll-reveal"
                 aria-label="Scroll down">
 
                 <span class="scroll-arrow">
@@ -141,11 +96,6 @@
             </div>
 
         </section>
-
-
-        <!-- =================================================
-             EVENT DETAILS
-        ================================================== -->
 
         <section class="event-details reveal">
 
@@ -165,9 +115,7 @@
 
             </div>
 
-
             <div class="vertical-divider"></div>
-
 
             <div class="detail-item">
 
@@ -185,9 +133,7 @@
 
             </div>
 
-
             <div class="vertical-divider"></div>
-
 
             <div class="detail-item">
 
@@ -202,7 +148,7 @@
                 <span class="detail-main">
                     Adventist Church
                 </span>
-                
+
                 <span class="detail-sub">
                     Bobon, Burgos Ilocos Norte
                 </span>
@@ -210,11 +156,6 @@
             </div>
 
         </section>
-
-
-        <!-- =================================================
-             DRESS CODE
-        ================================================== -->
 
         <section class="info-section reveal">
 
@@ -238,11 +179,6 @@
             </p>
 
         </section>
-
-
-        <!-- =================================================
-             SEATING
-        ================================================== -->
 
         <section class="info-section seating reveal">
 
@@ -270,11 +206,6 @@
 
         </section>
 
-
-        <!-- =================================================
-             PERSONALIZED MESSAGE
-        ================================================== -->
-
         <section class="guest-section reveal">
 
             <div class="section-line"></div>
@@ -288,17 +219,16 @@
             </h3>
 
             <p class="guest-intro">
-                Please enter your name below to receive
+                Please enter your name <b>first name</b> below to receive
                 a little message from Caleb's family.
             </p>
-
 
             <div class="guest-form">
 
                 <input
                     type="text"
                     id="guestName"
-                    placeholder="Your name"
+                    placeholder="Enter your first name..."
                     autocomplete="name"
                     aria-label="Enter your name">
 
@@ -312,7 +242,6 @@
 
             </div>
 
-
             <div
                 id="guestMessage"
                 class="guest-message"
@@ -320,11 +249,6 @@
             </div>
 
         </section>
-
-
-        <!-- =================================================
-             CLOSING
-        ================================================== -->
 
         <section class="closing reveal">
 
@@ -354,11 +278,6 @@
         </section>
 
     </main>
-
-
-    <!-- =====================================================
-         JAVASCRIPT
-    ====================================================== -->
 
     <script src="script.js"></script>
 
