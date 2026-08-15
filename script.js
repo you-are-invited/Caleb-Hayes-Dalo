@@ -1210,7 +1210,7 @@ function showGuestMessage(guest) {
 
                 <div class="rsvp-buttons">
                     <a
-                        href="https://m.me/shean.dalo.2025"
+                        href="https://m.me/XDaegusvenus"
                         target="_blank"
                         rel="noopener"
                         class="rsvp-button">
