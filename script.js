@@ -1209,9 +1209,8 @@ function showGuestMessage(guest) {
                 </p>
 
                 <div class="rsvp-buttons">
-
                     <a
-                        href="https://m.me/@shean.dalo.2025"
+                        href="https://m.me/shean.dalo.2025"
                         target="_blank"
                         rel="noopener"
                         class="rsvp-button">
@@ -1224,7 +1223,7 @@ function showGuestMessage(guest) {
 
 
                     <a
-                        href="https://m.me/@laydslyne"
+                        href="https://m.me/laydslyne"
                         target="_blank"
                         rel="noopener"
                         class="rsvp-button">
