@@ -3,8 +3,6 @@
 ========================================================= */
 
 let invitationStarted = false;
-let cinematicStarted = false;
-let isPlaying = false;
 
 
 /* =========================================================
@@ -51,25 +49,21 @@ document.body.classList.add(
 );
 
 
+/* =========================================================
+   VIDEO INITIAL STATE
+========================================================= */
+
 if (bgVideo) {
 
     bgVideo.pause();
 
-    bgVideo.style.opacity = "0";
-
-    /*
-     * IMPORTANT:
-     * Do NOT force currentTime = 0 here.
-     * If the browser has already buffered the video,
-     * resetting it repeatedly can cause unnecessary
-     * seeking and playback delay.
-     */
+    bgVideo.preload = "auto";
 
     bgVideo.muted = true;
 
     bgVideo.playsInline = true;
 
-    bgVideo.preload = "auto";
+    bgVideo.style.opacity = "0";
 
 }
 
@@ -79,17 +73,31 @@ if (bgVideo) {
 ========================================================= */
 
 let videoMetadataReady = false;
-let videoCanPlay = false;
+
+let videoBufferReady = false;
+
 let videoLoadingFinished = false;
+
 let videoLoadFailed = false;
 
-let videoFallbackTimer = null;
+let videoLoadCheckTimer = null;
 
-const VIDEO_FALLBACK_TIME = 12000;
+let videoProgressTimer = null;
+
+
+/*
+ * We only need the video to be sufficiently buffered
+ * before allowing the invitation to start.
+ *
+ * Since your video is only around 10 seconds,
+ * we aim to have almost the whole video buffered.
+ */
+
+const REQUIRED_BUFFER_SECONDS = 8;
 
 
 /* =========================================================
-   UPDATE LOADING MESSAGE
+   LOADING STATUS
 ========================================================= */
 
 function setLoadingStatus(message) {
@@ -98,13 +106,11 @@ function setLoadingStatus(message) {
         return;
     }
 
+
     loadingStatus.style.opacity = "0";
 
-    setTimeout(() => {
 
-        if (!loadingStatus) {
-            return;
-        }
+    setTimeout(() => {
 
         loadingStatus.textContent =
             message;
@@ -112,13 +118,13 @@ function setLoadingStatus(message) {
         loadingStatus.style.opacity =
             "1";
 
-    }, 150);
+    }, 160);
 
 }
 
 
 /* =========================================================
-   UPDATE LOADING PROGRESS
+   LOADING PROGRESS
 ========================================================= */
 
 function setLoadingProgress(value) {
@@ -127,11 +133,13 @@ function setLoadingProgress(value) {
         return;
     }
 
+
     const safeValue =
         Math.min(
             Math.max(value, 0),
             100
         );
+
 
     loadingProgress.style.width =
         `${safeValue}%`;
@@ -149,6 +157,7 @@ function showViewInvitation() {
         return;
     }
 
+
     viewInvitationWrapper.classList.add(
         "ready"
     );
@@ -157,34 +166,184 @@ function showViewInvitation() {
 
 
 /* =========================================================
-   VIDEO READY
+   GET BUFFERED SECONDS
 ========================================================= */
 
-function markVideoReady() {
+function getBufferedSeconds() {
 
-    if (videoLoadingFinished) {
-        return;
+    if (!bgVideo) {
+        return 0;
     }
 
-    videoLoadingFinished = true;
 
-    if (videoFallbackTimer) {
+    if (
+        !bgVideo.buffered ||
+        bgVideo.buffered.length === 0
+    ) {
 
-        clearTimeout(
-            videoFallbackTimer
+        return 0;
+
+    }
+
+
+    try {
+
+        const currentTime =
+            bgVideo.currentTime || 0;
+
+
+        for (
+            let i = 0;
+            i < bgVideo.buffered.length;
+            i++
+        ) {
+
+            const start =
+                bgVideo.buffered.start(i);
+
+            const end =
+                bgVideo.buffered.end(i);
+
+
+            /*
+             * Find the range containing
+             * the current playback position.
+             */
+
+            if (
+                currentTime >= start &&
+                currentTime <= end
+            ) {
+
+                return Math.max(
+                    0,
+                    end - currentTime
+                );
+
+            }
+
+        }
+
+
+        /*
+         * If currentTime is not inside a range,
+         * use the latest buffered range.
+         */
+
+        return Math.max(
+            0,
+            bgVideo.buffered.end(
+                bgVideo.buffered.length - 1
+            ) - currentTime
         );
 
-        videoFallbackTimer = null;
+    } catch (error) {
+
+        return 0;
 
     }
 
-    setLoadingProgress(100);
+}
 
-    setLoadingStatus(
-        "Your invitation is ready."
-    );
 
-    showViewInvitation();
+/* =========================================================
+   GET BUFFERED PERCENTAGE
+========================================================= */
+
+function getBufferedPercentage() {
+
+    if (!bgVideo) {
+        return 0;
+    }
+
+
+    const duration =
+        bgVideo.duration;
+
+
+    if (
+        !Number.isFinite(duration) ||
+        duration <= 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    if (
+        !bgVideo.buffered ||
+        bgVideo.buffered.length === 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    try {
+
+        const currentTime =
+            bgVideo.currentTime || 0;
+
+
+        let bestEnd =
+            currentTime;
+
+
+        for (
+            let i = 0;
+            i < bgVideo.buffered.length;
+            i++
+        ) {
+
+            const start =
+                bgVideo.buffered.start(i);
+
+            const end =
+                bgVideo.buffered.end(i);
+
+
+            if (
+                currentTime >= start &&
+                currentTime <= end
+            ) {
+
+                bestEnd = end;
+
+                break;
+
+            }
+
+
+            if (
+                end > bestEnd &&
+                start <= currentTime + 0.1
+            ) {
+
+                bestEnd = end;
+
+            }
+
+        }
+
+
+        return Math.min(
+            100,
+            Math.max(
+                0,
+                (
+                    bestEnd /
+                    duration
+                ) * 100
+            )
+        );
+
+    } catch (error) {
+
+        return 0;
+
+    }
 
 }
 
@@ -195,55 +354,57 @@ function markVideoReady() {
 
 function updateVideoProgress() {
 
-    if (!bgVideo) {
-        return;
-    }
-
     if (
-        bgVideo.buffered &&
-        bgVideo.buffered.length
+        !bgVideo ||
+        videoLoadingFinished
     ) {
 
-        try {
+        return;
 
-            const bufferedEnd =
-                bgVideo.buffered.end(
-                    bgVideo.buffered.length - 1
-                );
+    }
 
-            const duration =
-                bgVideo.duration;
 
-            if (
-                Number.isFinite(duration) &&
-                duration > 0
-            ) {
+    const bufferedPercentage =
+        getBufferedPercentage();
 
-                const percentage =
-                    Math.min(
-                        95,
-                        35 +
-                        (
-                            bufferedEnd /
-                            duration
-                        ) * 60
-                    );
 
-                if (!videoLoadingFinished) {
+    if (bufferedPercentage > 0) {
 
-                    setLoadingProgress(
-                        percentage
-                    );
+        /*
+         * Keep progress below 100 until
+         * the required buffer is actually ready.
+         */
 
-                }
+        const visualProgress =
+            Math.min(
+                95,
+                20 +
+                (
+                    bufferedPercentage *
+                    0.75
+                )
+            );
 
-            }
 
-        } catch (error) {
+        setLoadingProgress(
+            visualProgress
+        );
 
-            console.warn(
-                "Could not read video buffer.",
-                error
+
+        if (
+            bufferedPercentage >= 80
+        ) {
+
+            setLoadingStatus(
+                "Almost ready..."
+            );
+
+        } else if (
+            bufferedPercentage >= 40
+        ) {
+
+            setLoadingStatus(
+                "Loading your invitation..."
             );
 
         }
@@ -254,12 +415,124 @@ function updateVideoProgress() {
 
 
 /* =========================================================
-   VIDEO PRELOAD
+   MARK VIDEO READY
 ========================================================= */
 
-function prepareVideo() {
+function markVideoReady() {
 
-    if (!bgVideo) {
+    if (videoLoadingFinished) {
+        return;
+    }
+
+
+    videoLoadingFinished = true;
+
+    videoBufferReady = true;
+
+
+    if (videoProgressTimer) {
+
+        clearInterval(
+            videoProgressTimer
+        );
+
+        videoProgressTimer = null;
+
+    }
+
+
+    if (videoLoadCheckTimer) {
+
+        clearInterval(
+            videoLoadCheckTimer
+        );
+
+        videoLoadCheckTimer = null;
+
+    }
+
+
+    setLoadingProgress(100);
+
+
+    setLoadingStatus(
+        "Your invitation is ready."
+    );
+
+
+    showViewInvitation();
+
+}
+
+
+/* =========================================================
+   CHECK VIDEO BUFFER
+========================================================= */
+
+function checkVideoBuffer() {
+
+    if (
+        !bgVideo ||
+        videoLoadingFinished ||
+        videoLoadFailed
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !videoMetadataReady
+    ) {
+
+        return;
+
+    }
+
+
+    const duration =
+        bgVideo.duration;
+
+
+    const bufferedSeconds =
+        getBufferedSeconds();
+
+
+    const bufferedPercentage =
+        getBufferedPercentage();
+
+
+    /*
+     * For a short 10-second video:
+     *
+     * - If almost the entire video is buffered,
+     *   allow it immediately.
+     *
+     * - Otherwise require at least the target amount.
+     */
+
+    const enoughBuffer =
+        (
+            duration > 0 &&
+            bufferedSeconds >=
+            Math.min(
+                REQUIRED_BUFFER_SECONDS,
+                duration * 0.85
+            )
+        );
+
+
+    const almostFullyBuffered =
+        (
+            bufferedPercentage >= 90
+        );
+
+
+    if (
+        enoughBuffer ||
+        almostFullyBuffered
+    ) {
 
         markVideoReady();
 
@@ -267,11 +540,62 @@ function prepareVideo() {
 
     }
 
+
+    /*
+     * Update visual loading.
+     */
+
+    if (
+        bufferedPercentage > 0
+    ) {
+
+        const progress =
+            Math.min(
+                94,
+                20 +
+                bufferedPercentage * 0.74
+            );
+
+
+        setLoadingProgress(
+            progress
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PREPARE VIDEO
+========================================================= */
+
+function prepareVideo() {
+
+    if (!bgVideo) {
+
+        videoMetadataReady = true;
+
+        videoBufferReady = true;
+
+        markVideoReady();
+
+        return;
+
+    }
+
+
     setLoadingStatus(
         "Preparing the invitation..."
     );
 
     setLoadingProgress(5);
+
+
+    /*
+     * IMPORTANT:
+     * Listeners are attached BEFORE load().
+     */
 
 
     /* =====================================================
@@ -284,15 +608,49 @@ function prepareVideo() {
 
             videoMetadataReady = true;
 
-            setLoadingProgress(25);
+
+            setLoadingProgress(15);
+
 
             setLoadingStatus(
                 "Preparing the video..."
             );
 
-        },
-        {
-            once: true
+
+            try {
+
+                bgVideo.pause();
+
+                bgVideo.currentTime = 0;
+
+            } catch (error) {
+
+                console.warn(
+                    "Could not reset video:",
+                    error
+                );
+
+            }
+
+
+            checkVideoBuffer();
+
+        }
+    );
+
+
+    /* =====================================================
+       PROGRESS
+    ===================================================== */
+
+    bgVideo.addEventListener(
+        "progress",
+        () => {
+
+            updateVideoProgress();
+
+            checkVideoBuffer();
+
         }
     );
 
@@ -305,19 +663,18 @@ function prepareVideo() {
         "canplay",
         () => {
 
-            videoCanPlay = true;
+            /*
+             * DO NOT mark ready here.
+             *
+             * canplay only means the browser can
+             * start playback. It does NOT guarantee
+             * enough buffering for uninterrupted playback.
+             */
 
-            setLoadingProgress(70);
+            videoMetadataReady = true;
 
-            setLoadingStatus(
-                "Almost ready..."
-            );
+            checkVideoBuffer();
 
-            markVideoReady();
-
-        },
-        {
-            once: true
         }
     );
 
@@ -330,26 +687,36 @@ function prepareVideo() {
         "canplaythrough",
         () => {
 
-            videoCanPlay = true;
+            /*
+             * This is a stronger signal that the browser
+             * expects continuous playback.
+             */
 
-            setLoadingProgress(100);
+            videoMetadataReady = true;
 
-            markVideoReady();
+            setLoadingProgress(96);
 
-        },
-        {
-            once: true
+            checkVideoBuffer();
+
         }
     );
 
 
     /* =====================================================
-       BUFFER PROGRESS
+       LOADED DATA
     ===================================================== */
 
     bgVideo.addEventListener(
-        "progress",
-        updateVideoProgress
+        "loadeddata",
+        () => {
+
+            videoMetadataReady = true;
+
+            setLoadingProgress(20);
+
+            checkVideoBuffer();
+
+        }
     );
 
 
@@ -384,7 +751,7 @@ function prepareVideo() {
             if (!invitationStarted) {
 
                 setLoadingStatus(
-                    "Your connection is a little slow..."
+                    "Still preparing the video..."
                 );
 
             }
@@ -403,20 +770,28 @@ function prepareVideo() {
 
             videoLoadFailed = true;
 
+
             console.warn(
                 "Background video could not be loaded."
             );
 
+
             /*
-             * Video failure must NEVER prevent
-             * the invitation from opening.
+             * We don't trap the user on the loading screen.
              */
 
-            markVideoReady();
+            if (!videoLoadingFinished) {
 
-        },
-        {
-            once: true
+                setLoadingStatus(
+                    "Your invitation is ready."
+                );
+
+                setLoadingProgress(100);
+
+                showViewInvitation();
+
+            }
+
         }
     );
 
@@ -438,9 +813,17 @@ function prepareVideo() {
             error
         );
 
+
         videoLoadFailed = true;
 
-        markVideoReady();
+
+        setLoadingProgress(100);
+
+        setLoadingStatus(
+            "Your invitation is ready."
+        );
+
+        showViewInvitation();
 
         return;
 
@@ -448,247 +831,80 @@ function prepareVideo() {
 
 
     /* =====================================================
-       ALREADY BUFFERED
+       CONTINUOUS BUFFER CHECK
     ===================================================== */
 
-    setTimeout(() => {
+    videoProgressTimer =
+        setInterval(() => {
 
-        if (videoLoadingFinished) {
-            return;
-        }
+            updateVideoProgress();
 
-        if (
-            bgVideo.readyState >=
-            HTMLMediaElement.HAVE_FUTURE_DATA
-        ) {
+            checkVideoBuffer();
 
-            videoCanPlay = true;
-
-            markVideoReady();
-
-        }
-
-    }, 250);
+        }, 250);
 
 
     /* =====================================================
-       FALLBACK
+       VERY SLOW CONNECTION SAFETY
     ===================================================== */
 
-    videoFallbackTimer =
-        setTimeout(() => {
+    videoLoadCheckTimer =
+        setInterval(() => {
 
             if (videoLoadingFinished) {
+
                 return;
+
             }
 
-            if (
-                bgVideo.readyState >=
-                HTMLMediaElement.HAVE_FUTURE_DATA
-            ) {
 
-                videoCanPlay = true;
+            /*
+             * If the browser has already loaded
+             * enough data, use it.
+             */
+
+            checkVideoBuffer();
+
+
+            /*
+             * If the browser reports that the whole
+             * video has been downloaded, definitely ready.
+             */
+
+            const percentage =
+                getBufferedPercentage();
+
+
+            if (
+                percentage >= 98
+            ) {
 
                 markVideoReady();
 
-                return;
-
             }
 
-            console.warn(
-                "Video is taking too long to load."
-            );
-
-            videoLoadFailed = true;
-
-            setLoadingProgress(100);
-
-            setLoadingStatus(
-                "Your invitation is ready."
-            );
-
-            showViewInvitation();
-
-        }, VIDEO_FALLBACK_TIME);
+        }, 1000);
 
 }
 
 
 /* =========================================================
-   VIDEO PLAYBACK
+   MUSIC STATE
 ========================================================= */
 
-function playBackgroundVideo() {
-
-    if (!bgVideo) {
-        return Promise.resolve(false);
-    }
-
-    try {
-
-        /*
-         * Only reset if the video has not started yet.
-         * This avoids unnecessary seeking.
-         */
-
-        if (
-            bgVideo.ended ||
-            !Number.isFinite(bgVideo.currentTime)
-        ) {
-
-            bgVideo.currentTime = 0;
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "Could not reset video:",
-            error
-        );
-
-    }
-
-
-    bgVideo.style.opacity = "1";
-
-
-    try {
-
-        const playPromise =
-            bgVideo.play();
-
-        if (
-            playPromise &&
-            typeof playPromise.then === "function"
-        ) {
-
-            return playPromise
-                .then(() => true)
-                .catch(error => {
-
-                    console.warn(
-                        "Video playback could not start:",
-                        error
-                    );
-
-                    return false;
-
-                });
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "Video playback error:",
-            error
-        );
-
-    }
-
-    return Promise.resolve(false);
-
-}
-
-
-/* =========================================================
-   MUSIC PLAYBACK
-========================================================= */
-
-function playBackgroundMusic() {
-
-    if (!music) {
-        return Promise.resolve(false);
-    }
-
-    try {
-
-        const playPromise =
-            music.play();
-
-        if (
-            playPromise &&
-            typeof playPromise.then === "function"
-        ) {
-
-            return playPromise
-                .then(() => {
-
-                    isPlaying = true;
-
-                    updateMusicButton();
-
-                    return true;
-
-                })
-                .catch(error => {
-
-                    console.warn(
-                        "Music could not start:",
-                        error
-                    );
-
-                    isPlaying = false;
-
-                    updateMusicButton();
-
-                    return false;
-
-                });
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "Music playback error:",
-            error
-        );
-
-    }
-
-    return Promise.resolve(false);
-
-}
-
-
-/* =========================================================
-   MUSIC BUTTON UI
-========================================================= */
-
-function updateMusicButton() {
-
-    if (musicText) {
-
-        musicText.textContent =
-            isPlaying
-                ? "Pause"
-                : "Tap for music";
-
-    }
-
-    if (musicBtn) {
-
-        musicBtn.classList.toggle(
-            "playing",
-            isPlaying
-        );
-
-    }
-
-}
+let isPlaying = false;
 
 
 /* =========================================================
    START INVITATION
 ========================================================= */
 
-function startInvitation() {
+async function startInvitation() {
 
     if (invitationStarted) {
         return;
     }
+
 
     invitationStarted = true;
 
@@ -712,57 +928,132 @@ function startInvitation() {
 
     }
 
+
     document.body.classList.remove(
         "invitation-loading"
     );
 
 
-    /*
-     * IMPORTANT:
-     *
-     * Start VIDEO and MUSIC from the SAME user click.
-     * Do NOT await one before starting the other.
-     */
+    /* =====================================================
+       VIDEO
+    ===================================================== */
 
-    const videoPromise =
-        playBackgroundVideo();
+    if (bgVideo) {
 
-    const musicPromise =
-        playBackgroundMusic();
+        /*
+         * IMPORTANT:
+         *
+         * DO NOT call:
+         * bgVideo.load()
+         *
+         * DO NOT reset currentTime unnecessarily.
+         *
+         * The video has already been preloaded.
+         */
+
+        bgVideo.style.opacity = "1";
+
+
+        try {
+
+            /*
+             * Make sure playback starts from
+             * the beginning only once.
+             */
+
+            if (
+                bgVideo.currentTime > 0.05
+            ) {
+
+                bgVideo.currentTime = 0;
+
+            }
+
+
+            await bgVideo.play();
+
+        } catch (error) {
+
+            console.warn(
+                "Video playback could not start:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       MUSIC
+    ===================================================== */
+
+    if (music) {
+
+        try {
+
+            await music.play();
+
+            isPlaying = true;
+
+
+            if (musicText) {
+
+                musicText.textContent =
+                    "Pause";
+
+            }
+
+
+            if (musicBtn) {
+
+                musicBtn.classList.add(
+                    "playing"
+                );
+
+            }
+
+        } catch (error) {
+
+            console.log(
+                "Music requires another tap:",
+                error
+            );
+
+
+            isPlaying = false;
+
+
+            if (musicText) {
+
+                musicText.textContent =
+                    "Tap for music";
+
+            }
+
+
+            if (musicBtn) {
+
+                musicBtn.classList.remove(
+                    "playing"
+                );
+
+            }
+
+        }
+
+    }
 
 
     /* =====================================================
        START CINEMATIC HERO
     ===================================================== */
 
-    /*
-     * Start the hero almost immediately after media
-     * playback has been requested.
-     *
-     * This prevents the text from waiting several seconds
-     * while video/music are already playing.
-     */
-
-    setTimeout(() => {
-
-        startCinematicHero();
-
-    }, 120);
-
-
-    /*
-     * Catch promises so one media failure does not
-     * stop the invitation.
-     */
-
-    Promise.allSettled([
-        videoPromise,
-        musicPromise
-    ]);
+    startCinematicHero();
 
 
     /* =====================================================
-       HIDE VIEW INVITATION BUTTON
+       HIDE VIEW INVITATION
     ===================================================== */
 
     if (viewInvitationWrapper) {
@@ -800,7 +1091,7 @@ function startInvitation() {
 
         }
 
-    }, 1000);
+    }, 1100);
 
 }
 
@@ -813,10 +1104,7 @@ if (viewInvitationBtn) {
 
     viewInvitationBtn.addEventListener(
         "click",
-        startInvitation,
-        {
-            once: true
-        }
+        startInvitation
     );
 
 }
@@ -830,15 +1118,7 @@ if (musicBtn) {
 
     musicBtn.addEventListener(
         "click",
-        async event => {
-
-            /*
-             * Prevent this click from accidentally
-             * triggering other controls.
-             */
-
-            event.stopPropagation();
-
+        async () => {
 
             if (!music) {
                 return;
@@ -853,15 +1133,39 @@ if (musicBtn) {
 
                     isPlaying = true;
 
+
+                    if (musicText) {
+
+                        musicText.textContent =
+                            "Pause";
+
+                    }
+
+
+                    musicBtn.classList.add(
+                        "playing"
+                    );
+
                 } else {
 
                     music.pause();
 
                     isPlaying = false;
 
-                }
 
-                updateMusicButton();
+                    if (musicText) {
+
+                        musicText.textContent =
+                            "Tap for music";
+
+                    }
+
+
+                    musicBtn.classList.remove(
+                        "playing"
+                    );
+
+                }
 
             } catch (error) {
 
@@ -1094,10 +1398,6 @@ function showGuestMessage(guest) {
         );
 
 
-    /*
-     * Save current scroll position.
-     */
-
     const currentScrollPosition =
         window.scrollY;
 
@@ -1128,7 +1428,7 @@ function showGuestMessage(guest) {
                  RSVP
             ================================================== -->
 
-            <div class="guest-rsvp">
+            <div class="rsvp-section">
 
                 <div class="rsvp-divider"></div>
 
@@ -1147,57 +1447,36 @@ function showGuestMessage(guest) {
                     help us prepare a place for everyone.
                 </p>
 
-                <p class="rsvp-note">
-                    We would be grateful if you could
-                    confirm your attendance with:
+                <p class="rsvp-confirm">
+                    Kindly confirm with:
                 </p>
 
-                <div class="rsvp-confirm">
+                <div class="rsvp-buttons">
 
-                    <p class="rsvp-confirm-label">
-                        Kindly confirm with
-                    </p>
+                    <a
+                        href="https://m.me/shean.dalo.2025"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="rsvp-button">
 
-                    <div class="rsvp-buttons">
+                        <span>
+                            Confirm to Shean
+                        </span>
 
-                        <!-- SHEAN -->
-
-                        <a
-                            href="https://m.me/shean.dalo.2025"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="rsvp-button">
-
-                            <span class="rsvp-button-label">
-                                Confirm to
-                            </span>
-
-                            <strong>
-                                Shean
-                            </strong>
-
-                        </a>
+                    </a>
 
 
-                        <!-- LYNE -->
+                    <a
+                        href="https://m.me/laydslyne"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="rsvp-button">
 
-                        <a
-                            href="https://m.me/laydslyne"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="rsvp-button">
+                        <span>
+                            Confirm to Lyne
+                        </span>
 
-                            <span class="rsvp-button-label">
-                                Confirm to
-                            </span>
-
-                            <strong>
-                                Lyne
-                            </strong>
-
-                        </a>
-
-                    </div>
+                    </a>
 
                 </div>
 
@@ -1213,47 +1492,12 @@ function showGuestMessage(guest) {
     );
 
 
-    /*
-     * Prevent browser from jumping when the
-     * message expands.
-     */
-
     requestAnimationFrame(() => {
 
-        requestAnimationFrame(() => {
-
-            window.scrollTo(
-                0,
-                currentScrollPosition
-            );
-
-        });
-
-    });
-
-
-    /*
-     * Reveal RSVP after message is visible.
-     */
-
-    requestAnimationFrame(() => {
-
-        setTimeout(() => {
-
-            const rsvp =
-                guestMessage.querySelector(
-                    ".guest-rsvp"
-                );
-
-            if (rsvp) {
-
-                rsvp.classList.add(
-                    "show"
-                );
-
-            }
-
-        }, 250);
+        window.scrollTo(
+            0,
+            currentScrollPosition
+        );
 
     });
 
@@ -1479,7 +1723,7 @@ function revealGuestMessage() {
 
 
 /* =========================================================
-   GUEST INPUT
+   ENTER KEY / INPUT
 ========================================================= */
 
 if (guestName) {
@@ -1514,13 +1758,10 @@ if (guestName) {
                     "name-required"
                 );
 
-                if (guestMessage) {
+                guestMessage.classList.remove(
+                    "show"
+                );
 
-                    guestMessage.classList.remove(
-                        "show"
-                    );
-
-                }
 
                 if (revealBtn) {
 
@@ -1559,31 +1800,12 @@ if (revealBtn) {
 
 
 /* =========================================================
-   OPTIMIZED BACKGROUND SCROLL EFFECT
+   BACKGROUND SCROLL EFFECT
 ========================================================= */
 
-/*
- * OLD VERSION:
- *
- * animateBackground()
- *
- * was running requestAnimationFrame()
- * FOREVER, even when the user was not scrolling.
- *
- * This can waste CPU/GPU resources and contribute
- * to video stuttering.
- *
- * NEW VERSION:
- *
- * Only animate while scrolling or while a transition
- * is still settling.
- */
-
 let currentScroll = 0;
-let targetScroll = 0;
 
-let scrollAnimationFrame = null;
-let scrollStopTimer = null;
+let targetScroll = 0;
 
 
 function updateBackgroundScroll() {
@@ -1606,72 +1828,16 @@ function updateBackgroundScroll() {
 
     }
 
-
-    startBackgroundAnimation();
-
-
-    /*
-     * Detect when user stops scrolling.
-     */
-
-    clearTimeout(
-        scrollStopTimer
-    );
-
-
-    scrollStopTimer =
-        setTimeout(() => {
-
-            startBackgroundAnimation();
-
-        }, 120);
-
-}
-
-
-function startBackgroundAnimation() {
-
-    if (scrollAnimationFrame !== null) {
-        return;
-    }
-
-
-    scrollAnimationFrame =
-        requestAnimationFrame(
-            animateBackground
-        );
-
 }
 
 
 function animateBackground() {
 
-    scrollAnimationFrame = null;
-
-
-    const difference =
-        targetScroll -
-        currentScroll;
-
-
-    /*
-     * Smooth interpolation.
-     */
-
     currentScroll +=
-        difference *
-        0.12;
-
-
-    if (
-        Math.abs(difference) <
-        0.5
-    ) {
-
-        currentScroll =
-            targetScroll;
-
-    }
+        (
+            targetScroll -
+            currentScroll
+        ) * .055;
 
 
     const maxScroll =
@@ -1703,10 +1869,10 @@ function animateBackground() {
     ) {
 
         const fadeStart =
-            0.015;
+            .015;
 
         const fadeEnd =
-            0.24;
+            .24;
 
 
         let videoProgress =
@@ -1730,48 +1896,18 @@ function animateBackground() {
             );
 
 
-        /*
-         * Smoothstep.
-         */
-
         const smoothFade =
             videoProgress *
             videoProgress *
             (
                 3 -
-                2 *
-                videoProgress
+                2 * videoProgress
             );
 
 
-        const opacity =
+        bgVideo.style.opacity =
             1 -
             smoothFade;
-
-
-        /*
-         * Only update if the value actually changed.
-         */
-
-        const roundedOpacity =
-            Math.round(
-                opacity *
-                1000
-            ) / 1000;
-
-
-        if (
-            bgVideo.dataset.opacity !==
-            String(roundedOpacity)
-        ) {
-
-            bgVideo.style.opacity =
-                roundedOpacity;
-
-            bgVideo.dataset.opacity =
-                String(roundedOpacity);
-
-        }
 
     }
 
@@ -1787,8 +1923,7 @@ function animateBackground() {
                 scrollProgress *
                 Math.PI *
                 1.15
-            ) *
-            4;
+            ) * 4;
 
 
         const moveY =
@@ -1796,8 +1931,7 @@ function animateBackground() {
                 scrollProgress *
                 Math.PI *
                 .95
-            ) *
-            3;
+            ) * 3;
 
 
         colorBackground.style.transform =
@@ -1814,8 +1948,7 @@ function animateBackground() {
                 scrollProgress *
                 Math.PI *
                 1.15
-            ) *
-            13;
+            ) * 13;
 
 
         const positionY =
@@ -1824,8 +1957,7 @@ function animateBackground() {
                 scrollProgress *
                 Math.PI *
                 .95
-            ) *
-            9;
+            ) * 9;
 
 
         colorBackground.style.backgroundPosition =
@@ -1834,21 +1966,9 @@ function animateBackground() {
     }
 
 
-    /*
-     * Continue only while there is meaningful movement.
-     */
-
-    if (
-        Math.abs(
-            targetScroll -
-            currentScroll
-        ) >
-        0.5
-    ) {
-
-        startBackgroundAnimation();
-
-    }
+    requestAnimationFrame(
+        animateBackground
+    );
 
 }
 
@@ -1864,10 +1984,15 @@ window.addEventListener(
 
 updateBackgroundScroll();
 
+animateBackground();
+
 
 /* =========================================================
    CINEMATIC HERO
 ========================================================= */
+
+let cinematicStarted = false;
+
 
 function startCinematicHero() {
 
@@ -1938,29 +2063,19 @@ function startCinematicHero() {
     }
 
 
-    /*
-     * Much tighter cinematic timing.
-     *
-     * The old version waited 7 seconds before
-     * starting automatic scroll.
-     *
-     * This keeps the animation but avoids making
-     * the page feel frozen.
-     */
-
     setTimeout(() => {
 
         reveal(eyebrow);
         reveal(line);
 
-    }, 350);
+    }, 500);
 
 
     setTimeout(() => {
 
         reveal(intro);
 
-    }, 500);
+    }, 600);
 
 
     setTimeout(() => {
@@ -1968,28 +2083,28 @@ function startCinematicHero() {
         reveal(name);
         reveal(underline);
 
-    }, 1200);
+    }, 1500);
 
 
     setTimeout(() => {
 
         reveal(label);
 
-    }, 2200);
+    }, 3000);
 
 
     setTimeout(() => {
 
         reveal(title);
 
-    }, 3400);
+    }, 4800);
 
 
     setTimeout(() => {
 
         reveal(hosted);
 
-    }, 4700);
+    }, 7000);
 
 
     setTimeout(() => {
@@ -2005,7 +2120,7 @@ function startCinematicHero() {
 
         }
 
-    }, 4700);
+    }, 7000);
 
 
     /* =====================================================
@@ -2014,222 +2129,103 @@ function startCinematicHero() {
 
     setTimeout(() => {
 
-        /*
-         * IMPORTANT:
-         *
-         * Only auto-scroll if the user has NOT touched
-         * the page yet.
-         */
+        if (window.scrollY <= 10) {
 
-        if (
-            window.scrollY > 10 ||
-            userHasInteractedWithScroll
-        ) {
-
-            return;
-
-        }
-
-
-        const eventDetails =
-            document.querySelector(
-                ".event-details"
-            );
-
-
-        if (!eventDetails) {
-            return;
-        }
-
-
-        const sectionTop =
-            eventDetails.getBoundingClientRect().top +
-            window.scrollY;
-
-
-        const viewportHeight =
-            window.innerHeight;
-
-
-        let targetPosition =
-            sectionTop -
-            (
-                viewportHeight *
-                0.52
-            );
-
-
-        const maxScroll =
-            document.documentElement.scrollHeight -
-            window.innerHeight;
-
-
-        targetPosition =
-            Math.max(
-                0,
-                Math.min(
-                    targetPosition,
-                    maxScroll
-                )
-            );
-
-
-        smoothScrollTo(
-            targetPosition,
-            1800
-        );
-
-
-        /* =================================================
-           INPUT PULSE
-        ================================================= */
-
-        setTimeout(() => {
-
-            if (
-                userHasInteractedWithScroll
-            ) {
-
-                return;
-
-            }
-
-
-            const nameInput =
-                document.getElementById(
-                    "guestName"
+            const eventDetails =
+                document.querySelector(
+                    ".event-details"
                 );
 
 
-            if (!nameInput) {
+            if (!eventDetails) {
                 return;
             }
 
 
-            nameInput.classList.remove(
-                "input-pulse"
+            const sectionTop =
+                eventDetails.getBoundingClientRect().top +
+                window.scrollY;
+
+
+            const viewportHeight =
+                window.innerHeight;
+
+
+            let targetPosition =
+                sectionTop -
+                (
+                    viewportHeight *
+                    .52
+                );
+
+
+            const maxScroll =
+                document.documentElement.scrollHeight -
+                window.innerHeight;
+
+
+            targetPosition =
+                Math.max(
+                    0,
+                    Math.min(
+                        targetPosition,
+                        maxScroll
+                    )
+                );
+
+
+            smoothScrollTo(
+                targetPosition,
+                2400
             );
 
 
-            void nameInput.offsetWidth;
+            /* =================================================
+               INPUT PULSE
+            ================================================= */
+
+            setTimeout(() => {
+
+                const nameInput =
+                    document.getElementById(
+                        "guestName"
+                    );
 
 
-            nameInput.classList.add(
-                "input-pulse"
-            );
-
-        }, 1900);
-
-    }, 4800);
-
-}
+                if (!nameInput) {
+                    return;
+                }
 
 
-/* =========================================================
-   USER SCROLL INTERACTION
-========================================================= */
-
-let userHasInteractedWithScroll = false;
+                nameInput.classList.remove(
+                    "input-pulse"
+                );
 
 
-function markUserScrollInteraction() {
-
-    userHasInteractedWithScroll = true;
-
-}
+                void nameInput.offsetWidth;
 
 
-window.addEventListener(
-    "wheel",
-    markUserScrollInteraction,
-    {
-        passive: true,
-        once: true
-    }
-);
+                nameInput.classList.add(
+                    "input-pulse"
+                );
 
-
-window.addEventListener(
-    "touchstart",
-    markUserScrollInteraction,
-    {
-        passive: true,
-        once: true
-    }
-);
-
-
-window.addEventListener(
-    "touchmove",
-    markUserScrollInteraction,
-    {
-        passive: true,
-        once: true
-    }
-);
-
-
-window.addEventListener(
-    "keydown",
-    event => {
-
-        const scrollingKeys = [
-            "ArrowUp",
-            "ArrowDown",
-            "PageUp",
-            "PageDown",
-            "Home",
-            "End",
-            " "
-        ];
-
-
-        if (
-            scrollingKeys.includes(
-                event.key
-            )
-        ) {
-
-            markUserScrollInteraction();
+            }, 2600);
 
         }
 
-    },
-    {
-        passive: true,
-        once: true
-    }
-);
+    }, 7000);
+
+}
 
 
 /* =========================================================
    ULTRA-SMOOTH SCROLL
 ========================================================= */
 
-let smoothScrollFrame = null;
-
-
 function smoothScrollTo(
     target,
     duration
 ) {
-
-    /*
-     * Cancel any previous automatic scroll.
-     */
-
-    if (
-        smoothScrollFrame !== null
-    ) {
-
-        cancelAnimationFrame(
-            smoothScrollFrame
-        );
-
-        smoothScrollFrame = null;
-
-    }
-
 
     const start =
         window.scrollY;
@@ -2240,23 +2236,13 @@ function smoothScrollTo(
         start;
 
 
-    if (
-        Math.abs(distance) <
-        2
-    ) {
-
-        return;
-
-    }
-
-
     const startTime =
         performance.now();
 
 
     function easeInOutCubic(t) {
 
-        return t < 0.5
+        return t < .5
 
             ? 4 *
                 t *
@@ -2275,22 +2261,6 @@ function smoothScrollTo(
     function animateScroll(
         currentTime
     ) {
-
-        /*
-         * If user starts interacting,
-         * immediately surrender control.
-         */
-
-        if (
-            userHasInteractedWithScroll
-        ) {
-
-            smoothScrollFrame = null;
-
-            return;
-
-        }
-
 
         const elapsed =
             currentTime -
@@ -2321,25 +2291,18 @@ function smoothScrollTo(
 
         if (progress < 1) {
 
-            smoothScrollFrame =
-                requestAnimationFrame(
-                    animateScroll
-                );
-
-        } else {
-
-            smoothScrollFrame =
-                null;
+            requestAnimationFrame(
+                animateScroll
+            );
 
         }
 
     }
 
 
-    smoothScrollFrame =
-        requestAnimationFrame(
-            animateScroll
-        );
+    requestAnimationFrame(
+        animateScroll
+    );
 
 }
 
