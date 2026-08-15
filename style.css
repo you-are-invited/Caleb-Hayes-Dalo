@@ -1229,12 +1229,18 @@ background-repeat: no-repeat;
 
     z-index: -5;
 
-    transform: scale(1.02);
+    /*
+       PERFORMANCE FIX:
+       CSS `filter` and `transform: scale()` on a <video>
+       force the browser to recompute/repaint every single
+       frame during playback, on top of decoding the video
+       itself. On lower-end phones this is the #1 cause of
+       stutter/lag on background videos.
 
-    filter:
-        brightness(1.08)
-        contrast(1.03)
-        saturate(1.08);
+       The brightness/contrast/saturation look should be
+       baked into the video file itself (once, with ffmpeg)
+       instead of being applied live in the browser.
+    */
 
     opacity: 0;
 

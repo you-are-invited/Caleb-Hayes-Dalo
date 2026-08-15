@@ -1801,11 +1801,26 @@ if (revealBtn) {
 
 /* =========================================================
    BACKGROUND SCROLL EFFECT
+
+   PERFORMANCE FIX:
+   The old version ran requestAnimationFrame() forever,
+   60 times per second, for the entire lifetime of the page
+   — even while the user wasn't scrolling at all. That
+   constant work (trig math + DOM style writes every frame)
+   competes with the video decoder for the main thread and
+   is a common cause of video stutter, especially on phones.
+
+   Now the animation loop only runs while it still has
+   something to animate (i.e. while currentScroll hasn't
+   caught up to targetScroll yet), and stops itself once it
+   settles. It's restarted automatically on the next scroll.
 ========================================================= */
 
 let currentScroll = 0;
 
 let targetScroll = 0;
+
+let bgAnimationFrameId = null;
 
 
 function updateBackgroundScroll() {
@@ -1828,10 +1843,49 @@ function updateBackgroundScroll() {
 
     }
 
+
+    /*
+     * Wake the animation loop back up if it had
+     * settled and stopped itself.
+     */
+
+    if (bgAnimationFrameId === null) {
+
+        bgAnimationFrameId =
+            requestAnimationFrame(
+                animateBackground
+            );
+
+    }
+
 }
 
 
 function animateBackground() {
+
+    const distanceToTarget =
+        Math.abs(
+            targetScroll -
+            currentScroll
+        );
+
+
+    /*
+     * Close enough — snap to the target and stop
+     * the loop instead of running forever.
+     */
+
+    if (distanceToTarget < 0.5) {
+
+        currentScroll =
+            targetScroll;
+
+        bgAnimationFrameId = null;
+
+        return;
+
+    }
+
 
     currentScroll +=
         (
@@ -1966,9 +2020,10 @@ function animateBackground() {
     }
 
 
-    requestAnimationFrame(
-        animateBackground
-    );
+    bgAnimationFrameId =
+        requestAnimationFrame(
+            animateBackground
+        );
 
 }
 
@@ -1983,8 +2038,6 @@ window.addEventListener(
 
 
 updateBackgroundScroll();
-
-animateBackground();
 
 
 /* =========================================================
