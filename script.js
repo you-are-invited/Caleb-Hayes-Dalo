@@ -1,48 +1,624 @@
 /* =========================================================
-   BACKGROUND MUSIC
+   GLOBAL INVITATION STATE
 ========================================================= */
 
-const music = document.getElementById("bgMusic");
-const musicBtn = document.getElementById("musicBtn");
-const musicText = document.getElementById("musicText");
+let invitationStarted = false;
 
-let isPlaying = false;
 
-musicBtn.addEventListener("click", async () => {
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
-    try {
+const loadingScreen =
+    document.getElementById("loadingScreen");
 
-        if (!isPlaying) {
+const loadingStatus =
+    document.getElementById("loadingStatus");
 
-            await music.play();
+const loadingProgress =
+    document.getElementById("loadingProgress");
 
-            isPlaying = true;
+const viewInvitationWrapper =
+    document.getElementById("viewInvitationWrapper");
 
-            musicText.textContent = "Pause";
+const viewInvitationBtn =
+    document.getElementById("viewInvitationBtn");
 
-            musicBtn.classList.add("playing");
+const bgVideo =
+    document.getElementById("bgVideo");
 
-        } else {
+const music =
+    document.getElementById("bgMusic");
 
-            music.pause();
+const musicBtn =
+    document.getElementById("musicBtn");
 
-            isPlaying = false;
+const musicText =
+    document.getElementById("musicText");
 
-            musicText.textContent = "Tap for music";
+const colorBackground =
+    document.querySelector(".color-background");
 
-            musicBtn.classList.remove("playing");
+
+/* =========================================================
+   INITIAL STATE
+========================================================= */
+
+document.body.classList.add(
+    "invitation-loading"
+);
+
+
+if (bgVideo) {
+
+    bgVideo.pause();
+
+    bgVideo.currentTime = 0;
+
+    bgVideo.style.opacity = "0";
+
+}
+
+
+/* =========================================================
+   LOADING STATE
+========================================================= */
+
+let videoReady = false;
+
+let videoMetadataReady = false;
+
+let videoEnoughToStart = false;
+
+
+/* =========================================================
+   UPDATE LOADING MESSAGE
+========================================================= */
+
+function setLoadingStatus(message) {
+
+    if (!loadingStatus) {
+
+        return;
+
+    }
+
+
+    loadingStatus.style.opacity = "0";
+
+
+    setTimeout(() => {
+
+        loadingStatus.textContent =
+            message;
+
+        loadingStatus.style.opacity =
+            "1";
+
+    }, 180);
+
+}
+
+
+/* =========================================================
+   UPDATE LOADING PROGRESS
+========================================================= */
+
+function setLoadingProgress(value) {
+
+    if (!loadingProgress) {
+
+        return;
+
+    }
+
+
+    const safeValue =
+        Math.min(
+            Math.max(value, 0),
+            100
+        );
+
+
+    loadingProgress.style.width =
+        `${safeValue}%`;
+
+}
+
+
+/* =========================================================
+   VIDEO PRELOAD
+========================================================= */
+
+function prepareVideo() {
+
+    if (!bgVideo) {
+
+        videoReady = true;
+
+        videoEnoughToStart = true;
+
+        showViewInvitation();
+
+        return;
+
+    }
+
+
+    setLoadingStatus(
+        "Preparing the invitation..."
+    );
+
+    setLoadingProgress(10);
+
+
+    bgVideo.load();
+
+
+    /* =====================================================
+       METADATA READY
+    ===================================================== */
+
+    bgVideo.addEventListener(
+        "loadedmetadata",
+        () => {
+
+            videoMetadataReady = true;
+
+            setLoadingProgress(35);
+
+            setLoadingStatus(
+                "Preparing the video..."
+            );
+
+
+            bgVideo.pause();
+
+            bgVideo.currentTime = 0;
+
+            checkVideoReady();
+
+        },
+        {
+            once: true
+        }
+    );
+
+
+    /* =====================================================
+       CAN PLAY
+    ===================================================== */
+
+    bgVideo.addEventListener(
+        "canplay",
+        () => {
+
+            videoReady = true;
+
+            setLoadingProgress(65);
+
+            setLoadingStatus(
+                "Almost ready..."
+            );
+
+            checkVideoReady();
+
+        },
+        {
+            once: true
+        }
+    );
+
+
+    /* =====================================================
+       CAN PLAY THROUGH
+    ===================================================== */
+
+    bgVideo.addEventListener(
+        "canplaythrough",
+        () => {
+
+            videoEnoughToStart = true;
+
+            setLoadingProgress(100);
+
+            setLoadingStatus(
+                "Your invitation is ready."
+            );
+
+            checkVideoReady();
+
+        },
+        {
+            once: true
+        }
+    );
+
+
+    /* =====================================================
+       PROGRESS
+    ===================================================== */
+
+    bgVideo.addEventListener(
+        "progress",
+        updateVideoProgress
+    );
+
+
+    /* =====================================================
+       ERROR
+    ===================================================== */
+
+    bgVideo.addEventListener(
+        "error",
+        () => {
+
+            console.warn(
+                "Background video could not be fully loaded."
+            );
+
+
+            if (videoReady) {
+
+                videoEnoughToStart = true;
+
+                setLoadingProgress(100);
+
+                setLoadingStatus(
+                    "Your invitation is ready."
+                );
+
+                showViewInvitation();
+
+            }
+
+        },
+        {
+            once: true
+        }
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE VIDEO PROGRESS
+========================================================= */
+
+function updateVideoProgress() {
+
+    if (!bgVideo) {
+
+        return;
+
+    }
+
+
+    if (
+        bgVideo.buffered &&
+        bgVideo.buffered.length
+    ) {
+
+        try {
+
+            const bufferedEnd =
+                bgVideo.buffered.end(
+                    bgVideo.buffered.length - 1
+                );
+
+            const duration =
+                bgVideo.duration;
+
+
+            if (
+                Number.isFinite(duration) &&
+                duration > 0
+            ) {
+
+                const percentage =
+                    Math.min(
+                        95,
+                        40 +
+                        (
+                            bufferedEnd /
+                            duration
+                        ) * 55
+                    );
+
+
+                setLoadingProgress(
+                    percentage
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Could not read video buffer.",
+                error
+            );
+
         }
 
-    } catch (error) {
+    }
 
-        console.error(
-            "Music could not be played:",
-            error
+}
+
+
+/* =========================================================
+   CHECK VIDEO READY
+========================================================= */
+
+function checkVideoReady() {
+
+    if (
+        videoMetadataReady &&
+        videoReady
+    ) {
+
+        videoEnoughToStart = true;
+
+        setLoadingProgress(100);
+
+        setLoadingStatus(
+            "Your invitation is ready."
+        );
+
+        showViewInvitation();
+
+    }
+
+}
+
+
+/* =========================================================
+   SHOW VIEW INVITATION
+========================================================= */
+
+function showViewInvitation() {
+
+    if (!viewInvitationWrapper) {
+
+        return;
+
+    }
+
+
+    viewInvitationWrapper.classList.add(
+        "ready"
+    );
+
+}
+
+
+/* =========================================================
+   START INVITATION
+========================================================= */
+
+async function startInvitation() {
+
+    if (invitationStarted) {
+
+        return;
+
+    }
+
+
+    if (!videoEnoughToStart) {
+
+        return;
+
+    }
+
+
+    invitationStarted = true;
+
+
+    if (viewInvitationBtn) {
+
+        viewInvitationBtn.disabled = true;
+
+    }
+
+
+    if (loadingScreen) {
+
+        loadingScreen.classList.add(
+            "hidden"
         );
 
     }
 
-});
+
+    document.body.classList.remove(
+        "invitation-loading"
+    );
+
+
+    if (bgVideo) {
+
+        try {
+
+            bgVideo.pause();
+
+            bgVideo.currentTime = 0;
+
+        } catch (error) {
+
+            console.warn(
+                "Could not reset video:",
+                error
+            );
+
+        }
+
+    }
+
+
+    if (bgVideo) {
+
+        bgVideo.style.opacity =
+            "1";
+
+    }
+
+
+    startCinematicHero();
+
+
+    if (bgVideo) {
+
+        try {
+
+            await bgVideo.play();
+
+        } catch (error) {
+
+            console.warn(
+                "Video autoplay was blocked:",
+                error
+            );
+
+        }
+
+    }
+
+
+    try {
+
+        await music.play();
+
+        isPlaying = true;
+
+        musicText.textContent =
+            "Pause";
+
+        musicBtn.classList.add(
+            "playing"
+        );
+
+    } catch (error) {
+
+        console.log(
+            "Music requires another tap:",
+            error
+        );
+
+        isPlaying = false;
+
+        musicText.textContent =
+            "Tap for music";
+
+        musicBtn.classList.remove(
+            "playing"
+        );
+
+    }
+
+
+    if (viewInvitationWrapper) {
+
+        viewInvitationWrapper.classList.remove(
+            "ready"
+        );
+
+    }
+
+
+    if (musicBtn) {
+
+        musicBtn.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    setTimeout(() => {
+
+        if (loadingScreen) {
+
+            loadingScreen.style.display =
+                "none";
+
+        }
+
+    }, 1100);
+
+}
+
+
+/* =========================================================
+   VIEW INVITATION CLICK
+========================================================= */
+
+if (viewInvitationBtn) {
+
+    viewInvitationBtn.addEventListener(
+        "click",
+        startInvitation
+    );
+
+}
+
+
+/* =========================================================
+   BACKGROUND MUSIC
+========================================================= */
+
+let isPlaying = false;
+
+
+if (musicBtn) {
+
+    musicBtn.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                if (!isPlaying) {
+
+                    await music.play();
+
+                    isPlaying = true;
+
+                    musicText.textContent =
+                        "Pause";
+
+                    musicBtn.classList.add(
+                        "playing"
+                    );
+
+                } else {
+
+                    music.pause();
+
+                    isPlaying = false;
+
+                    musicText.textContent =
+                        "Tap for music";
+
+                    musicBtn.classList.remove(
+                        "playing"
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Music could not be played:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+}
 
 
 /* =========================================================
@@ -72,6 +648,7 @@ async function loadGuests() {
         const response =
             await fetch("./guests.json");
 
+
         if (!response.ok) {
 
             throw new Error(
@@ -80,8 +657,10 @@ async function loadGuests() {
 
         }
 
+
         guests =
             await response.json();
+
 
         console.log(
             "Guest list loaded:",
@@ -106,10 +685,27 @@ async function loadGuests() {
 
 function normalizeName(name) {
 
-    return name
+    return String(name || "")
         .trim()
         .replace(/\s+/g, " ")
         .toLowerCase();
+
+}
+
+
+/* =========================================================
+   GET GUEST NAMES
+========================================================= */
+
+function getGuestNames(guest) {
+
+    if (Array.isArray(guest.name)) {
+
+        return guest.name;
+
+    }
+
+    return [guest.name];
 
 }
 
@@ -123,23 +719,57 @@ function findGuests(searchName) {
     const search =
         normalizeName(searchName);
 
+
     return guests.filter(guest => {
 
-        const fullName =
-            normalizeName(guest.name);
+        const possibleNames =
+            getGuestNames(guest);
 
-        if (fullName === search) {
 
-            return true;
+        return possibleNames.some(
+            name => {
 
-        }
+                const normalizedName =
+                    normalizeName(name);
 
-        const firstName =
-            fullName.split(" ")[0];
 
-        return firstName === search;
+                if (
+                    normalizedName ===
+                    search
+                ) {
+
+                    return true;
+
+                }
+
+
+                const firstName =
+                    normalizedName
+                        .split(" ")[0];
+
+
+                return firstName ===
+                    search;
+
+            }
+        );
 
     });
+
+}
+
+
+/* =========================================================
+   GET DISPLAY NAME
+========================================================= */
+
+function getDisplayName(guest) {
+
+    const names =
+        getGuestNames(guest);
+
+
+    return names[0] || "";
 
 }
 
@@ -153,9 +783,35 @@ function escapeHTML(text) {
     const div =
         document.createElement("div");
 
-    div.textContent = text;
+
+    div.textContent =
+        String(text || "");
+
 
     return div.innerHTML;
+
+}
+
+
+/* =========================================================
+   FORMAT MESSAGE
+========================================================= */
+
+function formatGuestMessage(message) {
+
+    return String(message || "")
+        .trim()
+        .split(/\n\s*\n/)
+        .map(paragraph => {
+
+            return `
+                <p class="message-paragraph">
+                    ${escapeHTML(paragraph).replace(/\n/g, "<br>")}
+                </p>
+            `;
+
+        })
+        .join("");
 
 }
 
@@ -166,26 +822,136 @@ function escapeHTML(text) {
 
 function showGuestMessage(guest) {
 
+    const displayName =
+        getDisplayName(guest);
+
+
+    const formattedMessage =
+        formatGuestMessage(
+            guest.message
+        );
+
+
+    /*
+     * SAVE CURRENT SCROLL POSITION
+     *
+     * This prevents the page from jumping
+     * down to the RSVP section when the
+     * message expands.
+     */
+
+    const currentScrollPosition =
+        window.scrollY;
+
+
     guestMessage.innerHTML = `
 
         <div class="message-divider"></div>
 
-        <p class="message-text">
+        <div class="message-text">
 
-            Dear
-            <strong>
-                ${escapeHTML(guest.name)}
-            </strong>,
+            <p class="message-greeting">
 
-            <br><br>
+                Dear
+                <strong>
+                    ${escapeHTML(displayName)}
+                </strong>,
 
-            ${escapeHTML(guest.message)}
+            </p>
 
-        </p>
+            <div class="message-body">
+
+                ${formattedMessage}
+
+            </div>
+
+
+            <!-- =================================================
+                 RSVP
+                 APPEARS ONLY AFTER THE MESSAGE IS REVEALED
+            ================================================== -->
+
+            <div class="rsvp-section">
+
+                <div class="rsvp-divider"></div>
+
+                <p class="rsvp-label">
+                    RSVP
+                </p>
+
+                <h4 class="rsvp-title">
+                    We hope you can join us.
+                </h4>
+
+                <p class="rsvp-text">
+                    Please let us know if you’ll be able to
+                    celebrate with us and if you’ll be bringing
+                    a guest. Seating is limited, so this will
+                    help us prepare a place for everyone.
+                </p>
+
+                <p class="rsvp-confirm">
+                    Kindly confirm with:
+                </p>
+
+                <div class="rsvp-buttons">
+
+                    <a
+                        href="https://m.me/YOUR_SEAN_MESSENGER"
+                        target="_blank"
+                        rel="noopener"
+                        class="rsvp-button">
+
+                        <span>
+                            Confirm to Shean
+                        </span>
+
+                    </a>
+
+
+                    <a
+                        href="https://m.me/YOUR_LYNE_MESSENGER"
+                        target="_blank"
+                        rel="noopener"
+                        class="rsvp-button">
+
+                        <span>
+                            Confirm to Lyne
+                        </span>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
 
     `;
 
-    guestMessage.classList.add("show");
+
+    guestMessage.classList.add(
+        "show"
+    );
+
+
+    /*
+     * RESTORE THE EXACT SCROLL POSITION
+     *
+     * The message can become much taller after
+     * being revealed. Restoring the previous
+     * position prevents the browser from jumping
+     * to the bottom / RSVP area.
+     */
+
+    requestAnimationFrame(() => {
+
+        window.scrollTo(
+            0,
+            currentScrollPosition
+        );
+
+    });
 
 }
 
@@ -198,48 +964,59 @@ function showGuestChoices(matches) {
 
     let buttons = "";
 
-    matches.forEach((guest, index) => {
 
-        buttons += `
+    matches.forEach(
+        (guest, index) => {
 
-            <button
-                class="guest-choice"
-                data-index="${index}"
-                type="button">
+            buttons += `
 
-                ${escapeHTML(guest.name)}
+                <button
+                    class="guest-choice"
+                    data-index="${index}"
+                    type="button">
 
-            </button>
+                    ${escapeHTML(
+                        getDisplayName(guest)
+                    )}
 
-        `;
+                </button>
 
-    });
+            `;
+
+        }
+    );
 
 
     guestMessage.innerHTML = `
 
         <div class="message-divider"></div>
 
-        <p class="message-text">
+        <div class="message-text">
 
-            We found a few guests with that name.
+            <p class="message-paragraph">
 
-            <br>
+                We found a few guests with that name.
 
-            Please select your name.
+                <br><br>
 
-        </p>
+                Please select your name.
 
-        <div class="guest-choices">
+            </p>
 
-            ${buttons}
+            <div class="guest-choices">
+
+                ${buttons}
+
+            </div>
 
         </div>
 
     `;
 
 
-    guestMessage.classList.add("show");
+    guestMessage.classList.add(
+        "show"
+    );
 
 
     const choiceButtons =
@@ -248,26 +1025,32 @@ function showGuestChoices(matches) {
         );
 
 
-    choiceButtons.forEach(button => {
+    choiceButtons.forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                const index =
-                    button.dataset.index;
+                    const index =
+                        Number(
+                            button.dataset.index
+                        );
 
-                const selectedGuest =
-                    matches[index];
 
-                showGuestMessage(
-                    selectedGuest
-                );
+                    const selectedGuest =
+                        matches[index];
 
-            }
-        );
 
-    });
+                    showGuestMessage(
+                        selectedGuest
+                    );
+
+                }
+            );
+
+        }
+    );
 
 }
 
@@ -282,10 +1065,6 @@ function revealGuestMessage() {
         guestName.value.trim();
 
 
-    /* =====================================================
-       EMPTY NAME
-    ===================================================== */
-
     if (!input) {
 
         guestName.focus();
@@ -295,11 +1074,11 @@ function revealGuestMessage() {
 
             <div class="message-divider"></div>
 
-            <p class="message-text validation-message">
+            <div class="message-text validation-message">
 
                 Please enter your name first.
 
-            </p>
+            </div>
 
         `;
 
@@ -309,27 +1088,23 @@ function revealGuestMessage() {
         );
 
 
-        /*
-         * Restart the red shake animation.
-         */
-
         guestName.classList.remove(
             "name-required"
         );
 
+
         void guestName.offsetWidth;
+
 
         guestName.classList.add(
             "name-required"
         );
 
+
         return;
+
     }
 
-
-    /* =====================================================
-       NAME ENTERED
-    ===================================================== */
 
     guestName.classList.remove(
         "name-required"
@@ -340,27 +1115,29 @@ function revealGuestMessage() {
         findGuests(input);
 
 
-    /* =====================================================
-       NAME NOT FOUND
-    ===================================================== */
-
     if (matches.length === 0) {
 
         guestMessage.innerHTML = `
 
             <div class="message-divider"></div>
 
-            <p class="message-text">
+            <div class="message-text">
 
-                We couldn't find your name
-                on our guest list.
+                <p class="message-paragraph">
 
-                <br><br>
+                    We couldn't find your name
+                    on our guest list.
 
-                Please try typing your first
-                name or full name.
+                </p>
 
-            </p>
+                <p class="message-paragraph">
+
+                    Please try typing your first
+                    name or full name.
+
+                </p>
+
+            </div>
 
         `;
 
@@ -370,12 +1147,9 @@ function revealGuestMessage() {
         );
 
         return;
+
     }
 
-
-    /* =====================================================
-       ONE MATCH
-    ===================================================== */
 
     if (matches.length === 1) {
 
@@ -384,12 +1158,9 @@ function revealGuestMessage() {
         );
 
         return;
+
     }
 
-
-    /* =====================================================
-       MULTIPLE MATCHES
-    ===================================================== */
 
     showGuestChoices(
         matches
@@ -402,84 +1173,74 @@ function revealGuestMessage() {
    ENTER KEY
 ========================================================= */
 
-guestName.addEventListener(
-    "keydown",
-    event => {
+if (guestName) {
 
-        if (event.key === "Enter") {
+    guestName.addEventListener(
+        "keydown",
+        event => {
 
-            revealGuestMessage();
+            if (event.key === "Enter") {
 
-        }
+                revealGuestMessage();
 
-    }
-);
-
-
-/* =========================================================
-   REVEAL BUTTON
-========================================================= */
-
-revealBtn.addEventListener(
-    "click",
-    revealGuestMessage
-);
-
-
-/* =========================================================
-   NAME INPUT INTERACTION
-========================================================= */
-
-guestName.addEventListener(
-    "input",
-    () => {
-
-        const hasName =
-            guestName.value.trim().length > 0;
-
-
-        if (hasName) {
-
-            guestName.classList.remove(
-                "name-required"
-            );
-
-            guestMessage.classList.remove(
-                "show"
-            );
-
-            revealBtn.classList.add(
-                "ready"
-            );
-
-        } else {
-
-            revealBtn.classList.remove(
-                "ready"
-            );
+            }
 
         }
-
-    }
-);
+    );
 
 
-loadGuests();
+    guestName.addEventListener(
+        "input",
+        () => {
+
+            const hasName =
+                guestName.value.trim().length > 0;
+
+
+            if (hasName) {
+
+                guestName.classList.remove(
+                    "name-required"
+                );
+
+                guestMessage.classList.remove(
+                    "show"
+                );
+
+                revealBtn.classList.add(
+                    "ready"
+                );
+
+            } else {
+
+                revealBtn.classList.remove(
+                    "ready"
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+if (revealBtn) {
+
+    revealBtn.addEventListener(
+        "click",
+        revealGuestMessage
+    );
+
+}
 
 
 /* =========================================================
    BACKGROUND SCROLL EFFECT
 ========================================================= */
 
-const bgVideo =
-    document.querySelector(".bg-video");
-
-const colorBackground =
-    document.querySelector(
-        ".color-background"
-    );
-
 let currentScroll = 0;
+
 let targetScroll = 0;
 
 
@@ -509,8 +1270,10 @@ function updateBackgroundScroll() {
 function animateBackground() {
 
     currentScroll +=
-        (targetScroll - currentScroll) *
-        0.055;
+        (
+            targetScroll -
+            currentScroll
+        ) * .055;
 
 
     const maxScroll =
@@ -524,7 +1287,8 @@ function animateBackground() {
     const scrollProgress =
         Math.min(
             Math.max(
-                currentScroll / maxScroll,
+                currentScroll /
+                maxScroll,
                 0
             ),
             1
@@ -535,83 +1299,104 @@ function animateBackground() {
        VIDEO FADE
     ===================================================== */
 
-    const fadeStart = 0.015;
-    const fadeEnd = 0.24;
+    if (invitationStarted && bgVideo) {
+
+        const fadeStart =
+            .015;
+
+        const fadeEnd =
+            .24;
 
 
-    let videoProgress =
-        (scrollProgress - fadeStart) /
-        (fadeEnd - fadeStart);
+        let videoProgress =
+            (
+                scrollProgress -
+                fadeStart
+            ) /
+            (
+                fadeEnd -
+                fadeStart
+            );
 
 
-    videoProgress =
-        Math.min(
-            Math.max(
-                videoProgress,
-                0
-            ),
-            1
-        );
+        videoProgress =
+            Math.min(
+                Math.max(
+                    videoProgress,
+                    0
+                ),
+                1
+            );
 
 
-    const smoothFade =
-        videoProgress *
-        videoProgress *
-        (3 - 2 * videoProgress);
+        const smoothFade =
+            videoProgress *
+            videoProgress *
+            (
+                3 -
+                2 * videoProgress
+            );
 
 
-    bgVideo.style.opacity =
-        1 - smoothFade;
+        bgVideo.style.opacity =
+            1 -
+            smoothFade;
+
+    }
 
 
     /* =====================================================
-       SUBTLE BACKGROUND MOVEMENT
+       BACKGROUND MOVEMENT
     ===================================================== */
 
-    const moveX =
-        Math.sin(
-            scrollProgress *
-            Math.PI *
-            1.15
-        ) * 4;
+    if (colorBackground) {
+
+        const moveX =
+            Math.sin(
+                scrollProgress *
+                Math.PI *
+                1.15
+            ) * 4;
 
 
-    const moveY =
-        Math.cos(
-            scrollProgress *
-            Math.PI *
-            0.95
-        ) * 3;
+        const moveY =
+            Math.cos(
+                scrollProgress *
+                Math.PI *
+                .95
+            ) * 3;
 
 
-    colorBackground.style.transform =
-        `translate3d(
-            ${moveX}px,
-            ${moveY}px,
-            0
-        ) scale(1.08)`;
+        colorBackground.style.transform =
+            `translate3d(
+                ${moveX}px,
+                ${moveY}px,
+                0
+            ) scale(1.08)`;
 
 
-    const positionX =
-        42 +
-        Math.sin(
-            scrollProgress *
-            Math.PI *
-            1.15
-        ) * 13;
+        const positionX =
+            42 +
+            Math.sin(
+                scrollProgress *
+                Math.PI *
+                1.15
+            ) * 13;
 
 
-    const positionY =
-        45 +
-        Math.cos(
-            scrollProgress *
-            Math.PI *
-            0.95
-        ) * 9;
+        const positionY =
+            45 +
+            Math.cos(
+                scrollProgress *
+                Math.PI *
+                .95
+            ) * 9;
 
 
-    colorBackground.style.backgroundPosition =
-        `${positionX}% ${positionY}%`;
+        colorBackground.style.backgroundPosition =
+            `${positionX}% ${positionY}%`;
+
+    }
 
 
     requestAnimationFrame(
@@ -636,11 +1421,23 @@ animateBackground();
 
 
 /* =========================================================
-   CINEMATIC HERO SEQUENCE
-   TIMINGS PRESERVED
+   CINEMATIC HERO
 ========================================================= */
 
-(function startCinematicHero() {
+let cinematicStarted = false;
+
+
+function startCinematicHero() {
+
+    if (cinematicStarted) {
+
+        return;
+
+    }
+
+
+    cinematicStarted = true;
+
 
     const eyebrow =
         document.querySelector(
@@ -688,9 +1485,6 @@ animateBackground();
         );
 
 
-    let started = false;
-
-
     function reveal(element) {
 
         if (element) {
@@ -704,300 +1498,258 @@ animateBackground();
     }
 
 
-    function startSequence() {
+    setTimeout(() => {
 
-        if (started) {
+        reveal(eyebrow);
+        reveal(line);
 
-            return;
+    }, 500);
+
+
+    setTimeout(() => {
+
+        reveal(intro);
+
+    }, 600);
+
+
+    setTimeout(() => {
+
+        reveal(name);
+        reveal(underline);
+
+    }, 1500);
+
+
+    setTimeout(() => {
+
+        reveal(label);
+
+    }, 3000);
+
+
+    setTimeout(() => {
+
+        reveal(title);
+
+    }, 4800);
+
+
+    setTimeout(() => {
+
+        reveal(hosted);
+
+    }, 7000);
+
+
+    setTimeout(() => {
+
+        reveal(scrollIndicator);
+
+
+        if (scrollIndicator) {
+
+            scrollIndicator.classList.add(
+                "scroll-ready"
+            );
 
         }
 
-
-        started = true;
-
-
-        /* =================================================
-           EXISTING TIMINGS — PRESERVED
-        ================================================= */
+    }, 7000);
 
 
-        setTimeout(() => {
+    /* =====================================================
+       AUTOMATIC SMOOTH SCROLL
+    ===================================================== */
 
-            reveal(eyebrow);
-            reveal(line);
+    setTimeout(() => {
 
-        }, 500);
+        if (window.scrollY <= 10) {
 
-
-        setTimeout(() => {
-
-            reveal(intro);
-
-        }, 600);
-
-
-        setTimeout(() => {
-
-            reveal(name);
-            reveal(underline);
-
-        }, 1500);
-
-
-        setTimeout(() => {
-
-            reveal(label);
-
-        }, 3000);
-
-
-        setTimeout(() => {
-
-            reveal(title);
-
-        }, 4200);
-
-
-        setTimeout(() => {
-
-            reveal(hosted);
-
-        }, 7000);
-
-
-        setTimeout(() => {
-
-            reveal(scrollIndicator);
-
-
-            if (scrollIndicator) {
-
-                scrollIndicator.classList.add(
-                    "scroll-ready"
+            const eventDetails =
+                document.querySelector(
+                    ".event-details"
                 );
+
+
+            if (!eventDetails) {
+
+                return;
 
             }
 
-        }, 7000);
+
+            const sectionTop =
+                eventDetails.getBoundingClientRect().top +
+                window.scrollY;
 
 
-        /* =================================================
-           AUTOMATIC SMOOTH SCROLL
-        ================================================= */
+            const viewportHeight =
+                window.innerHeight;
 
-        setTimeout(() => {
 
-            if (window.scrollY <= 10) {
+            let targetPosition =
+                sectionTop -
+                (
+                    viewportHeight *
+                    .52
+                );
 
-                const eventDetails =
-                    document.querySelector(
-                        ".event-details"
+
+            const maxScroll =
+                document.documentElement.scrollHeight -
+                window.innerHeight;
+
+
+            targetPosition =
+                Math.max(
+                    0,
+                    Math.min(
+                        targetPosition,
+                        maxScroll
+                    )
+                );
+
+
+            smoothScrollTo(
+                targetPosition,
+                2400
+            );
+
+
+            /* =================================================
+               INPUT PULSE
+            ================================================= */
+
+            setTimeout(() => {
+
+                const nameInput =
+                    document.getElementById(
+                        "guestName"
                     );
 
 
-                if (!eventDetails) {
+                if (!nameInput) {
 
                     return;
 
                 }
 
 
-                const sectionTop =
-                    eventDetails.getBoundingClientRect().top +
-                    window.scrollY;
-
-
-                const viewportHeight =
-                    window.innerHeight;
-
-
-                let targetPosition =
-                    sectionTop -
-                    (viewportHeight * 0.52);
-
-
-                const maxScroll =
-                    document.documentElement.scrollHeight -
-                    window.innerHeight;
-
-
-                targetPosition =
-                    Math.max(
-                        0,
-                        Math.min(
-                            targetPosition,
-                            maxScroll
-                        )
-                    );
-
-
-                smoothScrollTo(
-                    targetPosition,
-                    2400
+                nameInput.classList.remove(
+                    "input-pulse"
                 );
 
 
-                /* =================================================
-                   INPUT PULSE
-                   
-                   The automatic scroll finishes after
-                   approximately 2400ms.
-
-                   Then the guest input gets a visible
-                   gold pulse so the user notices it.
-                ================================================= */
-
-                setTimeout(() => {
-
-                    const nameInput =
-                        document.getElementById(
-                            "guestName"
-                        );
+                void nameInput.offsetWidth;
 
 
-                    if (!nameInput) {
+                nameInput.classList.add(
+                    "input-pulse"
+                );
 
-                        return;
+            }, 2600);
 
-                    }
+        }
 
+    }, 7000);
 
-                    nameInput.classList.remove(
-                        "input-pulse"
-                    );
-
-
-                    void nameInput.offsetWidth;
+}
 
 
-                    nameInput.classList.add(
-                        "input-pulse"
-                    );
+/* =========================================================
+   ULTRA-SMOOTH SCROLL
+========================================================= */
+
+function smoothScrollTo(
+    target,
+    duration
+) {
+
+    const start =
+        window.scrollY;
 
 
-                }, 2600);
+    const distance =
+        target -
+        start;
 
-            }
 
-        }, 7000);
+    const startTime =
+        performance.now();
+
+
+    function easeInOutCubic(t) {
+
+        return t < .5
+
+            ? 4 *
+                t *
+                t *
+                t
+
+            : 1 -
+                Math.pow(
+                    -2 * t + 2,
+                    3
+                ) / 2;
 
     }
 
 
-    /* =====================================================
-       ULTRA-SMOOTH SCROLL
-    ===================================================== */
-
-    function smoothScrollTo(
-        target,
-        duration
+    function animateScroll(
+        currentTime
     ) {
 
-        const start =
-            window.scrollY;
+        const elapsed =
+            currentTime -
+            startTime;
 
 
-        const distance =
-            target - start;
-
-
-        const startTime =
-            performance.now();
-
-
-        function easeInOutCubic(t) {
-
-            return t < 0.5
-
-                ? 4 * t * t * t
-
-                : 1 -
-                    Math.pow(
-                        -2 * t + 2,
-                        3
-                    ) / 2;
-
-        }
-
-
-        function animateScroll(
-            currentTime
-        ) {
-
-            const elapsed =
-                currentTime -
-                startTime;
-
-
-            const progress =
-                Math.min(
-                    elapsed / duration,
-                    1
-                );
-
-
-            const eased =
-                easeInOutCubic(
-                    progress
-                );
-
-
-            window.scrollTo(
-                0,
-                start +
-                distance * eased
+        const progress =
+            Math.min(
+                elapsed /
+                duration,
+                1
             );
 
 
-            if (progress < 1) {
+        const eased =
+            easeInOutCubic(
+                progress
+            );
 
-                requestAnimationFrame(
-                    animateScroll
-                );
 
-            }
+        window.scrollTo(
+            0,
+            start +
+            distance *
+            eased
+        );
+
+
+        if (progress < 1) {
+
+            requestAnimationFrame(
+                animateScroll
+            );
 
         }
-
-
-        requestAnimationFrame(
-            animateScroll
-        );
 
     }
 
 
-    /* =====================================================
-       START WHEN VIDEO PLAYS
-    ===================================================== */
+    requestAnimationFrame(
+        animateScroll
+    );
 
-    const video =
-        document.querySelector(
-            ".bg-video"
-        );
+}
 
 
-    if (video) {
+/* =========================================================
+   START
+========================================================= */
 
-        video.addEventListener(
-            "play",
-            startSequence,
-            {
-                once: true
-            }
-        );
+loadGuests();
 
-
-        if (!video.paused) {
-
-            startSequence();
-
-        }
-
-    } else {
-
-        startSequence();
-
-    }
-
-})();
+prepareVideo();
