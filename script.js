@@ -82,18 +82,6 @@ let videoLoadFailed = false;
 let videoFallbackTimer = null;
 
 
-/*
- * IMPORTANT:
- *
- * We no longer depend entirely on canplaythrough.
- *
- * canplaythrough may never fire on slow mobile
- * connections even when the video is already
- * playable.
- *
- * canplay is enough to safely begin the invitation.
- */
-
 const VIDEO_FALLBACK_TIME = 12000;
 
 
@@ -210,11 +198,6 @@ function markVideoReady() {
 
 function prepareVideo() {
 
-    /*
-     * If there is no background video,
-     * the invitation can immediately start.
-     */
-
     if (!bgVideo) {
 
         videoMetadataReady = true;
@@ -234,11 +217,6 @@ function prepareVideo() {
 
     setLoadingProgress(5);
 
-
-    /*
-     * Make sure the browser knows we want
-     * the video loaded.
-     */
 
     try {
 
@@ -266,9 +244,7 @@ function prepareVideo() {
 
             videoMetadataReady = true;
 
-
             setLoadingProgress(25);
-
 
             setLoadingStatus(
                 "Preparing the video..."
@@ -307,22 +283,11 @@ function prepareVideo() {
 
             videoCanPlay = true;
 
-
-            /*
-             * THIS IS THE IMPORTANT PART.
-             *
-             * We allow the invitation to continue
-             * as soon as the browser has enough data
-             * to start playing.
-             */
-
             setLoadingProgress(70);
-
 
             setLoadingStatus(
                 "Almost ready..."
             );
-
 
             markVideoReady();
 
@@ -340,13 +305,6 @@ function prepareVideo() {
     bgVideo.addEventListener(
         "canplaythrough",
         () => {
-
-            /*
-             * This is now only an enhancement.
-             *
-             * The invitation is already allowed to
-             * start after canplay.
-             */
 
             setLoadingProgress(100);
 
@@ -434,12 +392,6 @@ function prepareVideo() {
             );
 
 
-            /*
-             * If the browser already has enough
-             * information to play the video,
-             * allow the invitation to continue.
-             */
-
             if (
                 videoCanPlay ||
                 bgVideo.readyState >= 3
@@ -451,15 +403,6 @@ function prepareVideo() {
 
             }
 
-
-            /*
-             * Even if the video fails completely,
-             * we don't want the entire invitation
-             * to become unusable.
-             *
-             * The rest of the invitation can still
-             * function using the normal background.
-             */
 
             setLoadingProgress(100);
 
@@ -485,18 +428,8 @@ function prepareVideo() {
     videoFallbackTimer =
         setTimeout(() => {
 
-            /*
-             * If canplay has not fired after
-             * several seconds, check the actual
-             * readyState.
-             */
-
-            if (
-                videoLoadingFinished
-            ) {
-
+            if (videoLoadingFinished) {
                 return;
-
             }
 
 
@@ -512,14 +445,6 @@ function prepareVideo() {
 
             }
 
-
-            /*
-             * If the video is still loading,
-             * don't leave the user staring at
-             * an endless loading screen.
-             *
-             * Allow the invitation to continue.
-             */
 
             console.warn(
                 "Video is taking too long to load. Using fallback."
@@ -585,11 +510,6 @@ function updateVideoProgress() {
                     );
 
 
-                /*
-                 * Don't overwrite 100%
-                 * after the video is ready.
-                 */
-
                 if (
                     !videoLoadingFinished
                 ) {
@@ -626,15 +546,6 @@ async function startInvitation() {
         return;
     }
 
-
-    /*
-     * We intentionally DO NOT require
-     * canplaythrough here.
-     *
-     * The button becomes available once
-     * the loading system determines that
-     * the invitation can safely continue.
-     */
 
     if (
         !videoLoadingFinished &&
@@ -729,12 +640,6 @@ async function startInvitation() {
                 "Video playback could not start:",
                 error
             );
-
-            /*
-             * Do not stop the invitation.
-             *
-             * The rest of the page continues working.
-             */
 
         }
 
@@ -1209,10 +1114,12 @@ function showGuestMessage(guest) {
                 </p>
 
                 <div class="rsvp-buttons">
+
+                    <!-- SHEAN -->
+
                     <a
                         href="https://m.me/XDaegusvenus"
                         target="_blank"
-                        rel="noopener"
                         class="rsvp-button">
 
                         <span>
@@ -1222,10 +1129,11 @@ function showGuestMessage(guest) {
                     </a>
 
 
+                    <!-- LYNE -->
+
                     <a
                         href="https://m.me/laydslyne"
                         target="_blank"
-                        rel="noopener"
                         class="rsvp-button">
 
                         <span>
