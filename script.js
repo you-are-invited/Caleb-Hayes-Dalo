@@ -53,7 +53,14 @@ if (bgVideo) {
 
     bgVideo.pause();
 
-    bgVideo.currentTime = 0;
+    try {
+        bgVideo.currentTime = 0;
+    } catch (error) {
+        console.warn(
+            "Could not reset video:",
+            error
+        );
+    }
 
     bgVideo.style.opacity = "0";
 
@@ -61,14 +68,33 @@ if (bgVideo) {
 
 
 /* =========================================================
-   LOADING STATE
+   VIDEO LOADING STATE
 ========================================================= */
-
-let videoReady = false;
 
 let videoMetadataReady = false;
 
-let videoEnoughToStart = false;
+let videoCanPlay = false;
+
+let videoLoadingFinished = false;
+
+let videoLoadFailed = false;
+
+let videoFallbackTimer = null;
+
+
+/*
+ * IMPORTANT:
+ *
+ * We no longer depend entirely on canplaythrough.
+ *
+ * canplaythrough may never fire on slow mobile
+ * connections even when the video is already
+ * playable.
+ *
+ * canplay is enough to safely begin the invitation.
+ */
+
+const VIDEO_FALLBACK_TIME = 12000;
 
 
 /* =========================================================
@@ -78,9 +104,7 @@ let videoEnoughToStart = false;
 function setLoadingStatus(message) {
 
     if (!loadingStatus) {
-
         return;
-
     }
 
 
@@ -107,9 +131,7 @@ function setLoadingStatus(message) {
 function setLoadingProgress(value) {
 
     if (!loadingProgress) {
-
         return;
-
     }
 
 
@@ -127,18 +149,79 @@ function setLoadingProgress(value) {
 
 
 /* =========================================================
+   SHOW VIEW INVITATION
+========================================================= */
+
+function showViewInvitation() {
+
+    if (!viewInvitationWrapper) {
+        return;
+    }
+
+
+    viewInvitationWrapper.classList.add(
+        "ready"
+    );
+
+}
+
+
+/* =========================================================
+   VIDEO IS READY
+========================================================= */
+
+function markVideoReady() {
+
+    if (videoLoadingFinished) {
+        return;
+    }
+
+
+    videoLoadingFinished = true;
+
+
+    if (videoFallbackTimer) {
+
+        clearTimeout(
+            videoFallbackTimer
+        );
+
+        videoFallbackTimer = null;
+
+    }
+
+
+    setLoadingProgress(100);
+
+
+    setLoadingStatus(
+        "Your invitation is ready."
+    );
+
+
+    showViewInvitation();
+
+}
+
+
+/* =========================================================
    VIDEO PRELOAD
 ========================================================= */
 
 function prepareVideo() {
 
+    /*
+     * If there is no background video,
+     * the invitation can immediately start.
+     */
+
     if (!bgVideo) {
 
-        videoReady = true;
+        videoMetadataReady = true;
 
-        videoEnoughToStart = true;
+        videoCanPlay = true;
 
-        showViewInvitation();
+        markVideoReady();
 
         return;
 
@@ -149,10 +232,28 @@ function prepareVideo() {
         "Preparing the invitation..."
     );
 
-    setLoadingProgress(10);
+    setLoadingProgress(5);
 
 
-    bgVideo.load();
+    /*
+     * Make sure the browser knows we want
+     * the video loaded.
+     */
+
+    try {
+
+        bgVideo.preload = "auto";
+
+        bgVideo.load();
+
+    } catch (error) {
+
+        console.warn(
+            "Could not start video preload:",
+            error
+        );
+
+    }
 
 
     /* =====================================================
@@ -165,18 +266,29 @@ function prepareVideo() {
 
             videoMetadataReady = true;
 
-            setLoadingProgress(35);
+
+            setLoadingProgress(25);
+
 
             setLoadingStatus(
                 "Preparing the video..."
             );
 
 
-            bgVideo.pause();
+            try {
 
-            bgVideo.currentTime = 0;
+                bgVideo.pause();
 
-            checkVideoReady();
+                bgVideo.currentTime = 0;
+
+            } catch (error) {
+
+                console.warn(
+                    "Could not reset video:",
+                    error
+                );
+
+            }
 
         },
         {
@@ -193,15 +305,26 @@ function prepareVideo() {
         "canplay",
         () => {
 
-            videoReady = true;
+            videoCanPlay = true;
 
-            setLoadingProgress(65);
+
+            /*
+             * THIS IS THE IMPORTANT PART.
+             *
+             * We allow the invitation to continue
+             * as soon as the browser has enough data
+             * to start playing.
+             */
+
+            setLoadingProgress(70);
+
 
             setLoadingStatus(
                 "Almost ready..."
             );
 
-            checkVideoReady();
+
+            markVideoReady();
 
         },
         {
@@ -218,15 +341,25 @@ function prepareVideo() {
         "canplaythrough",
         () => {
 
-            videoEnoughToStart = true;
+            /*
+             * This is now only an enhancement.
+             *
+             * The invitation is already allowed to
+             * start after canplay.
+             */
 
             setLoadingProgress(100);
 
-            setLoadingStatus(
-                "Your invitation is ready."
-            );
 
-            checkVideoReady();
+            if (!videoLoadingFinished) {
+
+                setLoadingStatus(
+                    "Your invitation is ready."
+                );
+
+                markVideoReady();
+
+            }
 
         },
         {
@@ -246,6 +379,46 @@ function prepareVideo() {
 
 
     /* =====================================================
+       WAITING
+    ===================================================== */
+
+    bgVideo.addEventListener(
+        "waiting",
+        () => {
+
+            if (!invitationStarted) {
+
+                setLoadingStatus(
+                    "Loading the invitation..."
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       STALLED
+    ===================================================== */
+
+    bgVideo.addEventListener(
+        "stalled",
+        () => {
+
+            if (!invitationStarted) {
+
+                setLoadingStatus(
+                    "Your connection is a little slow..."
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
        ERROR
     ===================================================== */
 
@@ -253,30 +426,117 @@ function prepareVideo() {
         "error",
         () => {
 
+            videoLoadFailed = true;
+
+
             console.warn(
-                "Background video could not be fully loaded."
+                "Background video could not be loaded."
             );
 
 
-            if (videoReady) {
+            /*
+             * If the browser already has enough
+             * information to play the video,
+             * allow the invitation to continue.
+             */
 
-                videoEnoughToStart = true;
+            if (
+                videoCanPlay ||
+                bgVideo.readyState >= 3
+            ) {
 
-                setLoadingProgress(100);
+                markVideoReady();
 
-                setLoadingStatus(
-                    "Your invitation is ready."
-                );
-
-                showViewInvitation();
+                return;
 
             }
+
+
+            /*
+             * Even if the video fails completely,
+             * we don't want the entire invitation
+             * to become unusable.
+             *
+             * The rest of the invitation can still
+             * function using the normal background.
+             */
+
+            setLoadingProgress(100);
+
+
+            setLoadingStatus(
+                "Your invitation is ready."
+            );
+
+
+            showViewInvitation();
 
         },
         {
             once: true
         }
     );
+
+
+    /* =====================================================
+       SLOW INTERNET FALLBACK
+    ===================================================== */
+
+    videoFallbackTimer =
+        setTimeout(() => {
+
+            /*
+             * If canplay has not fired after
+             * several seconds, check the actual
+             * readyState.
+             */
+
+            if (
+                videoLoadingFinished
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                bgVideo.readyState >= 3
+            ) {
+
+                videoCanPlay = true;
+
+                markVideoReady();
+
+                return;
+
+            }
+
+
+            /*
+             * If the video is still loading,
+             * don't leave the user staring at
+             * an endless loading screen.
+             *
+             * Allow the invitation to continue.
+             */
+
+            console.warn(
+                "Video is taking too long to load. Using fallback."
+            );
+
+
+            setLoadingProgress(100);
+
+
+            setLoadingStatus(
+                "Your invitation is ready."
+            );
+
+
+            showViewInvitation();
+
+        }, VIDEO_FALLBACK_TIME);
 
 }
 
@@ -288,9 +548,7 @@ function prepareVideo() {
 function updateVideoProgress() {
 
     if (!bgVideo) {
-
         return;
-
     }
 
 
@@ -306,6 +564,7 @@ function updateVideoProgress() {
                     bgVideo.buffered.length - 1
                 );
 
+
             const duration =
                 bgVideo.duration;
 
@@ -318,17 +577,28 @@ function updateVideoProgress() {
                 const percentage =
                     Math.min(
                         95,
-                        40 +
+                        35 +
                         (
                             bufferedEnd /
                             duration
-                        ) * 55
+                        ) * 60
                     );
 
 
-                setLoadingProgress(
-                    percentage
-                );
+                /*
+                 * Don't overwrite 100%
+                 * after the video is ready.
+                 */
+
+                if (
+                    !videoLoadingFinished
+                ) {
+
+                    setLoadingProgress(
+                        percentage
+                    );
+
+                }
 
             }
 
@@ -347,65 +617,30 @@ function updateVideoProgress() {
 
 
 /* =========================================================
-   CHECK VIDEO READY
-========================================================= */
-
-function checkVideoReady() {
-
-    if (
-        videoMetadataReady &&
-        videoReady
-    ) {
-
-        videoEnoughToStart = true;
-
-        setLoadingProgress(100);
-
-        setLoadingStatus(
-            "Your invitation is ready."
-        );
-
-        showViewInvitation();
-
-    }
-
-}
-
-
-/* =========================================================
-   SHOW VIEW INVITATION
-========================================================= */
-
-function showViewInvitation() {
-
-    if (!viewInvitationWrapper) {
-
-        return;
-
-    }
-
-
-    viewInvitationWrapper.classList.add(
-        "ready"
-    );
-
-}
-
-
-/* =========================================================
    START INVITATION
 ========================================================= */
 
 async function startInvitation() {
 
     if (invitationStarted) {
-
         return;
-
     }
 
 
-    if (!videoEnoughToStart) {
+    /*
+     * We intentionally DO NOT require
+     * canplaythrough here.
+     *
+     * The button becomes available once
+     * the loading system determines that
+     * the invitation can safely continue.
+     */
+
+    if (
+        !videoLoadingFinished &&
+        !videoCanPlay &&
+        !videoLoadFailed
+    ) {
 
         return;
 
@@ -436,6 +671,10 @@ async function startInvitation() {
     );
 
 
+    /* =====================================================
+       RESET VIDEO
+    ===================================================== */
+
     if (bgVideo) {
 
         try {
@@ -456,16 +695,27 @@ async function startInvitation() {
     }
 
 
+    /* =====================================================
+       SHOW VIDEO
+    ===================================================== */
+
     if (bgVideo) {
 
-        bgVideo.style.opacity =
-            "1";
+        bgVideo.style.opacity = "1";
 
     }
 
 
+    /* =====================================================
+       START CINEMATIC HERO
+    ===================================================== */
+
     startCinematicHero();
 
+
+    /* =====================================================
+       START VIDEO
+    ===================================================== */
 
     if (bgVideo) {
 
@@ -476,46 +726,85 @@ async function startInvitation() {
         } catch (error) {
 
             console.warn(
-                "Video autoplay was blocked:",
+                "Video playback could not start:",
                 error
             );
+
+            /*
+             * Do not stop the invitation.
+             *
+             * The rest of the page continues working.
+             */
 
         }
 
     }
 
 
-    try {
+    /* =====================================================
+       START MUSIC
+    ===================================================== */
 
-        await music.play();
+    if (music) {
 
-        isPlaying = true;
+        try {
 
-        musicText.textContent =
-            "Pause";
+            await music.play();
 
-        musicBtn.classList.add(
-            "playing"
-        );
+            isPlaying = true;
 
-    } catch (error) {
 
-        console.log(
-            "Music requires another tap:",
-            error
-        );
+            if (musicText) {
 
-        isPlaying = false;
+                musicText.textContent =
+                    "Pause";
 
-        musicText.textContent =
-            "Tap for music";
+            }
 
-        musicBtn.classList.remove(
-            "playing"
-        );
+
+            if (musicBtn) {
+
+                musicBtn.classList.add(
+                    "playing"
+                );
+
+            }
+
+        } catch (error) {
+
+            console.log(
+                "Music requires another tap:",
+                error
+            );
+
+
+            isPlaying = false;
+
+
+            if (musicText) {
+
+                musicText.textContent =
+                    "Tap for music";
+
+            }
+
+
+            if (musicBtn) {
+
+                musicBtn.classList.remove(
+                    "playing"
+                );
+
+            }
+
+        }
 
     }
 
+
+    /* =====================================================
+       HIDE VIEW INVITATION BUTTON
+    ===================================================== */
 
     if (viewInvitationWrapper) {
 
@@ -526,6 +815,10 @@ async function startInvitation() {
     }
 
 
+    /* =====================================================
+       SHOW MUSIC BUTTON
+    ===================================================== */
+
     if (musicBtn) {
 
         musicBtn.classList.remove(
@@ -534,6 +827,10 @@ async function startInvitation() {
 
     }
 
+
+    /* =====================================================
+       REMOVE LOADING SCREEN
+    ===================================================== */
 
     setTimeout(() => {
 
@@ -576,6 +873,11 @@ if (musicBtn) {
         "click",
         async () => {
 
+            if (!music) {
+                return;
+            }
+
+
             try {
 
                 if (!isPlaying) {
@@ -584,8 +886,14 @@ if (musicBtn) {
 
                     isPlaying = true;
 
-                    musicText.textContent =
-                        "Pause";
+
+                    if (musicText) {
+
+                        musicText.textContent =
+                            "Pause";
+
+                    }
+
 
                     musicBtn.classList.add(
                         "playing"
@@ -597,8 +905,14 @@ if (musicBtn) {
 
                     isPlaying = false;
 
-                    musicText.textContent =
-                        "Tap for music";
+
+                    if (musicText) {
+
+                        musicText.textContent =
+                            "Tap for music";
+
+                    }
+
 
                     musicBtn.classList.remove(
                         "playing"
@@ -646,7 +960,12 @@ async function loadGuests() {
     try {
 
         const response =
-            await fetch("./guests.json");
+            await fetch(
+                "./guests.json",
+                {
+                    cache: "no-cache"
+                }
+            );
 
 
         if (!response.ok) {
@@ -834,10 +1153,6 @@ function showGuestMessage(guest) {
 
     /*
      * SAVE CURRENT SCROLL POSITION
-     *
-     * This prevents the page from jumping
-     * down to the RSVP section when the
-     * message expands.
      */
 
     const currentScrollPosition =
@@ -868,7 +1183,6 @@ function showGuestMessage(guest) {
 
             <!-- =================================================
                  RSVP
-                 APPEARS ONLY AFTER THE MESSAGE IS REVEALED
             ================================================== -->
 
             <div class="rsvp-section">
@@ -897,7 +1211,7 @@ function showGuestMessage(guest) {
                 <div class="rsvp-buttons">
 
                     <a
-                        href="https://m.me/YOUR_SEAN_MESSENGER"
+                        href="https://m.me/@shean.dalo.2025"
                         target="_blank"
                         rel="noopener"
                         class="rsvp-button">
@@ -910,7 +1224,7 @@ function showGuestMessage(guest) {
 
 
                     <a
-                        href="https://m.me/YOUR_LYNE_MESSENGER"
+                        href="https://m.me/@laydslyne"
                         target="_blank"
                         rel="noopener"
                         class="rsvp-button">
@@ -936,12 +1250,7 @@ function showGuestMessage(guest) {
 
 
     /*
-     * RESTORE THE EXACT SCROLL POSITION
-     *
-     * The message can become much taller after
-     * being revealed. Restoring the previous
-     * position prevents the browser from jumping
-     * to the bottom / RSVP area.
+     * RESTORE EXACT SCROLL POSITION
      */
 
     requestAnimationFrame(() => {
@@ -1207,15 +1516,23 @@ if (guestName) {
                     "show"
                 );
 
-                revealBtn.classList.add(
-                    "ready"
-                );
+                if (revealBtn) {
+
+                    revealBtn.classList.add(
+                        "ready"
+                    );
+
+                }
 
             } else {
 
-                revealBtn.classList.remove(
-                    "ready"
-                );
+                if (revealBtn) {
+
+                    revealBtn.classList.remove(
+                        "ready"
+                    );
+
+                }
 
             }
 
@@ -1430,9 +1747,7 @@ let cinematicStarted = false;
 function startCinematicHero() {
 
     if (cinematicStarted) {
-
         return;
-
     }
 
 
@@ -1573,9 +1888,7 @@ function startCinematicHero() {
 
 
             if (!eventDetails) {
-
                 return;
-
             }
 
 
@@ -1630,9 +1943,7 @@ function startCinematicHero() {
 
 
                 if (!nameInput) {
-
                     return;
-
                 }
 
 
