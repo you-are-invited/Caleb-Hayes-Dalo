@@ -122,6 +122,7 @@ background-repeat: no-repeat;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    color: black;
 }
 
 
@@ -952,6 +953,7 @@ background-repeat: no-repeat;
         letter-spacing: 3.5px;
 
         margin-bottom: 15px;
+        color: black;
     }
 
 
@@ -967,6 +969,7 @@ background-repeat: no-repeat;
         font-size: 15px;
 
         margin-top: 13px;
+        color: black;
     }
 
 
@@ -980,6 +983,7 @@ background-repeat: no-repeat;
         font-size: 7px;
 
         letter-spacing: 1.8px;
+        color: black;
     }
 
 

@@ -218,20 +218,11 @@ function prepareVideo() {
     setLoadingProgress(5);
 
 
-    try {
-
-        bgVideo.preload = "auto";
-
-        bgVideo.load();
-
-    } catch (error) {
-
-        console.warn(
-            "Could not start video preload:",
-            error
-        );
-
-    }
+    /* =====================================================
+       IMPORTANT:
+       EVENT LISTENERS ARE SET FIRST
+       BEFORE bgVideo.load()
+    ===================================================== */
 
 
     /* =====================================================
@@ -305,6 +296,8 @@ function prepareVideo() {
     bgVideo.addEventListener(
         "canplaythrough",
         () => {
+
+            videoCanPlay = true;
 
             setLoadingProgress(100);
 
@@ -392,33 +385,69 @@ function prepareVideo() {
             );
 
 
-            if (
-                videoCanPlay ||
-                bgVideo.readyState >= 3
-            ) {
+            /*
+             * IMPORTANT:
+             * Video error should NOT prevent
+             * the invitation from opening.
+             */
 
-                markVideoReady();
-
-                return;
-
-            }
-
-
-            setLoadingProgress(100);
-
-
-            setLoadingStatus(
-                "Your invitation is ready."
-            );
-
-
-            showViewInvitation();
+            markVideoReady();
 
         },
         {
             once: true
         }
     );
+
+
+    /* =====================================================
+       NOW START VIDEO PRELOAD
+    ===================================================== */
+
+    try {
+
+        bgVideo.preload = "auto";
+
+        bgVideo.load();
+
+    } catch (error) {
+
+        console.warn(
+            "Could not start video preload:",
+            error
+        );
+
+        videoLoadFailed = true;
+
+        markVideoReady();
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       CHECK ALREADY-LOADED / CACHED VIDEO
+    ===================================================== */
+
+    setTimeout(() => {
+
+        if (videoLoadingFinished) {
+            return;
+        }
+
+
+        if (
+            bgVideo.readyState >= 3
+        ) {
+
+            videoCanPlay = true;
+
+            markVideoReady();
+
+        }
+
+    }, 300);
 
 
     /* =====================================================
@@ -449,6 +478,14 @@ function prepareVideo() {
             console.warn(
                 "Video is taking too long to load. Using fallback."
             );
+
+
+            /*
+             * The video is NOT removed.
+             * We simply stop waiting for it.
+             */
+
+            videoLoadFailed = true;
 
 
             setLoadingProgress(100);
@@ -547,16 +584,14 @@ async function startInvitation() {
     }
 
 
-    if (
-        !videoLoadingFinished &&
-        !videoCanPlay &&
-        !videoLoadFailed
-    ) {
-
-        return;
-
-    }
-
+    /*
+     * IMPORTANT:
+     * We no longer block the button waiting for video.
+     *
+     * If video is ready -> play it.
+     * If video is still loading -> still open invitation.
+     * If video failed -> still open invitation.
+     */
 
     invitationStarted = true;
 
@@ -567,6 +602,10 @@ async function startInvitation() {
 
     }
 
+
+    /* =====================================================
+       HIDE LOADING SCREEN
+    ===================================================== */
 
     if (loadingScreen) {
 
