@@ -3,6 +3,8 @@
 ========================================================= */
 
 let invitationStarted = false;
+let cinematicStarted = false;
+let isPlaying = false;
 
 
 /* =========================================================
@@ -53,16 +55,21 @@ if (bgVideo) {
 
     bgVideo.pause();
 
-    try {
-        bgVideo.currentTime = 0;
-    } catch (error) {
-        console.warn(
-            "Could not reset video:",
-            error
-        );
-    }
-
     bgVideo.style.opacity = "0";
+
+    /*
+     * IMPORTANT:
+     * Do NOT force currentTime = 0 here.
+     * If the browser has already buffered the video,
+     * resetting it repeatedly can cause unnecessary
+     * seeking and playback delay.
+     */
+
+    bgVideo.muted = true;
+
+    bgVideo.playsInline = true;
+
+    bgVideo.preload = "auto";
 
 }
 
@@ -72,15 +79,11 @@ if (bgVideo) {
 ========================================================= */
 
 let videoMetadataReady = false;
-
 let videoCanPlay = false;
-
 let videoLoadingFinished = false;
-
 let videoLoadFailed = false;
 
 let videoFallbackTimer = null;
-
 
 const VIDEO_FALLBACK_TIME = 12000;
 
@@ -95,11 +98,13 @@ function setLoadingStatus(message) {
         return;
     }
 
-
     loadingStatus.style.opacity = "0";
 
-
     setTimeout(() => {
+
+        if (!loadingStatus) {
+            return;
+        }
 
         loadingStatus.textContent =
             message;
@@ -107,7 +112,7 @@ function setLoadingStatus(message) {
         loadingStatus.style.opacity =
             "1";
 
-    }, 180);
+    }, 150);
 
 }
 
@@ -122,13 +127,11 @@ function setLoadingProgress(value) {
         return;
     }
 
-
     const safeValue =
         Math.min(
             Math.max(value, 0),
             100
         );
-
 
     loadingProgress.style.width =
         `${safeValue}%`;
@@ -146,7 +149,6 @@ function showViewInvitation() {
         return;
     }
 
-
     viewInvitationWrapper.classList.add(
         "ready"
     );
@@ -155,7 +157,7 @@ function showViewInvitation() {
 
 
 /* =========================================================
-   VIDEO IS READY
+   VIDEO READY
 ========================================================= */
 
 function markVideoReady() {
@@ -164,9 +166,7 @@ function markVideoReady() {
         return;
     }
 
-
     videoLoadingFinished = true;
-
 
     if (videoFallbackTimer) {
 
@@ -178,16 +178,77 @@ function markVideoReady() {
 
     }
 
-
     setLoadingProgress(100);
-
 
     setLoadingStatus(
         "Your invitation is ready."
     );
 
-
     showViewInvitation();
+
+}
+
+
+/* =========================================================
+   UPDATE VIDEO BUFFER PROGRESS
+========================================================= */
+
+function updateVideoProgress() {
+
+    if (!bgVideo) {
+        return;
+    }
+
+    if (
+        bgVideo.buffered &&
+        bgVideo.buffered.length
+    ) {
+
+        try {
+
+            const bufferedEnd =
+                bgVideo.buffered.end(
+                    bgVideo.buffered.length - 1
+                );
+
+            const duration =
+                bgVideo.duration;
+
+            if (
+                Number.isFinite(duration) &&
+                duration > 0
+            ) {
+
+                const percentage =
+                    Math.min(
+                        95,
+                        35 +
+                        (
+                            bufferedEnd /
+                            duration
+                        ) * 60
+                    );
+
+                if (!videoLoadingFinished) {
+
+                    setLoadingProgress(
+                        percentage
+                    );
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Could not read video buffer.",
+                error
+            );
+
+        }
+
+    }
 
 }
 
@@ -200,16 +261,11 @@ function prepareVideo() {
 
     if (!bgVideo) {
 
-        videoMetadataReady = true;
-
-        videoCanPlay = true;
-
         markVideoReady();
 
         return;
 
     }
-
 
     setLoadingStatus(
         "Preparing the invitation..."
@@ -219,14 +275,7 @@ function prepareVideo() {
 
 
     /* =====================================================
-       IMPORTANT:
-       EVENT LISTENERS ARE SET FIRST
-       BEFORE bgVideo.load()
-    ===================================================== */
-
-
-    /* =====================================================
-       METADATA READY
+       METADATA
     ===================================================== */
 
     bgVideo.addEventListener(
@@ -240,22 +289,6 @@ function prepareVideo() {
             setLoadingStatus(
                 "Preparing the video..."
             );
-
-
-            try {
-
-                bgVideo.pause();
-
-                bgVideo.currentTime = 0;
-
-            } catch (error) {
-
-                console.warn(
-                    "Could not reset video:",
-                    error
-                );
-
-            }
 
         },
         {
@@ -301,16 +334,7 @@ function prepareVideo() {
 
             setLoadingProgress(100);
 
-
-            if (!videoLoadingFinished) {
-
-                setLoadingStatus(
-                    "Your invitation is ready."
-                );
-
-                markVideoReady();
-
-            }
+            markVideoReady();
 
         },
         {
@@ -320,7 +344,7 @@ function prepareVideo() {
 
 
     /* =====================================================
-       PROGRESS
+       BUFFER PROGRESS
     ===================================================== */
 
     bgVideo.addEventListener(
@@ -379,15 +403,12 @@ function prepareVideo() {
 
             videoLoadFailed = true;
 
-
             console.warn(
                 "Background video could not be loaded."
             );
 
-
             /*
-             * IMPORTANT:
-             * Video error should NOT prevent
+             * Video failure must NEVER prevent
              * the invitation from opening.
              */
 
@@ -401,7 +422,7 @@ function prepareVideo() {
 
 
     /* =====================================================
-       NOW START VIDEO PRELOAD
+       START PRELOAD
     ===================================================== */
 
     try {
@@ -427,7 +448,7 @@ function prepareVideo() {
 
 
     /* =====================================================
-       CHECK ALREADY-LOADED / CACHED VIDEO
+       ALREADY BUFFERED
     ===================================================== */
 
     setTimeout(() => {
@@ -436,9 +457,9 @@ function prepareVideo() {
             return;
         }
 
-
         if (
-            bgVideo.readyState >= 3
+            bgVideo.readyState >=
+            HTMLMediaElement.HAVE_FUTURE_DATA
         ) {
 
             videoCanPlay = true;
@@ -447,11 +468,11 @@ function prepareVideo() {
 
         }
 
-    }, 300);
+    }, 250);
 
 
     /* =====================================================
-       SLOW INTERNET FALLBACK
+       FALLBACK
     ===================================================== */
 
     videoFallbackTimer =
@@ -461,9 +482,9 @@ function prepareVideo() {
                 return;
             }
 
-
             if (
-                bgVideo.readyState >= 3
+                bgVideo.readyState >=
+                HTMLMediaElement.HAVE_FUTURE_DATA
             ) {
 
                 videoCanPlay = true;
@@ -474,27 +495,17 @@ function prepareVideo() {
 
             }
 
-
             console.warn(
-                "Video is taking too long to load. Using fallback."
+                "Video is taking too long to load."
             );
-
-
-            /*
-             * The video is NOT removed.
-             * We simply stop waiting for it.
-             */
 
             videoLoadFailed = true;
 
-
             setLoadingProgress(100);
-
 
             setLoadingStatus(
                 "Your invitation is ready."
             );
-
 
             showViewInvitation();
 
@@ -504,69 +515,165 @@ function prepareVideo() {
 
 
 /* =========================================================
-   UPDATE VIDEO PROGRESS
+   VIDEO PLAYBACK
 ========================================================= */
 
-function updateVideoProgress() {
+function playBackgroundVideo() {
 
     if (!bgVideo) {
-        return;
+        return Promise.resolve(false);
+    }
+
+    try {
+
+        /*
+         * Only reset if the video has not started yet.
+         * This avoids unnecessary seeking.
+         */
+
+        if (
+            bgVideo.ended ||
+            !Number.isFinite(bgVideo.currentTime)
+        ) {
+
+            bgVideo.currentTime = 0;
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Could not reset video:",
+            error
+        );
+
     }
 
 
-    if (
-        bgVideo.buffered &&
-        bgVideo.buffered.length
-    ) {
-
-        try {
-
-            const bufferedEnd =
-                bgVideo.buffered.end(
-                    bgVideo.buffered.length - 1
-                );
+    bgVideo.style.opacity = "1";
 
 
-            const duration =
-                bgVideo.duration;
+    try {
 
+        const playPromise =
+            bgVideo.play();
 
-            if (
-                Number.isFinite(duration) &&
-                duration > 0
-            ) {
+        if (
+            playPromise &&
+            typeof playPromise.then === "function"
+        ) {
 
-                const percentage =
-                    Math.min(
-                        95,
-                        35 +
-                        (
-                            bufferedEnd /
-                            duration
-                        ) * 60
+            return playPromise
+                .then(() => true)
+                .catch(error => {
+
+                    console.warn(
+                        "Video playback could not start:",
+                        error
                     );
 
+                    return false;
 
-                if (
-                    !videoLoadingFinished
-                ) {
-
-                    setLoadingProgress(
-                        percentage
-                    );
-
-                }
-
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "Could not read video buffer.",
-                error
-            );
+                });
 
         }
+
+    } catch (error) {
+
+        console.warn(
+            "Video playback error:",
+            error
+        );
+
+    }
+
+    return Promise.resolve(false);
+
+}
+
+
+/* =========================================================
+   MUSIC PLAYBACK
+========================================================= */
+
+function playBackgroundMusic() {
+
+    if (!music) {
+        return Promise.resolve(false);
+    }
+
+    try {
+
+        const playPromise =
+            music.play();
+
+        if (
+            playPromise &&
+            typeof playPromise.then === "function"
+        ) {
+
+            return playPromise
+                .then(() => {
+
+                    isPlaying = true;
+
+                    updateMusicButton();
+
+                    return true;
+
+                })
+                .catch(error => {
+
+                    console.warn(
+                        "Music could not start:",
+                        error
+                    );
+
+                    isPlaying = false;
+
+                    updateMusicButton();
+
+                    return false;
+
+                });
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Music playback error:",
+            error
+        );
+
+    }
+
+    return Promise.resolve(false);
+
+}
+
+
+/* =========================================================
+   MUSIC BUTTON UI
+========================================================= */
+
+function updateMusicButton() {
+
+    if (musicText) {
+
+        musicText.textContent =
+            isPlaying
+                ? "Pause"
+                : "Tap for music";
+
+    }
+
+    if (musicBtn) {
+
+        musicBtn.classList.toggle(
+            "playing",
+            isPlaying
+        );
 
     }
 
@@ -577,21 +684,11 @@ function updateVideoProgress() {
    START INVITATION
 ========================================================= */
 
-async function startInvitation() {
+function startInvitation() {
 
     if (invitationStarted) {
         return;
     }
-
-
-    /*
-     * IMPORTANT:
-     * We no longer block the button waiting for video.
-     *
-     * If video is ready -> play it.
-     * If video is still loading -> still open invitation.
-     * If video failed -> still open invitation.
-     */
 
     invitationStarted = true;
 
@@ -615,135 +712,53 @@ async function startInvitation() {
 
     }
 
-
     document.body.classList.remove(
         "invitation-loading"
     );
 
 
-    /* =====================================================
-       RESET VIDEO
-    ===================================================== */
+    /*
+     * IMPORTANT:
+     *
+     * Start VIDEO and MUSIC from the SAME user click.
+     * Do NOT await one before starting the other.
+     */
 
-    if (bgVideo) {
+    const videoPromise =
+        playBackgroundVideo();
 
-        try {
-
-            bgVideo.pause();
-
-            bgVideo.currentTime = 0;
-
-        } catch (error) {
-
-            console.warn(
-                "Could not reset video:",
-                error
-            );
-
-        }
-
-    }
-
-
-    /* =====================================================
-       SHOW VIDEO
-    ===================================================== */
-
-    if (bgVideo) {
-
-        bgVideo.style.opacity = "1";
-
-    }
+    const musicPromise =
+        playBackgroundMusic();
 
 
     /* =====================================================
        START CINEMATIC HERO
     ===================================================== */
 
-    startCinematicHero();
+    /*
+     * Start the hero almost immediately after media
+     * playback has been requested.
+     *
+     * This prevents the text from waiting several seconds
+     * while video/music are already playing.
+     */
+
+    setTimeout(() => {
+
+        startCinematicHero();
+
+    }, 120);
 
 
-    /* =====================================================
-       START VIDEO
-    ===================================================== */
+    /*
+     * Catch promises so one media failure does not
+     * stop the invitation.
+     */
 
-    if (bgVideo) {
-
-        try {
-
-            await bgVideo.play();
-
-        } catch (error) {
-
-            console.warn(
-                "Video playback could not start:",
-                error
-            );
-
-        }
-
-    }
-
-
-    /* =====================================================
-       START MUSIC
-    ===================================================== */
-
-    if (music) {
-
-        try {
-
-            await music.play();
-
-            isPlaying = true;
-
-
-            if (musicText) {
-
-                musicText.textContent =
-                    "Pause";
-
-            }
-
-
-            if (musicBtn) {
-
-                musicBtn.classList.add(
-                    "playing"
-                );
-
-            }
-
-        } catch (error) {
-
-            console.log(
-                "Music requires another tap:",
-                error
-            );
-
-
-            isPlaying = false;
-
-
-            if (musicText) {
-
-                musicText.textContent =
-                    "Tap for music";
-
-            }
-
-
-            if (musicBtn) {
-
-                musicBtn.classList.remove(
-                    "playing"
-                );
-
-            }
-
-        }
-
-    }
+    Promise.allSettled([
+        videoPromise,
+        musicPromise
+    ]);
 
 
     /* =====================================================
@@ -773,7 +788,7 @@ async function startInvitation() {
 
 
     /* =====================================================
-       REMOVE LOADING SCREEN
+       REMOVE LOADING SCREEN COMPLETELY
     ===================================================== */
 
     setTimeout(() => {
@@ -785,7 +800,7 @@ async function startInvitation() {
 
         }
 
-    }, 1100);
+    }, 1000);
 
 }
 
@@ -798,24 +813,32 @@ if (viewInvitationBtn) {
 
     viewInvitationBtn.addEventListener(
         "click",
-        startInvitation
+        startInvitation,
+        {
+            once: true
+        }
     );
 
 }
 
 
 /* =========================================================
-   BACKGROUND MUSIC
+   BACKGROUND MUSIC CONTROL
 ========================================================= */
-
-let isPlaying = false;
-
 
 if (musicBtn) {
 
     musicBtn.addEventListener(
         "click",
-        async () => {
+        async event => {
+
+            /*
+             * Prevent this click from accidentally
+             * triggering other controls.
+             */
+
+            event.stopPropagation();
+
 
             if (!music) {
                 return;
@@ -830,39 +853,15 @@ if (musicBtn) {
 
                     isPlaying = true;
 
-
-                    if (musicText) {
-
-                        musicText.textContent =
-                            "Pause";
-
-                    }
-
-
-                    musicBtn.classList.add(
-                        "playing"
-                    );
-
                 } else {
 
                     music.pause();
 
                     isPlaying = false;
 
-
-                    if (musicText) {
-
-                        musicText.textContent =
-                            "Tap for music";
-
-                    }
-
-
-                    musicBtn.classList.remove(
-                        "playing"
-                    );
-
                 }
+
+                updateMusicButton();
 
             } catch (error) {
 
@@ -1096,7 +1095,7 @@ function showGuestMessage(guest) {
 
 
     /*
-     * SAVE CURRENT SCROLL POSITION
+     * Save current scroll position.
      */
 
     const currentScrollPosition =
@@ -1129,7 +1128,7 @@ function showGuestMessage(guest) {
                  RSVP
             ================================================== -->
 
-            <div class="rsvp-section">
+            <div class="guest-rsvp">
 
                 <div class="rsvp-divider"></div>
 
@@ -1148,38 +1147,57 @@ function showGuestMessage(guest) {
                     help us prepare a place for everyone.
                 </p>
 
-                <p class="rsvp-confirm">
-                    Kindly confirm with:
+                <p class="rsvp-note">
+                    We would be grateful if you could
+                    confirm your attendance with:
                 </p>
 
-                <div class="rsvp-buttons">
+                <div class="rsvp-confirm">
 
-                    <!-- SHEAN -->
+                    <p class="rsvp-confirm-label">
+                        Kindly confirm with
+                    </p>
 
-                    <a
-                        href="https://m.me/shean.dalo.2025"
-                        target="_blank"
-                        class="rsvp-button">
+                    <div class="rsvp-buttons">
 
-                        <span>
-                            Confirm to Shean
-                        </span>
+                        <!-- SHEAN -->
 
-                    </a>
+                        <a
+                            href="https://m.me/shean.dalo.2025"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="rsvp-button">
+
+                            <span class="rsvp-button-label">
+                                Confirm to
+                            </span>
+
+                            <strong>
+                                Shean
+                            </strong>
+
+                        </a>
 
 
-                    <!-- LYNE -->
+                        <!-- LYNE -->
 
-                    <a
-                        href="https://m.me/laydslyne"
-                        target="_blank"
-                        class="rsvp-button">
+                        <a
+                            href="https://m.me/laydslyne"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="rsvp-button">
 
-                        <span>
-                            Confirm to Lyne
-                        </span>
+                            <span class="rsvp-button-label">
+                                Confirm to
+                            </span>
 
-                    </a>
+                            <strong>
+                                Lyne
+                            </strong>
+
+                        </a>
+
+                    </div>
 
                 </div>
 
@@ -1196,15 +1214,46 @@ function showGuestMessage(guest) {
 
 
     /*
-     * RESTORE EXACT SCROLL POSITION
+     * Prevent browser from jumping when the
+     * message expands.
      */
 
     requestAnimationFrame(() => {
 
-        window.scrollTo(
-            0,
-            currentScrollPosition
-        );
+        requestAnimationFrame(() => {
+
+            window.scrollTo(
+                0,
+                currentScrollPosition
+            );
+
+        });
+
+    });
+
+
+    /*
+     * Reveal RSVP after message is visible.
+     */
+
+    requestAnimationFrame(() => {
+
+        setTimeout(() => {
+
+            const rsvp =
+                guestMessage.querySelector(
+                    ".guest-rsvp"
+                );
+
+            if (rsvp) {
+
+                rsvp.classList.add(
+                    "show"
+                );
+
+            }
+
+        }, 250);
 
     });
 
@@ -1316,6 +1365,11 @@ function showGuestChoices(matches) {
 
 function revealGuestMessage() {
 
+    if (!guestName || !guestMessage) {
+        return;
+    }
+
+
     const input =
         guestName.value.trim();
 
@@ -1425,7 +1479,7 @@ function revealGuestMessage() {
 
 
 /* =========================================================
-   ENTER KEY
+   GUEST INPUT
 ========================================================= */
 
 if (guestName) {
@@ -1435,6 +1489,8 @@ if (guestName) {
         event => {
 
             if (event.key === "Enter") {
+
+                event.preventDefault();
 
                 revealGuestMessage();
 
@@ -1458,9 +1514,13 @@ if (guestName) {
                     "name-required"
                 );
 
-                guestMessage.classList.remove(
-                    "show"
-                );
+                if (guestMessage) {
+
+                    guestMessage.classList.remove(
+                        "show"
+                    );
+
+                }
 
                 if (revealBtn) {
 
@@ -1499,12 +1559,31 @@ if (revealBtn) {
 
 
 /* =========================================================
-   BACKGROUND SCROLL EFFECT
+   OPTIMIZED BACKGROUND SCROLL EFFECT
 ========================================================= */
 
-let currentScroll = 0;
+/*
+ * OLD VERSION:
+ *
+ * animateBackground()
+ *
+ * was running requestAnimationFrame()
+ * FOREVER, even when the user was not scrolling.
+ *
+ * This can waste CPU/GPU resources and contribute
+ * to video stuttering.
+ *
+ * NEW VERSION:
+ *
+ * Only animate while scrolling or while a transition
+ * is still settling.
+ */
 
+let currentScroll = 0;
 let targetScroll = 0;
+
+let scrollAnimationFrame = null;
+let scrollStopTimer = null;
 
 
 function updateBackgroundScroll() {
@@ -1527,16 +1606,72 @@ function updateBackgroundScroll() {
 
     }
 
+
+    startBackgroundAnimation();
+
+
+    /*
+     * Detect when user stops scrolling.
+     */
+
+    clearTimeout(
+        scrollStopTimer
+    );
+
+
+    scrollStopTimer =
+        setTimeout(() => {
+
+            startBackgroundAnimation();
+
+        }, 120);
+
+}
+
+
+function startBackgroundAnimation() {
+
+    if (scrollAnimationFrame !== null) {
+        return;
+    }
+
+
+    scrollAnimationFrame =
+        requestAnimationFrame(
+            animateBackground
+        );
+
 }
 
 
 function animateBackground() {
 
+    scrollAnimationFrame = null;
+
+
+    const difference =
+        targetScroll -
+        currentScroll;
+
+
+    /*
+     * Smooth interpolation.
+     */
+
     currentScroll +=
-        (
-            targetScroll -
-            currentScroll
-        ) * .055;
+        difference *
+        0.12;
+
+
+    if (
+        Math.abs(difference) <
+        0.5
+    ) {
+
+        currentScroll =
+            targetScroll;
+
+    }
 
 
     const maxScroll =
@@ -1562,13 +1697,16 @@ function animateBackground() {
        VIDEO FADE
     ===================================================== */
 
-    if (invitationStarted && bgVideo) {
+    if (
+        invitationStarted &&
+        bgVideo
+    ) {
 
         const fadeStart =
-            .015;
+            0.015;
 
         const fadeEnd =
-            .24;
+            0.24;
 
 
         let videoProgress =
@@ -1592,18 +1730,48 @@ function animateBackground() {
             );
 
 
+        /*
+         * Smoothstep.
+         */
+
         const smoothFade =
             videoProgress *
             videoProgress *
             (
                 3 -
-                2 * videoProgress
+                2 *
+                videoProgress
             );
 
 
-        bgVideo.style.opacity =
+        const opacity =
             1 -
             smoothFade;
+
+
+        /*
+         * Only update if the value actually changed.
+         */
+
+        const roundedOpacity =
+            Math.round(
+                opacity *
+                1000
+            ) / 1000;
+
+
+        if (
+            bgVideo.dataset.opacity !==
+            String(roundedOpacity)
+        ) {
+
+            bgVideo.style.opacity =
+                roundedOpacity;
+
+            bgVideo.dataset.opacity =
+                String(roundedOpacity);
+
+        }
 
     }
 
@@ -1619,7 +1787,8 @@ function animateBackground() {
                 scrollProgress *
                 Math.PI *
                 1.15
-            ) * 4;
+            ) *
+            4;
 
 
         const moveY =
@@ -1627,7 +1796,8 @@ function animateBackground() {
                 scrollProgress *
                 Math.PI *
                 .95
-            ) * 3;
+            ) *
+            3;
 
 
         colorBackground.style.transform =
@@ -1644,7 +1814,8 @@ function animateBackground() {
                 scrollProgress *
                 Math.PI *
                 1.15
-            ) * 13;
+            ) *
+            13;
 
 
         const positionY =
@@ -1653,7 +1824,8 @@ function animateBackground() {
                 scrollProgress *
                 Math.PI *
                 .95
-            ) * 9;
+            ) *
+            9;
 
 
         colorBackground.style.backgroundPosition =
@@ -1662,9 +1834,21 @@ function animateBackground() {
     }
 
 
-    requestAnimationFrame(
-        animateBackground
-    );
+    /*
+     * Continue only while there is meaningful movement.
+     */
+
+    if (
+        Math.abs(
+            targetScroll -
+            currentScroll
+        ) >
+        0.5
+    ) {
+
+        startBackgroundAnimation();
+
+    }
 
 }
 
@@ -1680,15 +1864,10 @@ window.addEventListener(
 
 updateBackgroundScroll();
 
-animateBackground();
-
 
 /* =========================================================
    CINEMATIC HERO
 ========================================================= */
-
-let cinematicStarted = false;
-
 
 function startCinematicHero() {
 
@@ -1759,19 +1938,29 @@ function startCinematicHero() {
     }
 
 
+    /*
+     * Much tighter cinematic timing.
+     *
+     * The old version waited 7 seconds before
+     * starting automatic scroll.
+     *
+     * This keeps the animation but avoids making
+     * the page feel frozen.
+     */
+
     setTimeout(() => {
 
         reveal(eyebrow);
         reveal(line);
 
-    }, 500);
+    }, 350);
 
 
     setTimeout(() => {
 
         reveal(intro);
 
-    }, 600);
+    }, 500);
 
 
     setTimeout(() => {
@@ -1779,28 +1968,28 @@ function startCinematicHero() {
         reveal(name);
         reveal(underline);
 
-    }, 1500);
+    }, 1200);
 
 
     setTimeout(() => {
 
         reveal(label);
 
-    }, 3000);
+    }, 2200);
 
 
     setTimeout(() => {
 
         reveal(title);
 
-    }, 4800);
+    }, 3400);
 
 
     setTimeout(() => {
 
         reveal(hosted);
 
-    }, 7000);
+    }, 4700);
 
 
     setTimeout(() => {
@@ -1816,7 +2005,7 @@ function startCinematicHero() {
 
         }
 
-    }, 7000);
+    }, 4700);
 
 
     /* =====================================================
@@ -1825,103 +2014,222 @@ function startCinematicHero() {
 
     setTimeout(() => {
 
-        if (window.scrollY <= 10) {
+        /*
+         * IMPORTANT:
+         *
+         * Only auto-scroll if the user has NOT touched
+         * the page yet.
+         */
 
-            const eventDetails =
-                document.querySelector(
-                    ".event-details"
+        if (
+            window.scrollY > 10 ||
+            userHasInteractedWithScroll
+        ) {
+
+            return;
+
+        }
+
+
+        const eventDetails =
+            document.querySelector(
+                ".event-details"
+            );
+
+
+        if (!eventDetails) {
+            return;
+        }
+
+
+        const sectionTop =
+            eventDetails.getBoundingClientRect().top +
+            window.scrollY;
+
+
+        const viewportHeight =
+            window.innerHeight;
+
+
+        let targetPosition =
+            sectionTop -
+            (
+                viewportHeight *
+                0.52
+            );
+
+
+        const maxScroll =
+            document.documentElement.scrollHeight -
+            window.innerHeight;
+
+
+        targetPosition =
+            Math.max(
+                0,
+                Math.min(
+                    targetPosition,
+                    maxScroll
+                )
+            );
+
+
+        smoothScrollTo(
+            targetPosition,
+            1800
+        );
+
+
+        /* =================================================
+           INPUT PULSE
+        ================================================= */
+
+        setTimeout(() => {
+
+            if (
+                userHasInteractedWithScroll
+            ) {
+
+                return;
+
+            }
+
+
+            const nameInput =
+                document.getElementById(
+                    "guestName"
                 );
 
 
-            if (!eventDetails) {
+            if (!nameInput) {
                 return;
             }
 
 
-            const sectionTop =
-                eventDetails.getBoundingClientRect().top +
-                window.scrollY;
-
-
-            const viewportHeight =
-                window.innerHeight;
-
-
-            let targetPosition =
-                sectionTop -
-                (
-                    viewportHeight *
-                    .52
-                );
-
-
-            const maxScroll =
-                document.documentElement.scrollHeight -
-                window.innerHeight;
-
-
-            targetPosition =
-                Math.max(
-                    0,
-                    Math.min(
-                        targetPosition,
-                        maxScroll
-                    )
-                );
-
-
-            smoothScrollTo(
-                targetPosition,
-                2400
+            nameInput.classList.remove(
+                "input-pulse"
             );
 
 
-            /* =================================================
-               INPUT PULSE
-            ================================================= */
-
-            setTimeout(() => {
-
-                const nameInput =
-                    document.getElementById(
-                        "guestName"
-                    );
+            void nameInput.offsetWidth;
 
 
-                if (!nameInput) {
-                    return;
-                }
+            nameInput.classList.add(
+                "input-pulse"
+            );
+
+        }, 1900);
+
+    }, 4800);
+
+}
 
 
-                nameInput.classList.remove(
-                    "input-pulse"
-                );
+/* =========================================================
+   USER SCROLL INTERACTION
+========================================================= */
+
+let userHasInteractedWithScroll = false;
 
 
-                void nameInput.offsetWidth;
+function markUserScrollInteraction() {
+
+    userHasInteractedWithScroll = true;
+
+}
 
 
-                nameInput.classList.add(
-                    "input-pulse"
-                );
+window.addEventListener(
+    "wheel",
+    markUserScrollInteraction,
+    {
+        passive: true,
+        once: true
+    }
+);
 
-            }, 2600);
+
+window.addEventListener(
+    "touchstart",
+    markUserScrollInteraction,
+    {
+        passive: true,
+        once: true
+    }
+);
+
+
+window.addEventListener(
+    "touchmove",
+    markUserScrollInteraction,
+    {
+        passive: true,
+        once: true
+    }
+);
+
+
+window.addEventListener(
+    "keydown",
+    event => {
+
+        const scrollingKeys = [
+            "ArrowUp",
+            "ArrowDown",
+            "PageUp",
+            "PageDown",
+            "Home",
+            "End",
+            " "
+        ];
+
+
+        if (
+            scrollingKeys.includes(
+                event.key
+            )
+        ) {
+
+            markUserScrollInteraction();
 
         }
 
-    }, 7000);
-
-}
+    },
+    {
+        passive: true,
+        once: true
+    }
+);
 
 
 /* =========================================================
    ULTRA-SMOOTH SCROLL
 ========================================================= */
 
+let smoothScrollFrame = null;
+
+
 function smoothScrollTo(
     target,
     duration
 ) {
+
+    /*
+     * Cancel any previous automatic scroll.
+     */
+
+    if (
+        smoothScrollFrame !== null
+    ) {
+
+        cancelAnimationFrame(
+            smoothScrollFrame
+        );
+
+        smoothScrollFrame = null;
+
+    }
+
 
     const start =
         window.scrollY;
@@ -1932,13 +2240,23 @@ function smoothScrollTo(
         start;
 
 
+    if (
+        Math.abs(distance) <
+        2
+    ) {
+
+        return;
+
+    }
+
+
     const startTime =
         performance.now();
 
 
     function easeInOutCubic(t) {
 
-        return t < .5
+        return t < 0.5
 
             ? 4 *
                 t *
@@ -1957,6 +2275,22 @@ function smoothScrollTo(
     function animateScroll(
         currentTime
     ) {
+
+        /*
+         * If user starts interacting,
+         * immediately surrender control.
+         */
+
+        if (
+            userHasInteractedWithScroll
+        ) {
+
+            smoothScrollFrame = null;
+
+            return;
+
+        }
+
 
         const elapsed =
             currentTime -
@@ -1987,18 +2321,25 @@ function smoothScrollTo(
 
         if (progress < 1) {
 
-            requestAnimationFrame(
-                animateScroll
-            );
+            smoothScrollFrame =
+                requestAnimationFrame(
+                    animateScroll
+                );
+
+        } else {
+
+            smoothScrollFrame =
+                null;
 
         }
 
     }
 
 
-    requestAnimationFrame(
-        animateScroll
-    );
+    smoothScrollFrame =
+        requestAnimationFrame(
+            animateScroll
+        );
 
 }
 
