@@ -1118,7 +1118,7 @@ function showGuestMessage(guest) {
                     <!-- SHEAN -->
 
                     <a
-                        href="https://m.me/XDaegusvenus"
+                        href="https://m.me/shean.dalo.2025"
                         target="_blank"
                         class="rsvp-button">
 
