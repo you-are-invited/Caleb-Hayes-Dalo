@@ -7,14 +7,17 @@
     --navy: #062c45;
     --deep-ocean: #021c2e;
 
+    --abyss: #041c30;
+    --midwater: #0d3b5c;
+    --lagoon: #4fb8c4;
+    --seafoam: #bff2e8;
+    --pearl: #f6f0e2;
+    --coral-gold: #d9a066;
+
     --serif: "Cormorant Garamond", Georgia, serif;
     --sans: "Montserrat", Arial, sans-serif;
 }
 
-
-/* =========================================================
-   RESET
-========================================================= */
 
 * {
     margin: 0;
@@ -33,16 +36,11 @@ html {
 
 body {
     min-height: 100vh;
-
     width: 100%;
     max-width: 100%;
-
     overflow-x: hidden;
-
     color: var(--ivory);
-
     font-family: var(--sans);
-
     background:
         linear-gradient(
             135deg,
@@ -65,10 +63,6 @@ div {
 }
 
 
-/* =========================================================
-   PREVENT INTERACTION BEFORE INVITATION STARTS
-========================================================= */
-
 body.invitation-loading {
     overflow: hidden;
     height: 100vh;
@@ -76,45 +70,21 @@ body.invitation-loading {
 }
 
 
-/* =========================================================
-   LOADING SCREEN
-========================================================= */
-/* =========================================================
-   ELEGANT LOADING / ENTRY SCREEN
-========================================================= */
-
 .loading-screen {
     position: fixed;
     inset: 0;
     z-index: 10000;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     width: 100vw;
     height: 100vh;
-
     overflow: hidden;
-
     text-align: center;
-
-    /*
-       SOFT LUXURY BACKGROUND
-       Ivory → very pale blue → deep ocean edge
-    */
-    /* background-image:url(./background-image.jpg); */
     background-image: url("./background-image.jpg");
-background-size: cover;
-background-position: center;
-background-repeat: no-repeat;
-
-    /* opacity: 1; */
-    /* visibility: visible; */
-/* 
-    transition:
-        opacity 1.2s cubic-bezier(.16,1,.3,1),
-        visibility 1.2s ease; */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 
@@ -126,20 +96,11 @@ background-repeat: no-repeat;
 }
 
 
-/* =========================================================
-   SOFT LIGHT EFFECTS
-========================================================= */
-
 .loading-screen::before {
     content: "";
-
     position: absolute;
     inset: 0;
-
     pointer-events: none;
-
-  
-
     animation:
         loadingAmbient
         6s
@@ -150,19 +111,13 @@ background-repeat: no-repeat;
 
 .loading-screen::after {
     content: "";
-
     position: absolute;
-
     top: -25%;
     left: 50%;
-
     width: 650px;
     height: 650px;
-
     transform: translateX(-50%);
-
     border-radius: 50%;
-
     background:
         radial-gradient(
             circle,
@@ -170,11 +125,8 @@ background-repeat: no-repeat;
             rgba(143,220,232,.10) 35%,
             transparent 70%
         );
-
     filter: blur(30px);
-
     pointer-events: none;
-
     animation:
         loadingGlow
         7s
@@ -184,59 +136,42 @@ background-repeat: no-repeat;
 
 
 @keyframes loadingAmbient {
-
     0%,100% {
         opacity: .7;
         transform: scale(1);
     }
-
     50% {
         opacity: 1;
         transform: scale(1.04);
     }
-
 }
 
 
 @keyframes loadingGlow {
-
     0%,100% {
         transform:
             translateX(-50%)
             translateY(0)
             scale(.9);
-
         opacity: .55;
     }
-
     50% {
         transform:
             translateX(-50%)
             translateY(35px)
             scale(1.08);
-
         opacity: .95;
     }
-
 }
 
 
-/* =========================================================
-   DECORATIVE CORNERS
-========================================================= */
-
 .loading-decor {
     position: absolute;
-
     width: 230px;
     height: 230px;
-
     border-radius: 50%;
-
     pointer-events: none;
-
     opacity: .55;
-
     filter: blur(.2px);
 }
 
@@ -244,10 +179,8 @@ background-repeat: no-repeat;
 .decor-top {
     top: -150px;
     left: -150px;
-
     border:
         1px solid rgba(6,44,69,.10);
-
     box-shadow:
         35px 35px 0 -34px rgba(216,194,139,.45),
         70px 70px 0 -69px rgba(143,220,232,.35);
@@ -257,56 +190,34 @@ background-repeat: no-repeat;
 .decor-bottom {
     right: -150px;
     bottom: -150px;
-
     border:
         1px solid rgba(6,44,69,.10);
-
     box-shadow:
         -35px -35px 0 -34px rgba(216,194,139,.45),
         -70px -70px 0 -69px rgba(143,220,232,.35);
 }
 
 
-/* =========================================================
-   LOADING CONTENT
-========================================================= */
-
 .loading-content {
     position: relative;
-
     z-index: 2;
-
     width:
         min(560px, 88vw);
-
     max-width: 100%;
-
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
-
     justify-content: center;
 }
 
 
-/* =========================================================
-   ORNAMENT
-========================================================= */
-
 .loading-ornament {
     display: flex;
-
     align-items: center;
     justify-content: center;
-
     gap: 12px;
-
     margin-bottom: 24px;
-
     opacity: 0;
-
     animation:
         loadingFadeUp
         1.1s
@@ -318,10 +229,8 @@ background-repeat: no-repeat;
 
 .loading-ornament span {
     display: block;
-
     width: 38px;
     height: 1px;
-
     background:
         linear-gradient(
             to right,
@@ -343,25 +252,17 @@ background-repeat: no-repeat;
 
 .loading-ornament i {
     display: flex;
-
     align-items: center;
     justify-content: center;
-
     width: 22px;
     height: 22px;
-
     font-family: var(--serif);
-
     font-size: 14px;
-
     font-style: normal;
-
     color:
         #9c7d32;
-
     text-shadow:
         0 0 12px rgba(216,194,139,.45);
-
     animation:
         ornamentGlow
         3s
@@ -371,41 +272,27 @@ background-repeat: no-repeat;
 
 
 @keyframes ornamentGlow {
-
     0%,100% {
         opacity: .65;
         transform: scale(.95) rotate(0deg);
     }
-
     50% {
         opacity: 1;
         transform: scale(1.08) rotate(8deg);
     }
-
 }
 
-
-/* =========================================================
-   SMALL TITLE
-========================================================= */
 
 .loading-small {
     font-family:
         var(--sans);
-
     font-size: 8px;
-
     letter-spacing: 4.5px;
-
     font-weight: 600;
-
     color:
         rgba(6,44,69,.68);
-
     margin-bottom: 17px;
-
     opacity: 0;
-
     animation:
         loadingFadeUp
         1.1s
@@ -415,30 +302,16 @@ background-repeat: no-repeat;
 }
 
 
-/* =========================================================
-   CALEB HAYES
-========================================================= */
-
 .loading-name {
     position: relative;
-
     max-width: 100%;
-
     font-family:
         var(--serif);
-
     font-size:
         clamp(58px, 12vw, 98px);
-
     line-height: .9;
-
     font-weight: 600;
-
     letter-spacing: .3px;
-
-    /*
-       Elegant champagne → ivory → ocean blue
-    */
     background:
         linear-gradient(
             110deg,
@@ -450,33 +323,10 @@ background-repeat: no-repeat;
             #315568 80%,
             #062c45 100%
         );
-
     background-size: 280% 100%;
-
     -webkit-background-clip: text;
     background-clip: text;
-
     -webkit-text-fill-color: transparent;
-
-    animation:
-        loadingNameGradient
-        7s
-        ease-in-out
-        infinite;
-
-    opacity: 0;
-
-    transform:
-        translateY(20px)
-        scale(.96);
-
-    filter:
-        blur(8px)
-        drop-shadow(
-            0 5px 12px
-            rgba(6,44,69,.16)
-        );
-
     animation:
         loadingNameReveal
         1.5s
@@ -488,18 +338,25 @@ background-repeat: no-repeat;
         ease-in-out
         1.8s
         infinite;
+    opacity: 0;
+    transform:
+        translateY(20px)
+        scale(.96);
+    filter:
+        blur(8px)
+        drop-shadow(
+            0 5px 12px
+            rgba(6,44,69,.16)
+        );
 }
 
 
 @keyframes loadingNameReveal {
-
     0% {
         opacity: 0;
-
         transform:
             translateY(25px)
             scale(.94);
-
         filter:
             blur(12px)
             drop-shadow(
@@ -507,14 +364,11 @@ background-repeat: no-repeat;
                 rgba(6,44,69,.12)
             );
     }
-
     100% {
         opacity: 1;
-
         transform:
             translateY(0)
             scale(1);
-
         filter:
             blur(0)
             drop-shadow(
@@ -522,51 +376,34 @@ background-repeat: no-repeat;
                 rgba(6,44,69,.16)
             );
     }
-
 }
 
 
 @keyframes loadingNameGradient {
-
     0% {
         background-position: 0% 50%;
     }
-
     50% {
         background-position: 100% 50%;
     }
-
     100% {
         background-position: 0% 50%;
     }
-
 }
 
 
-/* =========================================================
-   SUBTITLE
-========================================================= */
-
 .loading-subtitle {
     margin-top: 15px;
-
     font-family:
         var(--serif);
-
     font-size:
         clamp(15px, 3vw, 19px);
-
     font-style: italic;
-
     font-weight: 400;
-
     letter-spacing: .5px;
-
     color:
         rgba(6,44,69,.72);
-
     opacity: 0;
-
     animation:
         loadingFadeUp
         1.1s
@@ -576,19 +413,12 @@ background-repeat: no-repeat;
 }
 
 
-/* =========================================================
-   GOLD LINE
-========================================================= */
-
 .loading-line {
     position: relative;
-
     width: 90px;
     height: 1px;
-
     margin:
         24px auto 21px;
-
     background:
         linear-gradient(
             to right,
@@ -598,12 +428,9 @@ background-repeat: no-repeat;
             #b4964d 70%,
             transparent
         );
-
     box-shadow:
         0 0 10px rgba(216,194,139,.35);
-
     opacity: 0;
-
     animation:
         loadingLineReveal
         1.2s
@@ -614,81 +441,52 @@ background-repeat: no-repeat;
 
 
 @keyframes loadingLineReveal {
-
     0% {
         opacity: 0;
         width: 0;
     }
-
     100% {
         opacity: 1;
         width: 90px;
     }
-
 }
 
 
-/* =========================================================
-   STATUS
-========================================================= */
-
 .loading-status {
     min-height: 18px;
-
     font-family:
         var(--sans);
-
     font-size: 8px;
-
     letter-spacing: 2.2px;
-
     font-weight: 500;
-
     text-transform: uppercase;
-
     color:
         rgba(6,44,69,.58);
-
     opacity: 0;
-
     animation:
         loadingFadeUp
         1s
         cubic-bezier(.16,1,.3,1)
         1.15s
         forwards;
-
     transition:
         opacity .35s ease;
 }
 
 
-/* =========================================================
-   PROGRESS BAR
-========================================================= */
-
 .loading-bar {
     position: relative;
-
     width:
         min(250px, 68vw);
-
     height: 2px;
-
     margin-top: 18px;
-
     overflow: hidden;
-
     border-radius: 20px;
-
     background:
         rgba(6,44,69,.12);
-
     box-shadow:
         inset 0 1px 2px rgba(6,44,69,.08);
-
     opacity: 0;
-
     animation:
         loadingFadeUp
         1s
@@ -700,12 +498,9 @@ background-repeat: no-repeat;
 
 .loading-progress {
     position: relative;
-
     width: 0%;
     height: 100%;
-
     border-radius: inherit;
-
     background:
         linear-gradient(
             to right,
@@ -714,327 +509,36 @@ background-repeat: no-repeat;
             #8fdce8,
             #315568
         );
-
     background-size: 200% 100%;
-
     box-shadow:
         0 0 9px rgba(143,220,232,.35);
-
     animation:
         progressShimmer
         2.5s
         linear
         infinite;
-
     transition:
         width .35s ease;
 }
 
 
 @keyframes progressShimmer {
-
     0% {
         background-position: 0% 50%;
     }
-
     100% {
         background-position: 200% 50%;
     }
-
 }
 
-
-/* =========================================================
-   VIEW INVITATION
-========================================================= */
-
-.view-invitation-wrapper {
-    margin-top: 30px;
-
-    opacity: 0;
-
-    transform:
-        translateY(12px)
-        scale(.96);
-
-    pointer-events: none;
-
-    transition:
-        opacity .9s ease,
-        transform .9s cubic-bezier(.16,1,.3,1);
-}
-
-
-.view-invitation-wrapper.ready {
-    opacity: 1;
-
-    transform:
-        translateY(0)
-        scale(1);
-
-    pointer-events: auto;
-}
-
-
-/* =========================================================
-   ELEGANT INVITATION BUTTON
-========================================================= */
-
-.view-invitation-btn {
-    position: relative;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    gap: 13px;
-
-    min-width: 220px;
-
-    padding: 14px 24px;
-
-    border:
-        1px solid rgba(128,104,46,.62);
-
-    border-radius: 3px;
-
-    background:
-        rgba(255,255,255,.32);
-
-    color:
-        #062c45;
-
-    font-family:
-        var(--sans);
-
-    font-size: 8px;
-
-    font-weight: 600;
-
-    letter-spacing: 2.5px;
-
-    cursor: pointer;
-
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.85),
-        0 8px 25px rgba(6,44,69,.10);
-
-    backdrop-filter:
-        blur(10px);
-
-    -webkit-backdrop-filter:
-        blur(10px);
-
-    transition:
-        transform .4s cubic-bezier(.16,1,.3,1),
-        background .4s ease,
-        box-shadow .4s ease,
-        border-color .4s ease;
-}
-
-
-.view-invitation-btn::before {
-    content: "";
-
-    position: absolute;
-
-    inset: 4px;
-
-    border:
-        1px solid rgba(128,104,46,.14);
-
-    pointer-events: none;
-}
-
-
-.view-invitation-btn:hover {
-    transform:
-        translateY(-3px);
-
-    background:
-        rgba(255,255,255,.65);
-
-    border-color:
-        rgba(128,104,46,.85);
-
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.95),
-        0 12px 30px rgba(6,44,69,.15),
-        0 0 18px rgba(216,194,139,.18);
-}
-
-
-.view-invitation-btn:active {
-    transform:
-        translateY(-1px)
-        scale(.98);
-}
-
-
-.view-arrow {
-    font-size: 17px;
-
-    line-height: .7;
-
-    color:
-        #9c7d32;
-
-    animation:
-        viewArrowMove
-        1.6s
-        ease-in-out
-        infinite;
-}
-
-
-@keyframes viewArrowMove {
-
-    0%,100% {
-        transform:
-            translateY(0);
-    }
-
-    50% {
-        transform:
-            translateY(4px);
-    }
-
-}
-
-
-/* =========================================================
-   GENERAL LOADING REVEAL
-========================================================= */
-
-@keyframes loadingFadeUp {
-
-    0% {
-        opacity: 0;
-
-        transform:
-            translateY(16px);
-    }
-
-    100% {
-        opacity: 1;
-
-        transform:
-            translateY(0);
-    }
-
-}
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 600px) {
-
-    .loading-content {
-        width: 88vw;
-    }
-
-
-    .loading-ornament {
-        margin-bottom: 20px;
-    }
-
-
-    .loading-ornament span {
-        width: 28px;
-    }
-
-
-    .loading-small {
-        font-size: 7px;
-
-        letter-spacing: 3.5px;
-
-        margin-bottom: 15px;
-        color: black;
-    }
-
-
-    .loading-name {
-        font-size:
-            clamp(55px, 16vw, 82px);
-
-        line-height: .92;
-    }
-
-
-    .loading-subtitle {
-        font-size: 15px;
-
-        margin-top: 13px;
-        color: black;
-    }
-
-
-    .loading-line {
-        margin:
-            21px auto 18px;
-    }
-
-
-    .loading-status {
-        font-size: 7px;
-
-        letter-spacing: 1.8px;
-        color: black;
-    }
-
-
-    .loading-bar {
-        width: 220px;
-
-        margin-top: 16px;
-    }
-
-
-    .view-invitation-wrapper {
-        margin-top: 26px;
-    }
-
-
-    .view-invitation-btn {
-        min-width: 205px;
-
-        padding:
-            13px 20px;
-
-        font-size: 7.5px;
-
-        letter-spacing: 2.2px;
-    }
-
-
-    .decor-top,
-    .decor-bottom {
-        width: 180px;
-        height: 180px;
-    }
-
-}
-
-
-/* =========================================================
-   VIEW INVITATION BUTTON
-========================================================= */
 
 .view-invitation-wrapper {
     margin-top: 28px;
-
     opacity: 0;
-
     transform:
         translateY(12px)
         scale(.96);
-
     pointer-events: none;
-
     transition:
         opacity .8s ease,
         transform .8s cubic-bezier(.16,1,.3,1);
@@ -1043,65 +547,45 @@ background-repeat: no-repeat;
 
 .view-invitation-wrapper.ready {
     opacity: 1;
-
     transform:
         translateY(0)
         scale(1);
-
     pointer-events: auto;
 }
 
 
 .view-invitation-btn {
     position: relative;
-
     display: flex;
-
     align-items: center;
     justify-content: center;
-
     gap: 13px;
-
     min-width: 230px;
-
     padding: 15px 25px;
-
     border-radius: 50px;
-
     border: 1px solid rgba(234,217,169,.75);
-
     background:
         linear-gradient(
             135deg,
             rgba(216,194,139,.22),
             rgba(143,220,232,.13)
         );
-
     color: #fffdf7;
-
     font-family: var(--sans);
-
     font-size: 9px;
-
     font-weight: 600;
-
     letter-spacing: 2.4px;
-
     cursor: pointer;
-
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.35),
         0 0 18px rgba(143,220,232,.18);
-
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-
     animation:
         viewInvitationPulse
         2.4s
         ease-in-out
         infinite;
-
     transition:
         transform .35s ease,
         background .35s ease,
@@ -1113,14 +597,12 @@ background-repeat: no-repeat;
     transform:
         translateY(-2px)
         scale(1.03);
-
     background:
         linear-gradient(
             135deg,
             rgba(216,194,139,.38),
             rgba(143,220,232,.24)
         );
-
     box-shadow:
         0 0 25px rgba(143,220,232,.32);
 }
@@ -1136,7 +618,6 @@ background-repeat: no-repeat;
 .view-arrow {
     font-size: 18px;
     line-height: .7;
-
     animation:
         viewArrowMove
         1.5s
@@ -1146,124 +627,419 @@ background-repeat: no-repeat;
 
 
 @keyframes viewInvitationPulse {
-
     0%,100% {
         box-shadow:
             inset 0 1px 0 rgba(255,255,255,.35),
             0 0 12px rgba(143,220,232,.12);
     }
-
     50% {
         box-shadow:
             inset 0 1px 0 rgba(255,255,255,.45),
             0 0 25px rgba(143,220,232,.32);
     }
-
 }
 
 
 @keyframes viewArrowMove {
-
     0%,100% {
         transform: translateY(0);
     }
-
     50% {
         transform: translateY(4px);
+    }
+}
+
+
+@keyframes loadingFadeUp {
+    0% {
+        opacity: 0;
+        transform:
+            translateY(16px);
+    }
+    100% {
+        opacity: 1;
+        transform:
+            translateY(0);
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .loading-content {
+        width: 88vw;
+    }
+
+    .loading-ornament {
+        margin-bottom: 20px;
+    }
+
+    .loading-ornament span {
+        width: 28px;
+    }
+
+    .loading-small {
+        font-size: 7px;
+        letter-spacing: 3.5px;
+        margin-bottom: 15px;
+        color: rgba(6,44,69,.68);
+    }
+
+    .loading-name {
+        font-size:
+            clamp(55px, 16vw, 82px);
+        line-height: .92;
+    }
+
+    .loading-subtitle {
+        font-size: 15px;
+        margin-top: 13px;
+        color: rgba(6,44,69,.72);
+    }
+
+    .loading-line {
+        margin:
+            21px auto 18px;
+    }
+
+    .loading-status {
+        font-size: 7px;
+        letter-spacing: 1.8px;
+        color: rgba(6,44,69,.58);
+    }
+
+    .loading-bar {
+        width: 220px;
+        margin-top: 16px;
+    }
+
+    .view-invitation-wrapper {
+        margin-top: 26px;
+    }
+
+    .view-invitation-btn {
+        min-width: 205px;
+        padding:
+            13px 20px;
+        font-size: 7.5px;
+        letter-spacing: 2.2px;
+        color: #fffdf7;
+    }
+
+    .decor-top,
+    .decor-bottom {
+        width: 180px;
+        height: 180px;
     }
 
 }
 
 
-/* =========================================================
-   BACKGROUND
-========================================================= */
-
 .color-background {
     position: fixed;
-
     inset: 0;
-
     width: 100vw;
     max-width: 100vw;
-
     z-index: -10;
-
     pointer-events: none;
-
     background:
         linear-gradient(
-            135deg,
-            #ffffff 0%,
-            #ffffff 10%,
-            #e8f6e6 24%,
-            #d8f1df 34%,
-            #c9edf0 46%,
-            #a9dce8 58%,
-            #739fbd 70%,
-            #062c45 82%,
-            #8fdce8 100%
+            160deg,
+            #fdfaf1 0%,
+            #eaf7f2 9%,
+            #cdeee7 20%,
+            #8fd8d6 34%,
+            #4fb8c4 48%,
+            #226e93 64%,
+            #0d3b5c 80%,
+            #041c30 100%
         );
-
-    background-size: 180% 180%;
-
+    background-size: 160% 160%;
     background-position: 0% 0%;
-
     transition:
         background-position .2s linear;
 }
 
 
+.bubble-field {
+    position: fixed;
+    inset: 0;
+    z-index: -6;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+
+.bubble {
+    position: absolute;
+    bottom: -60px;
+    border-radius: 50%;
+    background:
+        radial-gradient(
+            circle at 32% 28%,
+            rgba(255,255,255,.85),
+            rgba(255,255,255,.15) 45%,
+            rgba(255,255,255,.05) 70%
+        );
+    border: 1px solid rgba(255,255,255,.28);
+    opacity: 0;
+    animation-name: bubbleRise;
+    animation-timing-function: ease-in;
+    animation-iteration-count: infinite;
+}
+
+
+@keyframes bubbleRise {
+    0% {
+        transform:
+            translateY(0)
+            translateX(0);
+        opacity: 0;
+    }
+    8% {
+        opacity: .55;
+    }
+    92% {
+        opacity: .32;
+    }
+    100% {
+        transform:
+            translateY(-112vh)
+            translateX(var(--drift, 18px));
+        opacity: 0;
+    }
+}
+
+
+.bubble:nth-child(1) { left: 6%; width: 9px; height: 9px; --drift: 22px; animation-duration: 13s; animation-delay: 0s; }
+.bubble:nth-child(2) { left: 18%; width: 5px; height: 5px; --drift: -14px; animation-duration: 10s; animation-delay: 2.4s; }
+.bubble:nth-child(3) { left: 32%; width: 13px; height: 13px; --drift: 28px; animation-duration: 17s; animation-delay: 5s; }
+.bubble:nth-child(4) { left: 48%; width: 6px; height: 6px; --drift: -20px; animation-duration: 11s; animation-delay: 1.2s; }
+.bubble:nth-child(5) { left: 63%; width: 10px; height: 10px; --drift: 16px; animation-duration: 15s; animation-delay: 3.6s; }
+.bubble:nth-child(6) { left: 76%; width: 7px; height: 7px; --drift: -24px; animation-duration: 12s; animation-delay: 6.2s; }
+.bubble:nth-child(7) { left: 88%; width: 11px; height: 11px; --drift: 12px; animation-duration: 16s; animation-delay: 4.4s; }
+.bubble:nth-child(8) { left: 95%; width: 5px; height: 5px; --drift: -10px; animation-duration: 9s; animation-delay: 7.8s; }
+
+
+@media (prefers-reduced-motion: reduce) {
+    .bubble {
+        animation: none;
+        opacity: 0;
+    }
+}
+
+
+/* =========================================================
+   FISH SILHOUETTES
+   Same lightweight approach as the bubble field: pure CSS
+   keyframes, no JS, so it never competes with the video
+   decoder or the scroll animation for the main thread.
+========================================================= */
+
+.fish-field {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+
+.fish {
+    position: absolute;
+    width: 46px;
+    height: 23px;
+    opacity: 0;
+    fill: rgba(255, 253, 247, .55);
+    filter: drop-shadow(0 0 6px rgba(2, 20, 34, .35));
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+
+@keyframes fishSwimRight {
+    0% {
+        transform: translateX(-10vw) translateY(0);
+        opacity: 0;
+    }
+    8% {
+        opacity: .75;
+    }
+    50% {
+        transform: translateX(55vw) translateY(-18px);
+    }
+    92% {
+        opacity: .6;
+    }
+    100% {
+        transform: translateX(115vw) translateY(6px);
+        opacity: 0;
+    }
+}
+
+
+@keyframes fishSwimLeft {
+    0% {
+        transform: translateX(10vw) scaleX(-1) translateY(0);
+        opacity: 0;
+    }
+    8% {
+        opacity: .7;
+    }
+    50% {
+        transform: translateX(-55vw) scaleX(-1) translateY(14px);
+    }
+    92% {
+        opacity: .55;
+    }
+    100% {
+        transform: translateX(-115vw) scaleX(-1) translateY(-8px);
+        opacity: 0;
+    }
+}
+
+
+.fish-1 {
+    top: 22%;
+    left: 0;
+    width: 34px;
+    height: 17px;
+    animation-name: fishSwimRight;
+    animation-duration: 34s;
+    animation-delay: 2s;
+}
+
+
+.fish-2 {
+    top: 58%;
+    right: 0;
+    width: 52px;
+    height: 26px;
+    animation-name: fishSwimLeft;
+    animation-duration: 42s;
+    animation-delay: 9s;
+}
+
+
+.fish-3 {
+    top: 40%;
+    left: 0;
+    width: 26px;
+    height: 13px;
+    animation-name: fishSwimRight;
+    animation-duration: 28s;
+    animation-delay: 18s;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+    .fish {
+        animation: none;
+        opacity: 0;
+    }
+}
+
+
+@media (max-width: 700px) {
+    .fish-1 { top: 16%; }
+    .fish-2 { top: 66%; }
+    .fish-3 { top: 34%; }
+}
+
+
+/* =========================================================
+   CORAL BED
+   A static silhouette anchored to the bottom of the
+   viewport, layered behind all page content, reinforcing
+   the underwater setting without costing any extra motion.
+========================================================= */
+
+.coral-bed {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -8;
+    width: 100vw;
+    height: min(140px, 16vh);
+    pointer-events: none;
+    opacity: .5;
+}
+
+
+.coral-bed svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+
+.coral-shape {
+    fill: rgba(4, 28, 48, .55);
+}
+
+
+.coral-shape.coral-front {
+    fill: rgba(4, 28, 48, .8);
+}
+
+
+@media (max-width: 700px) {
+    .coral-bed {
+        height: min(90px, 12vh);
+        opacity: .42;
+    }
+}
+
+
+.wave-divider {
+    display: block;
+    width: min(320px, 70vw);
+    height: 22px;
+    margin: 0 auto 26px;
+    color: var(--lagoon);
+    opacity: .85;
+}
+
+
+.wave-divider svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+
+.wave-divider path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+}
+
+
 .bg-video {
     position: fixed;
-
     top: 0;
     left: 0;
-
     width: 100vw;
     max-width: 100vw;
-
     height: 100vh;
-
     object-fit: cover;
-
     z-index: -5;
-
-    /*
-       PERFORMANCE FIX:
-       CSS `filter` and `transform: scale()` on a <video>
-       force the browser to recompute/repaint every single
-       frame during playback, on top of decoding the video
-       itself. On lower-end phones this is the #1 cause of
-       stutter/lag on background videos.
-
-       The brightness/contrast/saturation look should be
-       baked into the video file itself (once, with ffmpeg)
-       instead of being applied live in the browser.
-    */
-
     opacity: 0;
-
     pointer-events: none;
-
     will-change: opacity;
-
     transition: none;
 }
 
 
 .ocean-overlay {
     position: fixed;
-
     inset: 0;
-
     width: 100vw;
     max-width: 100vw;
-
     z-index: -4;
-
     pointer-events: none;
-
     background:
         linear-gradient(
             to bottom,
@@ -1275,16 +1051,11 @@ background-repeat: no-repeat;
 
 .ocean-glow {
     position: fixed;
-
     inset: 0;
-
     width: 100vw;
     max-width: 100vw;
-
     z-index: -3;
-
     pointer-events: none;
-
     background:
         radial-gradient(
             ellipse at center,
@@ -1296,18 +1067,12 @@ background-repeat: no-repeat;
 
 body::before {
     content: "";
-
     position: fixed;
-
     inset: 0;
-
     width: 100vw;
     max-width: 100vw;
-
     z-index: -2;
-
     pointer-events: none;
-
     background:
         linear-gradient(
             to bottom,
@@ -1317,65 +1082,40 @@ body::before {
 }
 
 
-/* =========================================================
-   MUSIC BUTTON
-========================================================= */
-
 .music-button {
     position: fixed;
-
     top: 25px;
     right: 25px;
-
     z-index: 100;
-
     display: flex;
-
     align-items: center;
     justify-content: center;
-
     gap: 9px;
-
     min-width: 132px;
-
     padding: 11px 17px;
-
     background:
         rgba(3,28,45,.48);
-
     border:
         1px solid rgba(255,255,255,.48);
-
     border-radius: 50px;
-
     color: #fff;
-
     font-family: var(--sans);
-
     font-size: 9px;
-
     font-weight: 600;
-
     letter-spacing: 1.8px;
-
     cursor: pointer;
-
     backdrop-filter: blur(14px) saturate(125%);
     -webkit-backdrop-filter:
         blur(14px) saturate(125%);
-
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.35),
         0 6px 22px rgba(0,20,35,.2);
-
     text-transform: uppercase;
-
     transition:
         background .35s ease,
         transform .35s ease,
         border-color .35s ease,
         box-shadow .35s ease;
-
     animation:
         musicAttention
         2.8s
@@ -1391,20 +1131,13 @@ body::before {
 
 .music-button::before {
     content: "";
-
     position: absolute;
-
     inset: -5px;
-
     border-radius: inherit;
-
     border:
         1px solid rgba(143,220,232,.28);
-
     opacity: 0;
-
     pointer-events: none;
-
     animation:
         musicRing
         2.8s
@@ -1416,14 +1149,11 @@ body::before {
 .music-button:hover {
     background:
         rgba(3,28,45,.72);
-
     border-color:
         var(--gold-light);
-
     transform:
         translateY(-2px)
         scale(1.02);
-
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.45),
         0 8px 26px rgba(0,20,35,.28),
@@ -1441,7 +1171,6 @@ body::before {
 .music-button.playing {
     border-color:
         rgba(234,217,169,.72);
-
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.42),
         0 7px 24px rgba(0,20,35,.24),
@@ -1451,27 +1180,19 @@ body::before {
 
 .music-icon {
     display: inline-flex;
-
     align-items: center;
     justify-content: center;
-
     width: 19px;
     height: 19px;
-
     color:
         var(--gold-light);
-
     font-family:
         var(--serif);
-
     font-size: 19px;
-
     line-height: 1;
-
     text-shadow:
         0 0 5px rgba(234,217,169,.65),
         0 0 12px rgba(143,220,232,.35);
-
     transition:
         transform .35s ease;
 }
@@ -1483,7 +1204,6 @@ body::before {
         1.2s
         ease-in-out
         infinite;
-
     text-shadow:
         0 0 6px rgba(255,255,255,.85),
         0 0 13px rgba(234,217,169,.85),
@@ -1492,102 +1212,72 @@ body::before {
 
 
 @keyframes musicAttention {
-
     0%,100% {
         box-shadow:
             inset 0 1px 0 rgba(255,255,255,.35),
             0 6px 22px rgba(0,20,35,.2),
             0 0 0 rgba(143,220,232,0);
     }
-
     50% {
         box-shadow:
             inset 0 1px 0 rgba(255,255,255,.4),
             0 7px 24px rgba(0,20,35,.23),
             0 0 15px rgba(143,220,232,.18);
     }
-
 }
 
 
 @keyframes musicRing {
-
     0% {
         transform: scale(.94);
         opacity: 0;
     }
-
     18% {
         opacity: .45;
     }
-
     60%,100% {
         transform: scale(1.13);
         opacity: 0;
     }
-
 }
 
 
 @keyframes musicNotePulse {
-
     0%,100% {
         transform:
             scale(1)
             rotate(0);
     }
-
     50% {
         transform:
             scale(1.12)
             rotate(-4deg);
     }
-
 }
 
-
-/* =========================================================
-   MAIN
-========================================================= */
 
 .invitation {
     width:
         min(900px, 100%);
-
     max-width: 100%;
-
     margin:
         0 auto;
-
     padding:
         90px 30px 80px;
 }
 
 
-/* =========================================================
-   HERO
-========================================================= */
-
 .hero {
     position: relative;
-
     width: 100%;
     max-width: 100%;
-
     min-height: 82vh;
-
     display: flex;
-
     flex-direction: column;
-
     justify-content: center;
-
     align-items: center;
-
     text-align: center;
-
     isolation: isolate;
-
     padding:
         85px 25px 70px;
 }
@@ -1595,26 +1285,17 @@ body::before {
 
 .hero::before {
     content: "";
-
     position: absolute;
-
     left: 50%;
     top: 7%;
-
     width:
         min(700px, 100%);
-
     max-width: 100%;
-
     height: 86%;
-
     transform:
         translateX(-50%);
-
     z-index: -1;
-
     pointer-events: none;
-
     background:
         radial-gradient(
             ellipse at center,
@@ -1624,26 +1305,17 @@ body::before {
             rgba(0,8,18,.008) 67%,
             transparent 82%
         );
-
     border-radius: 50%;
-
     filter: blur(25px);
 }
 
 
-/* =========================================================
-   CINEMATIC
-========================================================= */
-
 .cinematic {
     opacity: 0;
-
     transform:
         translateY(28px)
         scale(.97);
-
     filter: blur(10px);
-
     transition:
         opacity 1.05s cubic-bezier(.22,1,.36,1),
         transform 1.25s cubic-bezier(.16,1,.3,1),
@@ -1653,35 +1325,23 @@ body::before {
 
 .cinematic.show {
     opacity: 1;
-
     transform:
         translateY(0)
         scale(1);
-
     filter: blur(0);
 }
 
 
-/* =========================================================
-   EYEBROW
-========================================================= */
-
 .eyebrow {
     font-family:
         var(--sans);
-
     font-size: 10px;
-
     letter-spacing: 5px;
-
     font-weight: 600;
-
     color:
         rgba(255,255,255,.98);
-
     -webkit-text-stroke:
         .15px rgba(0,0,0,.35);
-
     text-shadow:
         0 2px 5px rgba(0,0,0,.75),
         0 5px 10px rgba(0,0,0,.35);
@@ -1697,26 +1357,22 @@ body::before {
 
 
 @keyframes softLetterReveal {
-
     0% {
         opacity: 0;
         letter-spacing: 9px;
         filter: blur(8px);
     }
-
     100% {
         opacity: 1;
         letter-spacing: 5px;
         filter: blur(0);
     }
-
 }
 
 
 .small-line {
     width: 55px;
     height: 1px;
-
     background:
         linear-gradient(
             to right,
@@ -1724,10 +1380,8 @@ body::before {
             var(--gold),
             transparent
         );
-
     margin:
         20px 0 24px;
-
     box-shadow:
         0 2px 6px rgba(0,0,0,.45);
 }
@@ -1742,69 +1396,46 @@ body::before {
 
 
 @keyframes lineGrow {
-
     0% {
         width: 0;
         opacity: 0;
     }
-
     100% {
         width: 55px;
         opacity: 1;
     }
-
 }
 
 
 .celebration-intro {
     font-family:
         var(--serif);
-
     font-size: 23px;
-
     font-style: italic;
-
     font-weight: 400;
-
     color:
         #fffdf7;
-
     margin-bottom: 5px;
-
     -webkit-text-stroke:
         .12px rgba(0,0,0,.42);
-
     text-shadow:
         0 2px 5px rgba(0,0,0,.7),
         0 5px 10px rgba(0,0,0,.35);
 }
 
 
-/* =========================================================
-   CALEB HAYES
-========================================================= */
-
 .cinematic-name {
     position: relative;
-
     max-width: 100%;
-
     font-family:
         var(--serif);
-
     font-size:
         clamp(62px,10.5vw,108px);
-
     line-height: .92;
-
     font-weight: 600;
-
     letter-spacing: .5px;
-
     margin-top: 0.3em;
-
     white-space: nowrap;
-
     background:
         linear-gradient(
             110deg,
@@ -1817,34 +1448,25 @@ body::before {
             #fffdf7 92%,
             #d8c28b 100%
         );
-
     background-size: 280% 100%;
-
     -webkit-background-clip: text;
     background-clip: text;
-
     -webkit-text-fill-color: transparent;
-
     -webkit-text-stroke:
         .65px rgba(0,0,0,.62);
-
     animation:
         calebGradient
         8s
         ease-in-out
         infinite;
-
     opacity: 0;
-
     transform:
         translateY(45px)
         scale(.82);
-
     filter:
         blur(18px)
         drop-shadow(0 2px 2px rgba(0,0,0,.98))
         drop-shadow(0 4px 6px rgba(0,0,0,.78));
-
     transition:
         opacity 1.3s ease,
         transform 1.55s cubic-bezier(.16,1,.3,1),
@@ -1854,11 +1476,9 @@ body::before {
 
 .cinematic-name.show {
     opacity: 1;
-
     transform:
         translateY(0)
         scale(1);
-
     filter:
         blur(0)
         drop-shadow(0 2px 2px rgba(0,0,0,.98))
@@ -1868,45 +1488,24 @@ body::before {
 
 
 @keyframes calebGradient {
-
-    0% {
-        background-position: 0% 50%;
-    }
-
-    25% {
-        background-position: 35% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    75% {
-        background-position: 65% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-
+    0% { background-position: 0% 50%; }
+    25% { background-position: 35% 50%; }
+    50% { background-position: 100% 50%; }
+    75% { background-position: 65% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 
 .cinematic-name::before {
     content: "";
-
     position: absolute;
-
     left: 50%;
     top: 50%;
-
     width: 115%;
     height: 145%;
-
     transform:
         translate(-50%,-50%)
         scale(.65);
-
     background:
         radial-gradient(
             ellipse,
@@ -1915,13 +1514,9 @@ body::before {
             rgba(255,255,255,.08) 45%,
             transparent 72%
         );
-
     filter: blur(28px);
-
     opacity: 0;
-
     z-index: -1;
-
     pointer-events: none;
 }
 
@@ -1936,38 +1531,30 @@ body::before {
 
 
 @keyframes nameHalo {
-
     0% {
         opacity: 0;
-
         transform:
             translate(-50%,-50%)
             scale(.55);
     }
-
     35% {
         opacity: 1;
-
         transform:
             translate(-50%,-50%)
             scale(1);
     }
-
     100% {
         opacity: .22;
-
         transform:
             translate(-50%,-50%)
             scale(1.18);
     }
-
 }
 
 
 .name-underline {
     width: 100px;
     height: 1px;
-
     background:
         linear-gradient(
             to right,
@@ -1975,37 +1562,24 @@ body::before {
             var(--gold),
             transparent
         );
-
     margin:
         19px auto 27px;
-
     box-shadow:
         0 2px 6px rgba(0,0,0,.45);
 }
 
 
-/* =========================================================
-   BIRTHDAY TITLE
-========================================================= */
-
 .celebration-label {
     font-family:
         var(--sans);
-
     font-size: 9px;
-
     letter-spacing: 4px;
-
     font-weight: 600;
-
     color:
         rgba(255,255,255,.96);
-
     margin-bottom: 12px;
-
     -webkit-text-stroke:
         .12px rgba(0,0,0,.42);
-
     text-shadow:
         0 2px 5px rgba(0,0,0,.7),
         0 5px 10px rgba(0,0,0,.35);
@@ -2014,40 +1588,26 @@ body::before {
 
 .cinematic-title {
     position: relative;
-
     max-width: 100%;
-
     font-family:
         var(--serif);
-
     font-weight: 500;
-
     font-size:
         clamp(30px,4.8vw,49px);
-
     line-height: 1.08;
-
     color: #fff;
-
     text-transform: uppercase;
-
     letter-spacing: 1px;
-
     -webkit-text-stroke:
         .35px rgba(0,0,0,.58);
-
     text-shadow:
         0 2px 5px rgba(0,0,0,.78),
         0 5px 11px rgba(0,0,0,.45);
-
     opacity: 0;
-
     transform:
         translateY(35px)
         scale(.78);
-
     filter: blur(14px);
-
     transition:
         opacity 1.25s ease,
         transform 1.55s cubic-bezier(.16,1,.3,1),
@@ -2057,13 +1617,10 @@ body::before {
 
 .cinematic-title.show {
     opacity: 1;
-
     transform:
         translateY(0)
         scale(1);
-
     filter: blur(0);
-
     animation:
         birthdayImpact
         1.8s
@@ -2074,15 +1631,11 @@ body::before {
 .cinematic-title span {
     color:
         var(--gold-light);
-
     font-style: italic;
-
     padding:
         0 8px;
-
     -webkit-text-stroke:
         .35px rgba(0,0,0,.58);
-
     text-shadow:
         0 2px 5px rgba(0,0,0,.78),
         0 5px 11px rgba(0,0,0,.45);
@@ -2090,60 +1643,43 @@ body::before {
 
 
 @keyframes birthdayImpact {
-
     0% {
         text-shadow:
             0 0 0 rgba(234,217,169,0),
             0 2px 5px rgba(0,0,0,.78);
     }
-
     30% {
         text-shadow:
             0 0 20px rgba(234,217,169,.85),
             0 0 38px rgba(143,220,232,.45),
             0 2px 5px rgba(0,0,0,.78);
     }
-
     60% {
         text-shadow:
             0 0 10px rgba(234,217,169,.45),
             0 2px 5px rgba(0,0,0,.78),
             0 5px 11px rgba(0,0,0,.45);
     }
-
     100% {
         text-shadow:
             0 2px 5px rgba(0,0,0,.78),
             0 5px 11px rgba(0,0,0,.45);
     }
-
 }
 
 
-/* =========================================================
-   HOSTED
-========================================================= */
-
 .hosted {
     margin-top: 32px;
-
     max-width: 100%;
-
     font-family:
         var(--serif);
-
     font-size: 17px;
-
     line-height: 1.55;
-
     font-weight: 400;
-
     color:
         rgba(255,255,255,.96);
-
     -webkit-text-stroke:
         .1px rgba(0,0,0,.42);
-
     text-shadow:
         0 2px 5px rgba(0,0,0,.72),
         0 5px 10px rgba(0,0,0,.35);
@@ -2153,70 +1689,46 @@ body::before {
 .hosted strong {
     color:
         #fffdf7;
-
     font-weight: 600;
-
     letter-spacing: .2px;
-
     -webkit-text-stroke:
         .15px rgba(0,0,0,.5);
 }
 
 
-/* =========================================================
-   SCROLL INDICATOR
-========================================================= */
-
 .scroll-indicator {
     margin-top: 25px;
-
     width: 50px;
     height: 50px;
-
     display: flex;
-
     justify-content: center;
-
     align-items: center;
-
     pointer-events: none;
 }
 
 
 .scroll-arrow {
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
-
     justify-content: center;
-
     width: 50px;
     height: 50px;
-
     font-family: Arial, sans-serif;
-
     font-size: 34px;
-
     font-weight: 700;
-
     line-height: 1;
-
     color: #fff;
-
     text-shadow:
         0 0 5px #fff,
         0 0 12px rgba(143,220,232,.95),
         0 0 22px rgba(143,220,232,.8),
         0 3px 8px rgba(0,20,35,.55);
-
     filter:
         drop-shadow(
             0 0 7px
             rgba(143,220,232,.95)
         );
-
     animation:
         glowingScrollArrow
         1.8s
@@ -2227,118 +1739,82 @@ body::before {
 
 .scroll-arrow small {
     display: block;
-
     white-space: nowrap;
-
     font-family: var(--sans);
-
     font-size: 7px;
-
     font-weight: 500;
-
     letter-spacing: 1.5px;
-
     line-height: 1;
-
     margin-bottom: 3px;
-
     color: #fff;
 }
 
 
 @keyframes glowingScrollArrow {
-
     0%,100% {
         transform:
             translateY(0)
             scale(1);
-
         opacity: .72;
     }
-
     50% {
         transform:
             translateY(8px)
             scale(1.12);
-
         opacity: 1;
     }
-
 }
+
+
 @media (max-width: 600px) {
-
-
     .scroll-arrow small {
         font-size: 0.4em;
         gap: 3px;
     }
 }
 
-/* =========================================================
-   EVENT DETAILS
-========================================================= */
 
 .event-details {
     position: relative;
-
     width: 100%;
     max-width: 100%;
-
     display: grid;
-
     grid-template-columns:
         1fr 1px 1fr 1px 1.4fr;
-
     align-items: center;
-
     gap: 30px;
-
     padding: 40px 25px;
-
     margin:
         20px auto 100px;
-
     border:
-        1px solid rgba(255,255,255,.48);
-
+        1px solid rgba(191,242,232,.4);
     border-radius: 18px;
-
     background:
         linear-gradient(
             135deg,
-            rgba(255,255,255,.28),
-            rgba(255,255,255,.12),
-            rgba(255,255,255,.2)
+            rgba(191,242,232,.22),
+            rgba(13,59,92,.16),
+            rgba(191,242,232,.14)
         );
-
     backdrop-filter:
-        blur(18px) saturate(125%);
-
+        blur(18px) saturate(140%);
     -webkit-backdrop-filter:
-        blur(18px) saturate(125%);
-
+        blur(18px) saturate(140%);
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.65),
-        inset 0 -1px 0 rgba(255,255,255,.1),
-        0 18px 45px rgba(0,20,35,.2);
+        inset 0 1px 0 rgba(255,255,255,.5),
+        inset 0 -1px 0 rgba(4,28,48,.15),
+        0 18px 45px rgba(2,16,28,.28);
 }
 
 
 .detail-item {
     position: relative;
-
     z-index: 1;
-
     min-width: 0;
-
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
-
     text-align: center;
-
     gap: 5px;
 }
 
@@ -2346,15 +1822,10 @@ body::before {
 .detail-label {
     font-family:
         var(--sans);
-
     font-size: 8px;
-
     letter-spacing: 3.5px;
-
     font-weight: 600;
-
     color: #80682e;
-
     margin-bottom: 7px;
 }
 
@@ -2362,14 +1833,10 @@ body::before {
 .detail-main {
     font-family:
         var(--serif);
-
     font-size: 22px;
-
     font-weight: 600;
-
     color:
         #062c45;
-
     line-height: 1.1;
 }
 
@@ -2377,13 +1844,9 @@ body::before {
 .detail-sub {
     font-family:
         var(--sans);
-
     font-size: 9px;
-
     letter-spacing: .4px;
-
     font-weight: 500;
-
     color:
         #173e51;
 }
@@ -2391,13 +1854,9 @@ body::before {
 
 .vertical-divider {
     position: relative;
-
     z-index: 1;
-
     width: 1px;
-
     height: 55px;
-
     background:
         linear-gradient(
             to bottom,
@@ -2408,17 +1867,11 @@ body::before {
 }
 
 
-/* =========================================================
-   INFO
-========================================================= */
-
 .info-section {
     width: 100%;
     max-width: 680px;
-
     margin:
         0 auto 90px;
-
     text-align: center;
 }
 
@@ -2426,7 +1879,6 @@ body::before {
 .section-line {
     width: 45px;
     height: 1px;
-
     background:
         linear-gradient(
             to right,
@@ -2434,7 +1886,6 @@ body::before {
             var(--gold),
             transparent
         );
-
     margin:
         0 auto 24px;
 }
@@ -2443,16 +1894,11 @@ body::before {
 .section-label {
     font-family:
         var(--sans);
-
     font-size: 9px;
-
     letter-spacing: 4px;
-
     font-weight: 700;
-
     color:
         #173e51;
-
     margin-bottom: 12px;
 }
 
@@ -2460,16 +1906,11 @@ body::before {
 .info-section h3 {
     font-family:
         var(--serif);
-
     font-size: 40px;
-
     line-height: 1.05;
-
     font-weight: 600;
-
     color:
         #062c45;
-
     margin-bottom: 17px;
 }
 
@@ -2477,14 +1918,10 @@ body::before {
 .info-section p:not(.section-label):not(.thank-you) {
     font-family:
         var(--sans);
-
     font-size: 13px;
-
     line-height: 1.95;
-
     color:
         #173e51;
-
     font-weight: 500;
 }
 
@@ -2498,114 +1935,76 @@ body::before {
 .thank-you {
     font-family:
         var(--serif);
-
     font-style: italic;
-
     font-size: 20px;
-
     line-height: 1.5;
-
     font-weight: 600;
-
     color:
         #062c45;
-
     margin-top: 20px;
 }
 
 
-/* =========================================================
-   GUEST SECTION
-========================================================= */
-
 .guest-section {
     position: relative;
-
     width: 100%;
     max-width: 650px;
-
     margin:
         0 auto 100px;
-
     padding:
         55px 35px;
-
     text-align: center;
-
     background:
         linear-gradient(
             135deg,
-            rgba(255,255,255,.3),
-            rgba(255,255,255,.13),
-            rgba(255,255,255,.22)
+            rgba(191,242,232,.24),
+            rgba(13,59,92,.15),
+            rgba(191,242,232,.16)
         );
-
     border:
-        1px solid rgba(255,255,255,.5);
-
+        1px solid rgba(191,242,232,.42);
     backdrop-filter:
-        blur(18px) saturate(125%);
-
+        blur(18px) saturate(140%);
     -webkit-backdrop-filter:
-        blur(18px) saturate(125%);
-
+        blur(18px) saturate(140%);
     border-radius: 18px;
-
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.7),
-        inset 0 -1px 0 rgba(255,255,255,.1),
-        0 20px 50px rgba(0,20,35,.2);
+        inset 0 1px 0 rgba(255,255,255,.55),
+        inset 0 -1px 0 rgba(4,28,48,.15),
+        0 20px 50px rgba(2,16,28,.3);
 }
 
 
 .guest-section h3 {
     font-family:
         var(--serif);
-
     font-size: 42px;
-
     line-height: 1.02;
-
     font-weight: 600;
-
     color:
         #062c45;
-
     margin-bottom: 14px;
 }
 
 
 .guest-intro {
     max-width: 430px;
-
     margin:
         0 auto 30px;
-
     color:
         #173e51;
-
     font-family:
         var(--sans);
-
     font-size: 12.5px;
-
     line-height: 1.9;
-
     font-weight: 500;
 }
 
 
-/* =========================================================
-   GUEST FORM
-========================================================= */
-
 .guest-form {
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
-
     gap: 12px;
 }
 
@@ -2613,30 +2012,20 @@ body::before {
 .guest-form input {
     width:
         min(100%,350px);
-
     padding:
         15px 18px;
-
     background:
         rgba(255,255,255,.16);
-
     border:
         1px solid rgba(255,255,255,.5);
-
     border-radius: 10px;
-
     outline: none;
-
     color:
         #062c45;
-
     font-family:
         var(--sans);
-
     font-size: 12px;
-
     text-align: center;
-
     transition:
         border-color .35s ease,
         box-shadow .35s ease,
@@ -2648,31 +2037,20 @@ body::before {
 .guest-form button {
     padding:
         13px 28px;
-
     border:
         1px solid var(--gold);
-
     background:
         rgba(0,18,30,.3);
-
     color:
         var(--ivory);
-
     font-family:
         var(--sans);
-
     font-size: 9px;
-
     font-weight: 600;
-
     letter-spacing: 2px;
-
     text-transform: uppercase;
-
     cursor: pointer;
-
     border-radius: 8px;
-
     transition: .3s ease;
 }
 
@@ -2680,28 +2058,18 @@ body::before {
 .guest-form button:hover {
     background:
         var(--gold);
-
     color:
         var(--deep-ocean);
-
     transform:
         translateY(-2px);
 }
 
 
-/* =========================================================
-   GUEST MESSAGE
-========================================================= */
-
 .guest-message {
     max-height: 0;
-
     opacity: 0;
-
     overflow: hidden;
-
     margin-top: 0;
-
     transition:
         max-height 1s cubic-bezier(.16,1,.3,1),
         opacity .6s ease,
@@ -2711,22 +2079,14 @@ body::before {
 
 .guest-message.show {
     max-height: 4000px;
-
     opacity: 1;
-
     margin-top: 30px;
 }
 
 
-/* =========================================================
-   MESSAGE DIVIDER
-========================================================= */
-
 .message-divider {
     width: 40px;
-
     height: 1px;
-
     background:
         linear-gradient(
             to right,
@@ -2734,49 +2094,32 @@ body::before {
             var(--gold),
             transparent
         );
-
     margin:
         0 auto 24px;
 }
 
 
-/* =========================================================
-   MESSAGE TEXT
-========================================================= */
-
 .message-text {
     width: 100%;
-
     max-width: 500px;
-
     margin:
         0 auto;
-
     font-family:
         var(--serif);
-
     font-size: 21px;
-
     line-height: 1.75;
-
     font-weight: 400;
-
     letter-spacing: .1px;
-
     color:
         #062c45;
-
     text-align: center;
-
     overflow-wrap: break-word;
-
     word-wrap: break-word;
 }
 
 
 .message-text strong {
     font-weight: 600;
-
     color:
         #062c45;
 }
@@ -2784,18 +2127,14 @@ body::before {
 
 .message-greeting {
     margin-bottom: 22px;
-
     font-size: 22px;
-
     line-height: 1.5;
 }
 
 
 .message-body {
     width: 100%;
-
     max-width: 500px;
-
     margin:
         0 auto;
 }
@@ -2804,9 +2143,7 @@ body::before {
 .message-paragraph {
     margin:
         0 0 20px;
-
     font-size: 20px;
-
     line-height: 1.8;
 }
 
@@ -2816,19 +2153,11 @@ body::before {
 }
 
 
-/* =========================================================
-   GUEST CHOICES
-========================================================= */
-
 .guest-choices {
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
-
     gap: 10px;
-
     margin-top: 25px;
 }
 
@@ -2836,30 +2165,20 @@ body::before {
 .guest-choice {
     width:
         min(100%,320px);
-
     padding:
         13px 20px;
-
     background:
         rgba(0,18,30,.28);
-
     border:
         1px solid rgba(215,193,138,.58);
-
     border-radius: 8px;
-
     color:
         var(--ivory);
-
     font-family:
         var(--serif);
-
     font-size: 18px;
-
     line-height: 1.3;
-
     cursor: pointer;
-
     transition:
         background .3s ease,
         transform .3s ease,
@@ -2870,80 +2189,49 @@ body::before {
 .guest-choice:hover {
     background:
         rgba(0,18,30,.42);
-
     transform:
         translateY(-2px);
-
     box-shadow:
         0 8px 20px rgba(0,20,35,.15);
 }
 
 
 /* =========================================================
-   RSVP
-   ELEGANT / FORMAL INVITATION STYLE
+   RSVP (rendered dynamically by script.js)
 ========================================================= */
 
-.guest-rsvp {
+.rsvp-section {
     position: relative;
-
-    max-height: 0;
+    margin-top: 44px;
+    padding-top: 30px;
+    border-top:
+        1px solid rgba(128,104,46,.16);
 
     opacity: 0;
-
-    overflow: hidden;
-
-    visibility: hidden;
-
-    margin-top: 0;
-
-    transform:
-        translateY(18px);
-
-    transition:
-        max-height 1.1s cubic-bezier(.16,1,.3,1),
-        opacity .7s ease,
-        margin .8s ease,
-        transform .8s cubic-bezier(.16,1,.3,1),
-        visibility 0s linear 1.1s;
+    transform: translateY(14px);
+    animation:
+        rsvpFadeIn
+        .8s
+        cubic-bezier(.16,1,.3,1)
+        .1s
+        forwards;
 }
 
 
-.guest-rsvp.show {
-    max-height: 1000px;
-
-    opacity: 1;
-
-    visibility: visible;
-
-    margin-top: 48px;
-
-    transform:
-        translateY(0);
-
-    transition:
-        max-height 1.1s cubic-bezier(.16,1,.3,1),
-        opacity .8s ease .12s,
-        margin .8s ease,
-        transform .8s cubic-bezier(.16,1,.3,1),
-        visibility 0s linear 0s;
+@keyframes rsvpFadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-
-/* =========================================================
-   RSVP DIVIDER
-========================================================= */
 
 .rsvp-divider {
     position: relative;
-
     width: 110px;
-
     height: 1px;
-
     margin:
         0 auto 25px;
-
     background:
         linear-gradient(
             to right,
@@ -2951,7 +2239,6 @@ body::before {
             rgba(128,104,46,.65),
             transparent
         );
-
     box-shadow:
         0 0 8px rgba(216,194,139,.15);
 }
@@ -2960,246 +2247,131 @@ body::before {
 .rsvp-divider::before,
 .rsvp-divider::after {
     content: "";
-
     position: absolute;
-
     top: 50%;
-
     width: 4px;
     height: 4px;
-
     border:
         1px solid rgba(128,104,46,.7);
-
     transform:
         translateY(-50%)
         rotate(45deg);
-
     background:
         rgba(255,255,255,.5);
 }
 
 
-.rsvp-divider::before {
-    left: 28px;
-}
+.rsvp-divider::before { left: 28px; }
+.rsvp-divider::after { right: 28px; }
 
-
-.rsvp-divider::after {
-    right: 28px;
-}
-
-
-/* =========================================================
-   RSVP LABEL
-========================================================= */
 
 .rsvp-label {
     margin:
         0 0 11px;
-
     font-family:
         var(--sans);
-
     font-size: 8px;
-
     letter-spacing: 4.5px;
-
     line-height: 1;
-
     font-weight: 600;
-
     text-transform: uppercase;
-
     color:
         #80682e;
 }
 
 
-/* =========================================================
-   RSVP TITLE
-========================================================= */
-
 .rsvp-title {
     margin:
         0 auto 14px;
-
     font-family:
         var(--serif);
-
     font-size:
-        clamp(31px, 5vw, 39px);
-
+        clamp(28px, 4.6vw, 34px);
     line-height: 1.05;
-
     font-weight: 500;
-
     letter-spacing: .2px;
-
     color:
         #062c45;
 }
 
 
-/* =========================================================
-   RSVP TEXT
-========================================================= */
-
 .rsvp-text {
     width: 100%;
-
     max-width: 455px;
-
     margin:
-        0 auto 12px;
-
+        0 auto 20px;
     font-family:
         var(--sans);
-
-    font-size: 11.5px;
-
+    font-size: 12.5px;
     line-height: 1.9;
-
     font-weight: 400;
-
     letter-spacing: .05px;
-
-    color:
-        #315568;
-}
-
-
-.rsvp-note {
-    width: 100%;
-
-    max-width: 420px;
-
-    margin:
-        0 auto;
-
-    font-family:
-        var(--serif);
-
-    font-size: 16px;
-
-    line-height: 1.55;
-
-    font-style: italic;
-
-    font-weight: 400;
-
     color:
         #173e51;
 }
 
 
-/* =========================================================
-   RSVP CONFIRMATION AREA
-========================================================= */
-
 .rsvp-confirm {
-    position: relative;
-
-    margin-top: 31px;
-
-    padding-top: 25px;
-
-    border-top:
-        1px solid rgba(128,104,46,.16);
-}
-
-
-.rsvp-confirm-label {
+    width: 100%;
+    max-width: 420px;
     margin:
-        0 0 16px;
-
+        0 auto 18px;
     font-family:
-        var(--sans);
-
-    font-size: 7.5px;
-
-    letter-spacing: 3px;
-
-    line-height: 1;
-
-    text-transform: uppercase;
-
-    font-weight: 600;
-
+        var(--serif);
+    font-size: 15px;
+    font-style: italic;
+    font-weight: 400;
     color:
-        #80682e;
+        #173e51;
 }
 
-
-/* =========================================================
-   RSVP BUTTONS
-========================================================= */
 
 .rsvp-buttons {
     display: flex;
-
     justify-content: center;
-
     align-items: stretch;
-
     gap: 14px;
-
     width: 100%;
-
     flex-wrap: wrap;
 }
 
 
 .rsvp-button {
     position: relative;
-
-    width: 158px;
-
-    min-height: 62px;
-
+    width: 168px;
+    min-height: 56px;
     padding:
-        12px 18px;
-
+        14px 18px;
     display: flex;
-
-    flex-direction: column;
-
     align-items: center;
-
     justify-content: center;
-
     text-align: center;
-
     text-decoration: none;
-
     border:
         1px solid rgba(128,104,46,.48);
-
     border-radius: 4px;
-
     background:
         linear-gradient(
             145deg,
             rgba(255,255,255,.48),
             rgba(255,255,255,.22)
         );
-
     color:
         #062c45;
-
+    font-family:
+        var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .8px;
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.7),
         inset 0 -1px 0 rgba(255,255,255,.08),
         0 8px 22px rgba(0,20,35,.07);
-
     backdrop-filter:
         blur(12px);
-
     -webkit-backdrop-filter:
         blur(12px);
-
     overflow: hidden;
-
     transition:
         transform .4s cubic-bezier(.16,1,.3,1),
         background .4s ease,
@@ -3210,18 +2382,12 @@ body::before {
 
 .rsvp-button::before {
     content: "";
-
     position: absolute;
-
     inset: 4px;
-
     border:
         1px solid rgba(128,104,46,.15);
-
     border-radius: 2px;
-
     pointer-events: none;
-
     transition:
         border-color .4s ease;
 }
@@ -3229,17 +2395,11 @@ body::before {
 
 .rsvp-button::after {
     content: "";
-
     position: absolute;
-
     top: 0;
-
     left: -120%;
-
     width: 70%;
-
     height: 100%;
-
     background:
         linear-gradient(
             90deg,
@@ -3247,13 +2407,10 @@ body::before {
             rgba(255,255,255,.32),
             transparent
         );
-
     transform:
         skewX(-18deg);
-
     transition:
         left .7s ease;
-
     pointer-events: none;
 }
 
@@ -3261,17 +2418,14 @@ body::before {
 .rsvp-button:hover {
     transform:
         translateY(-3px);
-
     border-color:
         rgba(128,104,46,.78);
-
     background:
         linear-gradient(
             145deg,
             rgba(255,255,255,.68),
             rgba(234,217,169,.25)
         );
-
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.85),
         0 12px 28px rgba(0,20,35,.12),
@@ -3279,15 +2433,8 @@ body::before {
 }
 
 
-.rsvp-button:hover::before {
-    border-color:
-        rgba(128,104,46,.28);
-}
-
-
-.rsvp-button:hover::after {
-    left: 145%;
-}
+.rsvp-button:hover::before { border-color: rgba(128,104,46,.28); }
+.rsvp-button:hover::after { left: 145%; }
 
 
 .rsvp-button:active {
@@ -3297,94 +2444,10 @@ body::before {
 }
 
 
-/* =========================================================
-   RSVP BUTTON LABEL
-========================================================= */
-
-.rsvp-button-label {
-    position: relative;
-
-    z-index: 2;
-
-    margin-bottom: 4px;
-
-    font-family:
-        var(--sans);
-
-    font-size: 6.5px;
-
-    letter-spacing: 2.4px;
-
-    line-height: 1;
-
-    text-transform: uppercase;
-
-    font-weight: 600;
-
-    color:
-        #80682e;
-}
-
-
-/* =========================================================
-   RSVP NAME
-========================================================= */
-
-.rsvp-button strong {
-    position: relative;
-
-    z-index: 2;
-
-    font-family:
-        var(--serif);
-
-    font-size: 21px;
-
-    line-height: 1;
-
-    font-weight: 600;
-
-    letter-spacing: .3px;
-
-    color:
-        #062c45;
-}
-
-
-.rsvp-button strong::after {
-    content: "";
-
-    display: block;
-
-    width: 22px;
-
-    height: 1px;
-
-    margin:
-        7px auto 0;
-
-    background:
-        linear-gradient(
-            to right,
-            transparent,
-            rgba(128,104,46,.55),
-            transparent
-        );
-
-    opacity: .7;
-}
-
-
-/* =========================================================
-   CLOSING
-========================================================= */
-
 .closing {
     width: 100%;
     max-width: 100%;
-
     text-align: center;
-
     padding:
         20px 20px 60px;
 }
@@ -3393,28 +2456,20 @@ body::before {
 .closing-symbol {
     color:
         var(--gold-light);
-
     font-size: 18px;
-
     margin-bottom: 20px;
 }
 
 
 .closing p {
     max-width: 500px;
-
     margin:
         0 auto;
-
     font-family:
         var(--serif);
-
     font-style: italic;
-
     font-size: 26px;
-
     line-height: 1.5;
-
     color:
         #062c45;
 }
@@ -3422,16 +2477,11 @@ body::before {
 
 .closing h4 {
     margin-top: 30px;
-
     margin-bottom: 3px;
-
     font-family:
         var(--serif);
-
     font-size: 20px;
-
     font-style: italic;
-
     color:
         #173e51;
 }
@@ -3440,9 +2490,7 @@ body::before {
 .closing strong {
     font-family:
         var(--serif);
-
     font-size: 23px;
-
     color:
         #062c45;
 }
@@ -3451,7 +2499,6 @@ body::before {
 .closing-line {
     width: 45px;
     height: 1px;
-
     background:
         linear-gradient(
             to right,
@@ -3459,7 +2506,6 @@ body::before {
             var(--gold),
             transparent
         );
-
     margin:
         25px auto 15px;
 }
@@ -3468,28 +2514,19 @@ body::before {
 .closing small {
     font-family:
         var(--sans);
-
     font-size: 8.5px;
-
     letter-spacing: 1.8px;
-
     color:
         #173e51;
 }
 
 
-/* =========================================================
-   NAME VALIDATION
-========================================================= */
-
 .guest-form input.name-required {
     border-color:
         #b52a2a !important;
-
     box-shadow:
         0 0 0 3px rgba(181,42,42,.18),
         0 0 22px rgba(181,42,42,.38);
-
     animation:
         guestNameShake
         .55s
@@ -3505,73 +2542,30 @@ body::before {
 
 
 @keyframes guestNameShake {
-
-    0%,100% {
-        transform: translateX(0);
-    }
-
-    15% {
-        transform: translateX(-9px);
-    }
-
-    30% {
-        transform: translateX(9px);
-    }
-
-    45% {
-        transform: translateX(-7px);
-    }
-
-    60% {
-        transform: translateX(7px);
-    }
-
-    75% {
-        transform: translateX(-4px);
-    }
-
-    90% {
-        transform: translateX(4px);
-    }
-
+    0%,100% { transform: translateX(0); }
+    15% { transform: translateX(-9px); }
+    30% { transform: translateX(9px); }
+    45% { transform: translateX(-7px); }
+    60% { transform: translateX(7px); }
+    75% { transform: translateX(-4px); }
+    90% { transform: translateX(4px); }
 }
 
 
 @keyframes guestNameRepeat {
-
-    0%,43%,100% {
-        transform: translateX(0);
-    }
-
-    46% {
-        transform: translateX(-6px);
-    }
-
-    49% {
-        transform: translateX(6px);
-    }
-
-    52% {
-        transform: translateX(-5px);
-    }
-
-    55% {
-        transform: translateX(5px);
-    }
-
-    58% {
-        transform: translateX(0);
-    }
-
+    0%,43%,100% { transform: translateX(0); }
+    46% { transform: translateX(-6px); }
+    49% { transform: translateX(6px); }
+    52% { transform: translateX(-5px); }
+    55% { transform: translateX(5px); }
+    58% { transform: translateX(0); }
 }
 
 
 .validation-message {
     color:
         #a52b2b !important;
-
     font-weight: 600;
-
     animation:
         validationMessageIn
         .4s
@@ -3581,35 +2575,25 @@ body::before {
 
 
 @keyframes validationMessageIn {
-
     from {
         opacity: 0;
-
         transform:
             translateY(8px);
     }
-
     to {
         opacity: 1;
-
         transform:
             translateY(0);
     }
-
 }
 
 
 .guest-form input.name-required::placeholder {
     color:
         #a52b2b;
-
     opacity: 1;
 }
 
-
-/* =========================================================
-   GOLD BUTTON
-========================================================= */
 
 .guest-form button.ready {
     background:
@@ -3619,17 +2603,13 @@ body::before {
             #e8c85c,
             #c99a24
         );
-
     color:
         #fffdf7;
-
     border-color:
         #d8b84e;
-
     box-shadow:
         0 0 12px rgba(216,194,139,.28),
         inset 0 1px 0 rgba(255,255,255,.35);
-
     animation:
         revealButtonGlow
         2.5s
@@ -3639,25 +2619,18 @@ body::before {
 
 
 @keyframes revealButtonGlow {
-
     0%,100% {
         box-shadow:
             0 0 8px rgba(216,194,139,.18),
             inset 0 1px 0 rgba(255,255,255,.3);
     }
-
     50% {
         box-shadow:
             0 0 18px rgba(216,194,139,.45),
             inset 0 1px 0 rgba(255,255,255,.4);
     }
-
 }
 
-
-/* =========================================================
-   INPUT PULSE
-========================================================= */
 
 .guest-form input.input-pulse {
     animation:
@@ -3670,63 +2643,45 @@ body::before {
 
 
 @keyframes inputAttentionPulse {
-
     0% {
         transform: scale(1);
-
         box-shadow:
             0 0 0 rgba(216,194,139,0);
     }
-
     20% {
         transform: scale(1.025);
-
         box-shadow:
             0 0 0 4px rgba(216,194,139,.18),
             0 0 22px rgba(216,194,139,.42);
     }
-
     40% {
         transform: scale(1);
-
         box-shadow:
             0 0 0 1px rgba(216,194,139,.1),
             0 0 8px rgba(216,194,139,.18);
     }
-
     60% {
         transform: scale(1.025);
-
         box-shadow:
             0 0 0 4px rgba(216,194,139,.18),
             0 0 22px rgba(216,194,139,.42);
     }
-
     80% {
         transform: scale(1);
-
         box-shadow:
             0 0 0 1px rgba(216,194,139,.1),
             0 0 8px rgba(216,194,139,.18);
     }
-
     100% {
         transform: scale(1);
-
         box-shadow:
             0 0 0 rgba(216,194,139,0);
     }
-
 }
 
 
-/* =========================================================
-   SCROLL ARROW
-========================================================= */
-
 .scroll-indicator.scroll-ready .scroll-arrow {
     display: flex;
-
     animation:
         arrowAttention
         1.5s
@@ -3736,317 +2691,198 @@ body::before {
 
 
 @keyframes arrowAttention {
-
     0%,100% {
         transform:
             translateY(0)
             scale(1);
-
         opacity: .65;
-
         text-shadow:
             0 0 0 rgba(255,255,255,0);
     }
-
     50% {
         transform:
             translateY(9px)
             scale(1.2);
-
         opacity: 1;
-
         text-shadow:
             0 0 6px rgba(255,255,255,.9),
             0 0 16px rgba(255,255,255,.7),
             0 0 28px rgba(255,255,255,.45);
     }
-
 }
 
-
-/* =========================================================
-   MOBILE
-========================================================= */
 
 @media (max-width: 700px) {
 
     .invitation {
         width: 100%;
         max-width: 100%;
-
         padding:
             65px 20px 60px;
     }
 
-
     .hero {
         width: 100%;
         max-width: 100%;
-
         min-height: 84vh;
-
         padding:
             70px 15px 55px;
     }
 
-
     .cinematic-name {
         max-width: 100%;
-
         font-size:
             clamp(58px,17vw,88px);
     }
 
-
     .cinematic-title {
         max-width: 100%;
-
         font-size:
             clamp(27px,8vw,42px);
     }
 
-
     .event-details {
         width: 100%;
         max-width: 100%;
-
         grid-template-columns: 1fr;
-
         gap: 25px;
-
         padding:
             35px 18px;
     }
 
-
     .vertical-divider {
         width: 55px;
-
         height: 1px;
-
         margin:
             0 auto;
     }
-
 
     .info-section {
         width: 100%;
         max-width: 100%;
     }
 
-
     .info-section h3 {
         font-size: 35px;
     }
 
-
     .guest-section {
         width: 100%;
         max-width: 650px;
-
         padding:
             45px 22px;
     }
-
 
     .guest-section h3 {
         font-size: 37px;
     }
 
-
     .guest-message.show {
         max-height: 5000px;
     }
 
-
     .message-text {
         max-width: 100%;
-
         font-size: 19px;
-
         line-height: 1.75;
     }
 
-
     .message-greeting {
         font-size: 20px;
-
         margin-bottom: 20px;
     }
-
 
     .message-body {
         max-width: 100%;
     }
 
-
     .message-paragraph {
         font-size: 18px;
-
         line-height: 1.8;
-
         margin-bottom: 18px;
     }
-
 
     .guest-choice {
         width: 100%;
         max-width: 320px;
-
         font-size: 18px;
     }
 
-
-    /* =====================================================
-       ELEGANT RSVP MOBILE
-    ====================================================== */
-
-    .guest-rsvp.show {
-        max-height: 1300px;
-
-        margin-top: 38px;
+    .rsvp-section {
+        margin-top: 34px;
+        padding-top: 26px;
     }
-
 
     .rsvp-divider {
         width: 90px;
-
         margin-bottom: 23px;
     }
 
-
-    .rsvp-divider::before {
-        left: 22px;
-    }
-
-
-    .rsvp-divider::after {
-        right: 22px;
-    }
-
+    .rsvp-divider::before { left: 22px; }
+    .rsvp-divider::after { right: 22px; }
 
     .rsvp-label {
         font-size: 7px;
-
         letter-spacing: 4px;
-
         margin-bottom: 10px;
     }
 
-
     .rsvp-title {
-        font-size: 29px;
-
+        font-size: 26px;
         margin-bottom: 13px;
     }
 
-
     .rsvp-text {
         max-width: 100%;
-
-        font-size: 10.8px;
-
+        font-size: 11.5px;
         line-height: 1.85;
     }
 
-
-    .rsvp-note {
-        max-width: 100%;
-
-        font-size: 15px;
-
-        line-height: 1.55;
-    }
-
-
     .rsvp-confirm {
-        margin-top: 27px;
-
-        padding-top: 22px;
+        max-width: 100%;
+        font-size: 14px;
     }
-
-
-    .rsvp-confirm-label {
-        font-size: 7px;
-
-        letter-spacing: 2.5px;
-
-        margin-bottom: 14px;
-    }
-
 
     .rsvp-buttons {
-        gap: 9px;
+        gap: 10px;
     }
-
 
     .rsvp-button {
         width:
-            calc(50% - 4.5px);
-
+            calc(50% - 5px);
         min-width: 0;
-
-        min-height: 59px;
-
-        padding:
-            10px 8px;
+        font-size: 10px;
     }
-
-
-    .rsvp-button-label {
-        font-size: 6px;
-
-        letter-spacing: 1.8px;
-    }
-
-
-    .rsvp-button strong {
-        font-size: 19px;
-    }
-
 
     .closing p {
         font-size: 23px;
     }
 
-
     .music-button {
         top: 15px;
-
         right: 15px;
-
         min-width: 124px;
-
         padding:
             10px 14px;
-
         font-size: 8px;
     }
-
 
     .guest-form input.input-pulse {
         animation-duration:
             2.5s;
     }
 
-
     .view-invitation-btn {
         min-width:
             215px;
-
         padding:
             14px 20px;
-
         font-size: 8px;
-        color:rgb(14, 5, 71);
+        color: #fffdf7;
     }
 
 }
 
-
-/* =========================================================
-   FINAL HORIZONTAL OVERFLOW SAFETY
-========================================================= */
 
 html,
 body {
@@ -4074,13 +2910,8 @@ body::before {
 
 @media (max-width: 700px) {
 
-    .hero::before {
-        width: 100%;
-    }
-
-    .cinematic-name::before {
-        width: 100%;
-    }
+    .hero::before { width: 100%; }
+    .cinematic-name::before { width: 100%; }
 
     .loading-content {
         width: 86vw;
@@ -4090,9 +2921,6 @@ body::before {
 
 }
 
-/* =========================================================
-   LOCATION / CELEBRATION
-========================================================= */
 
 .location-section {
     width: min(900px, 90%);
@@ -4105,31 +2933,25 @@ body::before {
     width: 55px;
     height: 1px;
     margin: 0 auto 25px;
-
     background: var(--gold-light);
     opacity: 0.9;
 }
 
 .location-section .section-label {
     margin-bottom: 12px;
-
     font-size: 10px;
     font-weight: 500;
     letter-spacing: 3px;
     text-transform: uppercase;
-
-     color: #062c45;
+    color: #062c45;
 }
 
 .location-section h3 {
     margin: 0 auto 18px;
-
     font-family: "Cormorant Garamond", serif;
     font-size: clamp(30px, 5vw, 44px);
     font-weight: 500;
-
-     color: #062c45;
-
+    color: #062c45;
     text-shadow:
         0 2px 12px rgba(0, 0, 0, 0.35);
 }
@@ -4137,54 +2959,36 @@ body::before {
 .location-intro {
     max-width: 560px;
     margin: 0 auto 35px;
-
     font-family: "Montserrat", sans-serif;
     font-size: 13px;
     font-weight: 400;
     line-height: 1.9;
-
     color: rgba(255, 255, 255, 0.9);
-
     text-shadow:
         0 1px 8px rgba(0, 0, 0, 0.35);
 }
 
 
-/* =========================================================
-   MAP CARD
-========================================================= */
-
 .map-card {
     width: 100%;
     max-width: 720px;
     margin: 0 auto;
-
     overflow: hidden;
-
     background: rgba(2, 28, 46, 0.78);
-
     border: 1px solid rgba(234, 217, 169, 0.4);
     border-radius: 5px;
-
     box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.3);
-
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
 
 
-/* =========================================================
-   MAP HEADER
-========================================================= */
-
 .map-card-header {
     display: flex;
     align-items: center;
     gap: 15px;
-
     padding: 22px 25px;
-
     text-align: left;
 }
 
@@ -4192,15 +2996,11 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: center;
-
     width: 38px;
     height: 38px;
-
     flex-shrink: 0;
-
     border: 1px solid rgba(234, 217, 169, 0.65);
     border-radius: 50%;
-
     color: var(--gold-light);
     font-size: 16px;
 }
@@ -4215,7 +3015,6 @@ body::before {
     font-family: "Cormorant Garamond", serif;
     font-size: 20px;
     font-weight: 500;
-
     color: var(--ivory);
 }
 
@@ -4223,64 +3022,43 @@ body::before {
     font-family: "Montserrat", sans-serif;
     font-size: 10px;
     letter-spacing: 0.5px;
-
-     color: #062c45;
+    color: var(--gold-light);
 }
 
 
-/* =========================================================
-   GOOGLE MAP
-========================================================= */
-
 .map-frame {
     position: relative;
-
     width: 100%;
     height: 330px;
-
     overflow: hidden;
 }
 
 .map-frame iframe {
     display: block;
-
     width: 100%;
     height: 100%;
-
     border: 0;
-
     filter:
         saturate(0.75)
         contrast(1);
 }
 
 
-/* =========================================================
-   GOOGLE MAP BUTTON
-========================================================= */
-
 .map-button {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
-
     width: 100%;
     padding: 17px 20px;
-
     text-decoration: none;
-
     background: rgba(0, 0, 0, 0.08);
-
     border-top: 1px solid rgba(234, 217, 169, 0.25);
-
     font-family: "Montserrat", sans-serif;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 2px;
-
     color: var(--gold-light);
-
     transition:
         background 0.3s ease,
         color 0.3s ease;
@@ -4293,7 +3071,6 @@ body::before {
 
 .map-arrow {
     font-size: 15px;
-
     transition:
         transform 0.3s ease;
 }
@@ -4302,10 +3079,6 @@ body::before {
     transform: translate(3px, -3px);
 }
 
-
-/* =========================================================
-   MOBILE
-========================================================= */
 
 @media (max-width: 600px) {
 
@@ -4320,12 +3093,9 @@ body::before {
 
     .location-intro {
         padding: 0 5px;
-
         font-size: 12px;
         line-height: 1.85;
-
-        color:
-#062c45;
+        color: #ffffff;
     }
 
     .map-card-header {
@@ -4346,8 +3116,7 @@ body::before {
     .map-location-text span {
         font-size: 9px;
         line-height: 1.5;
-
-        color: rgba(234, 217, 169, 0.1);
+        color: rgba(234, 217, 169, 0.85);
     }
 
     .map-frame {
@@ -4356,8 +3125,280 @@ body::before {
 
     .map-button {
         padding: 15px;
-
         font-size: 9px;
         letter-spacing: 1.5px;
     }
+}
+
+
+/* =========================================================
+   CAUSTIC LIGHT EFFECT
+   Mimics the shifting, rippling light patterns you see on
+   the sea floor when sunlight passes through moving water.
+   Built from a few overlapping soft-edged gradients that
+   drift and scale via CSS animation only — no images, no
+   canvas, no JS on the main thread. Sits above the video
+   (z-index -2) but below all readable content (which starts
+   at z-index 0+ / static), and uses "screen"-like blending
+   via mix-blend-mode so it only ever brightens what's under
+   it instead of muddying colors or hurting text contrast.
+========================================================= */
+
+.caustics-layer {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    z-index: -2;
+    pointer-events: none;
+    opacity: .38;
+    mix-blend-mode: screen;
+    overflow: hidden;
+    will-change: transform;
+}
+
+
+.caustics-layer::before,
+.caustics-layer::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 180vmax;
+    height: 180vmax;
+    background-image:
+        repeating-radial-gradient(
+            circle at 20% 30%,
+            rgba(255,255,255,.55) 0px,
+            rgba(255,255,255,0) 3px,
+            transparent 46px
+        ),
+        repeating-radial-gradient(
+            circle at 70% 65%,
+            rgba(191,242,232,.5) 0px,
+            rgba(191,242,232,0) 4px,
+            transparent 58px
+        ),
+        repeating-radial-gradient(
+            circle at 45% 80%,
+            rgba(143,220,232,.45) 0px,
+            rgba(143,220,232,0) 3px,
+            transparent 50px
+        );
+    background-repeat: repeat;
+    background-size:
+        260px 260px,
+        340px 340px,
+        300px 300px;
+    filter: blur(2px);
+    transform-origin: center center;
+}
+
+
+.caustics-layer::before {
+    transform: translate(-50%,-50%) rotate(0deg) scale(1.15);
+    animation:
+        causticsDriftOne
+        26s
+        linear
+        infinite;
+}
+
+
+.caustics-layer::after {
+    transform: translate(-50%,-50%) rotate(180deg) scale(1.35);
+    opacity: .75;
+    animation:
+        causticsDriftTwo
+        34s
+        linear
+        infinite reverse;
+}
+
+
+@keyframes causticsDriftOne {
+    0% {
+        transform:
+            translate(-50%,-50%)
+            rotate(0deg)
+            scale(1.15);
+    }
+    50% {
+        transform:
+            translate(-53%,-47%)
+            rotate(8deg)
+            scale(1.22);
+    }
+    100% {
+        transform:
+            translate(-50%,-50%)
+            rotate(0deg)
+            scale(1.15);
+    }
+}
+
+
+@keyframes causticsDriftTwo {
+    0% {
+        transform:
+            translate(-50%,-50%)
+            rotate(180deg)
+            scale(1.35);
+    }
+    50% {
+        transform:
+            translate(-47%,-53%)
+            rotate(172deg)
+            scale(1.28);
+    }
+    100% {
+        transform:
+            translate(-50%,-50%)
+            rotate(180deg)
+            scale(1.35);
+    }
+}
+
+
+/* Fade the caustics out toward the bottom so they don't
+   compete visually with the coral bed or footer text, and
+   soften them on mobile where screen space is tighter. */
+
+.caustics-layer {
+    -webkit-mask-image:
+        linear-gradient(
+            to bottom,
+            rgba(0,0,0,1) 0%,
+            rgba(0,0,0,.85) 55%,
+            rgba(0,0,0,.3) 85%,
+            transparent 100%
+        );
+    mask-image:
+        linear-gradient(
+            to bottom,
+            rgba(0,0,0,1) 0%,
+            rgba(0,0,0,.85) 55%,
+            rgba(0,0,0,.3) 85%,
+            transparent 100%
+        );
+}
+
+
+@media (max-width: 700px) {
+
+    .caustics-layer {
+        opacity: .26;
+    }
+
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    .caustics-layer::before,
+    .caustics-layer::after {
+        animation: none;
+    }
+
+}
+
+
+/* =========================================================
+   SCROLL REVEAL (PER SECTION)
+   Applies to every ".reveal" section except the hero, which
+   already runs its own bespoke cinematic sequence on load.
+   Sections start slightly lowered and blurred, then settle
+   into place the first time they cross into the viewport.
+   Triggered once per section via IntersectionObserver in
+   script.js — no scroll-position math needed here.
+========================================================= */
+
+.reveal:not(.hero) {
+    opacity: 0;
+    transform: translateY(46px) scale(.985);
+    filter: blur(6px);
+    transition:
+        opacity 1.1s cubic-bezier(.16,1,.3,1),
+        transform 1.2s cubic-bezier(.16,1,.3,1),
+        filter 1.1s cubic-bezier(.16,1,.3,1);
+    will-change: opacity, transform;
+}
+
+
+.reveal:not(.hero).in-view {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+}
+
+
+/* Small internal stagger for sections that contain a clear
+   row/grid of child pieces, so those pieces settle in just
+   after the section itself rather than all snapping at once. */
+
+.event-details.in-view .detail-item,
+.event-details.in-view .vertical-divider {
+    animation:
+        revealChildRise
+        .9s
+        cubic-bezier(.16,1,.3,1)
+        backwards;
+}
+
+.event-details.in-view .detail-item:nth-child(1) { animation-delay: .05s; }
+.event-details.in-view .vertical-divider:nth-of-type(1) { animation-delay: .12s; }
+.event-details.in-view .detail-item:nth-child(3) { animation-delay: .18s; }
+.event-details.in-view .vertical-divider:nth-of-type(2) { animation-delay: .25s; }
+.event-details.in-view .detail-item:nth-child(5) { animation-delay: .32s; }
+
+
+@keyframes revealChildRise {
+    0% {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+.location-section.in-view .map-card {
+    animation:
+        revealChildRise
+        1s
+        cubic-bezier(.16,1,.3,1)
+        .15s
+        backwards;
+}
+
+
+.guest-section.in-view .guest-form {
+    animation:
+        revealChildRise
+        .9s
+        cubic-bezier(.16,1,.3,1)
+        .15s
+        backwards;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    .reveal:not(.hero) {
+        opacity: 1;
+        transform: none;
+        filter: none;
+        transition: none;
+    }
+
+    .event-details.in-view .detail-item,
+    .event-details.in-view .vertical-divider,
+    .location-section.in-view .map-card,
+    .guest-section.in-view .guest-form {
+        animation: none;
+    }
+
 }

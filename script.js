@@ -39,6 +39,12 @@ const musicText =
 const colorBackground =
     document.querySelector(".color-background");
 
+const coralBed =
+    document.querySelector(".coral-bed");
+
+const fishField =
+    document.querySelector(".fish-field");
+
 
 /* =========================================================
    INITIAL STATE
@@ -84,14 +90,6 @@ let videoLoadCheckTimer = null;
 
 let videoProgressTimer = null;
 
-
-/*
- * We only need the video to be sufficiently buffered
- * before allowing the invitation to start.
- *
- * Since your video is only around 10 seconds,
- * we aim to have almost the whole video buffered.
- */
 
 const REQUIRED_BUFFER_SECONDS = 8;
 
@@ -205,11 +203,6 @@ function getBufferedSeconds() {
                 bgVideo.buffered.end(i);
 
 
-            /*
-             * Find the range containing
-             * the current playback position.
-             */
-
             if (
                 currentTime >= start &&
                 currentTime <= end
@@ -224,11 +217,6 @@ function getBufferedSeconds() {
 
         }
 
-
-        /*
-         * If currentTime is not inside a range,
-         * use the latest buffered range.
-         */
 
         return Math.max(
             0,
@@ -370,11 +358,6 @@ function updateVideoProgress() {
 
     if (bufferedPercentage > 0) {
 
-        /*
-         * Keep progress below 100 until
-         * the required buffer is actually ready.
-         */
-
         const visualProgress =
             Math.min(
                 95,
@@ -503,15 +486,6 @@ function checkVideoBuffer() {
         getBufferedPercentage();
 
 
-    /*
-     * For a short 10-second video:
-     *
-     * - If almost the entire video is buffered,
-     *   allow it immediately.
-     *
-     * - Otherwise require at least the target amount.
-     */
-
     const enoughBuffer =
         (
             duration > 0 &&
@@ -540,10 +514,6 @@ function checkVideoBuffer() {
 
     }
 
-
-    /*
-     * Update visual loading.
-     */
 
     if (
         bufferedPercentage > 0
@@ -592,16 +562,6 @@ function prepareVideo() {
     setLoadingProgress(5);
 
 
-    /*
-     * IMPORTANT:
-     * Listeners are attached BEFORE load().
-     */
-
-
-    /* =====================================================
-       METADATA
-    ===================================================== */
-
     bgVideo.addEventListener(
         "loadedmetadata",
         () => {
@@ -639,10 +599,6 @@ function prepareVideo() {
     );
 
 
-    /* =====================================================
-       PROGRESS
-    ===================================================== */
-
     bgVideo.addEventListener(
         "progress",
         () => {
@@ -655,21 +611,9 @@ function prepareVideo() {
     );
 
 
-    /* =====================================================
-       CAN PLAY
-    ===================================================== */
-
     bgVideo.addEventListener(
         "canplay",
         () => {
-
-            /*
-             * DO NOT mark ready here.
-             *
-             * canplay only means the browser can
-             * start playback. It does NOT guarantee
-             * enough buffering for uninterrupted playback.
-             */
 
             videoMetadataReady = true;
 
@@ -679,18 +623,9 @@ function prepareVideo() {
     );
 
 
-    /* =====================================================
-       CAN PLAY THROUGH
-    ===================================================== */
-
     bgVideo.addEventListener(
         "canplaythrough",
         () => {
-
-            /*
-             * This is a stronger signal that the browser
-             * expects continuous playback.
-             */
 
             videoMetadataReady = true;
 
@@ -701,10 +636,6 @@ function prepareVideo() {
         }
     );
 
-
-    /* =====================================================
-       LOADED DATA
-    ===================================================== */
 
     bgVideo.addEventListener(
         "loadeddata",
@@ -719,10 +650,6 @@ function prepareVideo() {
         }
     );
 
-
-    /* =====================================================
-       WAITING
-    ===================================================== */
 
     bgVideo.addEventListener(
         "waiting",
@@ -740,10 +667,6 @@ function prepareVideo() {
     );
 
 
-    /* =====================================================
-       STALLED
-    ===================================================== */
-
     bgVideo.addEventListener(
         "stalled",
         () => {
@@ -760,10 +683,6 @@ function prepareVideo() {
     );
 
 
-    /* =====================================================
-       ERROR
-    ===================================================== */
-
     bgVideo.addEventListener(
         "error",
         () => {
@@ -775,10 +694,6 @@ function prepareVideo() {
                 "Background video could not be loaded."
             );
 
-
-            /*
-             * We don't trap the user on the loading screen.
-             */
 
             if (!videoLoadingFinished) {
 
@@ -795,10 +710,6 @@ function prepareVideo() {
         }
     );
 
-
-    /* =====================================================
-       START PRELOAD
-    ===================================================== */
 
     try {
 
@@ -830,10 +741,6 @@ function prepareVideo() {
     }
 
 
-    /* =====================================================
-       CONTINUOUS BUFFER CHECK
-    ===================================================== */
-
     videoProgressTimer =
         setInterval(() => {
 
@@ -843,10 +750,6 @@ function prepareVideo() {
 
         }, 250);
 
-
-    /* =====================================================
-       VERY SLOW CONNECTION SAFETY
-    ===================================================== */
 
     videoLoadCheckTimer =
         setInterval(() => {
@@ -858,18 +761,8 @@ function prepareVideo() {
             }
 
 
-            /*
-             * If the browser has already loaded
-             * enough data, use it.
-             */
-
             checkVideoBuffer();
 
-
-            /*
-             * If the browser reports that the whole
-             * video has been downloaded, definitely ready.
-             */
 
             const percentage =
                 getBufferedPercentage();
@@ -916,10 +809,6 @@ async function startInvitation() {
     }
 
 
-    /* =====================================================
-       HIDE LOADING SCREEN
-    ===================================================== */
-
     if (loadingScreen) {
 
         loadingScreen.classList.add(
@@ -934,32 +823,12 @@ async function startInvitation() {
     );
 
 
-    /* =====================================================
-       VIDEO
-    ===================================================== */
-
     if (bgVideo) {
-
-        /*
-         * IMPORTANT:
-         *
-         * DO NOT call:
-         * bgVideo.load()
-         *
-         * DO NOT reset currentTime unnecessarily.
-         *
-         * The video has already been preloaded.
-         */
 
         bgVideo.style.opacity = "1";
 
 
         try {
-
-            /*
-             * Make sure playback starts from
-             * the beginning only once.
-             */
 
             if (
                 bgVideo.currentTime > 0.05
@@ -983,10 +852,6 @@ async function startInvitation() {
 
     }
 
-
-    /* =====================================================
-       MUSIC
-    ===================================================== */
 
     if (music) {
 
@@ -1045,16 +910,8 @@ async function startInvitation() {
     }
 
 
-    /* =====================================================
-       START CINEMATIC HERO
-    ===================================================== */
-
     startCinematicHero();
 
-
-    /* =====================================================
-       HIDE VIEW INVITATION
-    ===================================================== */
 
     if (viewInvitationWrapper) {
 
@@ -1065,10 +922,6 @@ async function startInvitation() {
     }
 
 
-    /* =====================================================
-       SHOW MUSIC BUTTON
-    ===================================================== */
-
     if (musicBtn) {
 
         musicBtn.classList.remove(
@@ -1077,10 +930,6 @@ async function startInvitation() {
 
     }
 
-
-    /* =====================================================
-       REMOVE LOADING SCREEN COMPLETELY
-    ===================================================== */
 
     setTimeout(() => {
 
@@ -1801,19 +1650,6 @@ if (revealBtn) {
 
 /* =========================================================
    BACKGROUND SCROLL EFFECT
-
-   PERFORMANCE FIX:
-   The old version ran requestAnimationFrame() forever,
-   60 times per second, for the entire lifetime of the page
-   — even while the user wasn't scrolling at all. That
-   constant work (trig math + DOM style writes every frame)
-   competes with the video decoder for the main thread and
-   is a common cause of video stutter, especially on phones.
-
-   Now the animation loop only runs while it still has
-   something to animate (i.e. while currentScroll hasn't
-   caught up to targetScroll yet), and stops itself once it
-   settles. It's restarted automatically on the next scroll.
 ========================================================= */
 
 let currentScroll = 0;
@@ -1844,11 +1680,6 @@ function updateBackgroundScroll() {
     }
 
 
-    /*
-     * Wake the animation loop back up if it had
-     * settled and stopped itself.
-     */
-
     if (bgAnimationFrameId === null) {
 
         bgAnimationFrameId =
@@ -1869,11 +1700,6 @@ function animateBackground() {
             currentScroll
         );
 
-
-    /*
-     * Close enough — snap to the target and stop
-     * the loop instead of running forever.
-     */
 
     if (distanceToTarget < 0.5) {
 
@@ -1912,10 +1738,6 @@ function animateBackground() {
             1
         );
 
-
-    /* =====================================================
-       VIDEO FADE
-    ===================================================== */
 
     if (
         invitationStarted &&
@@ -1966,10 +1788,6 @@ function animateBackground() {
     }
 
 
-    /* =====================================================
-       BACKGROUND MOVEMENT
-    ===================================================== */
-
     if (colorBackground) {
 
         const moveX =
@@ -2016,6 +1834,38 @@ function animateBackground() {
 
         colorBackground.style.backgroundPosition =
             `${positionX}% ${positionY}%`;
+
+    }
+
+
+    /* =====================================================
+       PARALLAX: CORAL BED + FISH FIELD
+
+       Reuses this same rAF loop (already running for the
+       background gradient drift) instead of adding a second
+       scroll listener, so there's no extra main-thread cost.
+    ===================================================== */
+
+    if (coralBed) {
+
+        const coralDrift =
+            scrollProgress * 26;
+
+
+        coralBed.style.transform =
+            `translateY(${coralDrift}px)`;
+
+    }
+
+
+    if (fishField) {
+
+        const fishDrift =
+            scrollProgress * -14;
+
+
+        fishField.style.transform =
+            `translateY(${fishDrift}px)`;
 
     }
 
@@ -2176,10 +2026,6 @@ function startCinematicHero() {
     }, 7000);
 
 
-    /* =====================================================
-       AUTOMATIC SMOOTH SCROLL
-    ===================================================== */
-
     setTimeout(() => {
 
         if (window.scrollY <= 10) {
@@ -2232,10 +2078,6 @@ function startCinematicHero() {
                 2400
             );
 
-
-            /* =================================================
-               INPUT PULSE
-            ================================================= */
 
             setTimeout(() => {
 
@@ -2361,9 +2203,105 @@ function smoothScrollTo(
 
 
 /* =========================================================
+   SCROLL REVEAL (PER SECTION)
+
+   Watches every ".reveal" section except the hero (which
+   already runs its own timed cinematic sequence from
+   startCinematicHero) and adds ".in-view" the first time
+   each one crosses into the viewport, matching the CSS
+   transition defined for ".reveal:not(.hero)".
+
+   Each section is only revealed once, then unobserved, so
+   scrolling back up and down doesn't re-trigger the animation.
+========================================================= */
+
+function initScrollReveal() {
+
+    const sections =
+        document.querySelectorAll(
+            "section.reveal:not(.hero)"
+        );
+
+
+    if (!sections.length) {
+        return;
+    }
+
+
+    const prefersReducedMotion =
+        window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+
+    if (
+        prefersReducedMotion ||
+        !("IntersectionObserver" in window)
+    ) {
+
+        sections.forEach(section => {
+
+            section.classList.add(
+                "in-view"
+            );
+
+        });
+
+
+        return;
+
+    }
+
+
+    const revealObserver =
+        new IntersectionObserver(
+            (entries, observer) => {
+
+                entries.forEach(entry => {
+
+                    if (
+                        entry.isIntersecting
+                    ) {
+
+                        entry.target.classList.add(
+                            "in-view"
+                        );
+
+
+                        observer.unobserve(
+                            entry.target
+                        );
+
+                    }
+
+                });
+
+            },
+            {
+                threshold: .18,
+                rootMargin:
+                    "0px 0px -8% 0px"
+            }
+        );
+
+
+    sections.forEach(section => {
+
+        revealObserver.observe(
+            section
+        );
+
+    });
+
+}
+
+
+/* =========================================================
    START
 ========================================================= */
 
 loadGuests();
 
 prepareVideo();
+
+initScrollReveal();
