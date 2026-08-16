@@ -124,6 +124,75 @@ function setLoadingStatus(message) {
 
 
 /* =========================================================
+   ROTATING LOADING MESSAGES
+
+   The status text used to only change when a buffer
+   percentage threshold was crossed — for a short 10-second
+   video that happens almost instantly, so the same message
+   would sit on screen doing nothing for several seconds and
+   feel stuck. This rotates through a set of ocean-themed
+   phrases on a fixed timer instead, so there's always
+   something new to read while things load.
+========================================================= */
+
+const LOADING_MESSAGES = [
+    "Preparing your invitation...",
+    "Gathering pearls and starlight...",
+    "Smoothing the waves for you...",
+    "Setting the underwater scene...",
+    "Almost time to dive in...",
+    "Just a few more ripples...",
+];
+
+let loadingMessageIndex = 0;
+
+let loadingMessageTimer = null;
+
+
+function startLoadingMessageRotation() {
+
+    if (loadingMessageTimer) {
+        return;
+    }
+
+
+    loadingMessageIndex = 0;
+
+    setLoadingStatus(
+        LOADING_MESSAGES[loadingMessageIndex]
+    );
+
+
+    loadingMessageTimer =
+        setInterval(() => {
+
+            loadingMessageIndex =
+                (loadingMessageIndex + 1) %
+                LOADING_MESSAGES.length;
+
+            setLoadingStatus(
+                LOADING_MESSAGES[loadingMessageIndex]
+            );
+
+        }, 1800);
+
+}
+
+
+function stopLoadingMessageRotation() {
+
+    if (loadingMessageTimer) {
+
+        clearInterval(loadingMessageTimer);
+
+        loadingMessageTimer = null;
+
+    }
+
+}
+
+
+/* =========================================================
    LOADING PROGRESS
 ========================================================= */
 
@@ -390,24 +459,11 @@ function updateVideoProgress() {
             visualProgress
         );
 
-
-        if (
-            bufferedPercentage >= 80
-        ) {
-
-            setLoadingStatus(
-                "Almost ready..."
-            );
-
-        } else if (
-            bufferedPercentage >= 40
-        ) {
-
-            setLoadingStatus(
-                "Loading your invitation..."
-            );
-
-        }
+        /*
+         * Text itself is handled by the rotating
+         * loading-message system now — this only
+         * drives the progress bar fill.
+         */
 
     }
 
@@ -450,6 +506,9 @@ function markVideoReady() {
         videoLoadCheckTimer = null;
 
     }
+
+
+    stopLoadingMessageRotation();
 
 
     setLoadingProgress(100);
@@ -585,9 +644,7 @@ function prepareVideo() {
     }
 
 
-    setLoadingStatus(
-        "Preparing the invitation..."
-    );
+    startLoadingMessageRotation();
 
     setLoadingProgress(5);
 
@@ -610,11 +667,6 @@ function prepareVideo() {
 
 
             setLoadingProgress(15);
-
-
-            setLoadingStatus(
-                "Preparing the video..."
-            );
 
 
             try {
@@ -728,13 +780,10 @@ function prepareVideo() {
         "waiting",
         () => {
 
-            if (!invitationStarted) {
-
-                setLoadingStatus(
-                    "Loading the invitation..."
-                );
-
-            }
+            /*
+             * The rotating loading message already
+             * covers this state — nothing to do here.
+             */
 
         }
     );
@@ -748,13 +797,10 @@ function prepareVideo() {
         "stalled",
         () => {
 
-            if (!invitationStarted) {
-
-                setLoadingStatus(
-                    "Still preparing the video..."
-                );
-
-            }
+            /*
+             * The rotating loading message already
+             * covers this state — nothing to do here.
+             */
 
         }
     );
@@ -781,6 +827,8 @@ function prepareVideo() {
              */
 
             if (!videoLoadingFinished) {
+
+                stopLoadingMessageRotation();
 
                 setLoadingStatus(
                     "Your invitation is ready."
@@ -816,6 +864,8 @@ function prepareVideo() {
 
         videoLoadFailed = true;
 
+
+        stopLoadingMessageRotation();
 
         setLoadingProgress(100);
 

@@ -36,7 +36,20 @@
 
 
 html {
-    scroll-behavior: smooth;
+    /*
+       SCROLL FEEL FIX:
+       `scroll-behavior: smooth` makes the browser animate
+       EVERY scroll movement, including normal mouse-wheel
+       and trackpad scrolling — not just anchor jumps. That
+       fights against the user's own scroll input and is a
+       common cause of scrolling feeling "heavy" or laggy.
+
+       We only want smooth animation for the one deliberate
+       auto-scroll after the intro (handled by our own
+       smoothScrollTo() in script.js), so native scrolling
+       here is left as instant/normal.
+    */
+    scroll-behavior: auto;
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
@@ -2495,6 +2508,14 @@ body::before {
 .event-details {
     position: relative;
 
+    /*
+       Limits repaint/layout recalculation to just this
+       element during scroll instead of the whole page —
+       helps the heavy blur/gradient card feel lighter
+       while scrolling.
+    */
+    contain: layout paint style;
+
     width: 100%;
     max-width: 100%;
 
@@ -2530,10 +2551,10 @@ body::before {
         );
 
     backdrop-filter:
-        blur(18px) saturate(140%);
+        blur(10px) saturate(135%);
 
     -webkit-backdrop-filter:
-        blur(18px) saturate(140%);
+        blur(10px) saturate(135%);
 
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.5),
@@ -2739,6 +2760,8 @@ body::before {
 .guest-section {
     position: relative;
 
+    contain: layout paint style;
+
     width: 100%;
     max-width: 650px;
 
@@ -2762,10 +2785,10 @@ body::before {
         1px solid rgba(191,242,232,.42);
 
     backdrop-filter:
-        blur(18px) saturate(140%);
+        blur(10px) saturate(135%);
 
     -webkit-backdrop-filter:
-        blur(18px) saturate(140%);
+        blur(10px) saturate(135%);
 
     border-radius: 18px;
 
@@ -4799,8 +4822,8 @@ body::before {
             rgba(191,242,232,.14)
         );
 
-    backdrop-filter: blur(16px) saturate(140%);
-    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(135%);
+    -webkit-backdrop-filter: blur(10px) saturate(135%);
 
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.35),
