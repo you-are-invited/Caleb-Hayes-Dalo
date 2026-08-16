@@ -4579,3 +4579,329 @@ body::before {
         letter-spacing: 1.5px;
     }
 }
+
+
+/* =========================================================
+   READABILITY FIX
+   The dark-navy body copy below was styled for the old,
+   mostly-white background. Now that .color-background is a
+   richer, darker ocean gradient, that same dark-navy text
+   sits directly on a mid-to-dark background in several
+   places (dress code, closing, location section, map card)
+   with no glass card behind it — hence low contrast.
+
+   Fix: for text that has NO card/backdrop behind it, switch
+   to light "pearl" type with a soft dark shadow, the same
+   technique already used for the hero text over the video.
+   Text that already sits inside a glass card (event details,
+   guest section, RSVP) keeps its dark navy — we just make
+   those cards themselves a bit lighter/more opaque so the
+   dark text stays legible against them.
+========================================================= */
+
+/* -- un-carded text: dress code section -- */
+
+.info-section .section-label,
+.info-section h3,
+.info-section p:not(.section-label):not(.thank-you),
+.info-section b,
+.thank-you {
+
+    color: var(--pearl);
+
+    text-shadow:
+        0 1px 4px rgba(2,16,28,.55),
+        0 4px 14px rgba(2,16,28,.35);
+
+}
+
+
+/* -- un-carded text: location / church section -- */
+
+.location-section .section-label,
+.location-section h3 {
+
+    color: var(--pearl) !important;
+
+    text-shadow:
+        0 1px 4px rgba(2,16,28,.55),
+        0 4px 14px rgba(2,16,28,.35);
+
+}
+
+
+.location-intro {
+
+    color: rgba(255,255,255,.92) !important;
+
+    text-shadow:
+        0 1px 6px rgba(2,16,28,.5);
+
+}
+
+
+@media (max-width: 600px) {
+
+    .location-intro {
+
+        color: rgba(255,255,255,.92) !important;
+
+    }
+
+}
+
+
+/* -- map card: light gold/pearl instead of dark navy on a dark card -- */
+
+.map-location-text span {
+
+    color: rgba(234,217,169,.85) !important;
+
+}
+
+
+@media (max-width: 600px) {
+
+    .map-location-text span {
+
+        color: rgba(234,217,169,.8) !important;
+
+    }
+
+}
+
+
+/* -- un-carded text: closing section -- */
+
+.closing p,
+.closing h4,
+.closing strong,
+.closing small {
+
+    color: var(--pearl);
+
+    text-shadow:
+        0 1px 4px rgba(2,16,28,.55),
+        0 4px 14px rgba(2,16,28,.35);
+
+}
+
+
+/* -- lighten the glass cards themselves so the dark navy
+      text they contain (event details, guest section,
+      RSVP, guest message) stays clearly readable -- */
+
+.event-details,
+.guest-section {
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(246,240,226,.62),
+            rgba(191,242,232,.38),
+            rgba(246,240,226,.5)
+        ) !important;
+
+    border-color: rgba(246,240,226,.55) !important;
+
+}
+
+
+/* =========================================================
+   BIBLE VERSE SOURCE (closing section)
+========================================================= */
+
+.verse-source {
+
+    display: block;
+
+    margin-top: 14px;
+
+    font-family: var(--sans);
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    letter-spacing: 1.5px;
+
+    text-transform: uppercase;
+
+    color: var(--coral-gold);
+
+    font-style: normal;
+
+}
+
+
+/* =========================================================
+   COUNTDOWN TIMER
+========================================================= */
+
+.countdown-section {
+
+    width: 100%;
+    max-width: 100%;
+
+    margin: -70px auto 100px;
+
+    text-align: center;
+
+}
+
+
+.countdown-label {
+
+    margin-bottom: 20px;
+
+    font-family: var(--sans);
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+    letter-spacing: 3.5px;
+
+    text-transform: uppercase;
+
+    color: var(--pearl);
+
+    text-shadow:
+        0 1px 4px rgba(2,16,28,.55),
+        0 4px 14px rgba(2,16,28,.35);
+
+}
+
+
+.countdown-grid {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 14px;
+
+    flex-wrap: wrap;
+
+    padding: 26px 32px;
+
+    border: 1px solid rgba(191,242,232,.42);
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(246,240,226,.2),
+            rgba(13,59,92,.28),
+            rgba(191,242,232,.14)
+        );
+
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.35),
+        inset 0 -1px 0 rgba(4,28,48,.2),
+        0 16px 40px rgba(2,16,28,.28);
+
+}
+
+
+.countdown-unit {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 62px;
+
+}
+
+
+.countdown-number {
+
+    font-family: var(--serif);
+
+    font-size: clamp(30px, 5vw, 42px);
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    color: var(--pearl);
+
+    text-shadow:
+        0 2px 8px rgba(2,16,28,.5),
+        0 0 18px rgba(191,242,232,.28);
+
+    font-variant-numeric: tabular-nums;
+
+}
+
+
+.countdown-unit-label {
+
+    margin-top: 8px;
+
+    font-family: var(--sans);
+
+    font-size: 8px;
+
+    font-weight: 600;
+
+    letter-spacing: 2px;
+
+    text-transform: uppercase;
+
+    color: var(--lagoon);
+
+}
+
+
+.countdown-separator {
+
+    font-family: var(--serif);
+
+    font-size: clamp(22px, 4vw, 32px);
+
+    font-weight: 500;
+
+    color: var(--coral-gold);
+
+    line-height: 1;
+
+    transform: translateY(-8px);
+
+    opacity: .8;
+
+}
+
+
+@media (max-width: 600px) {
+
+    .countdown-section {
+        margin-top: -50px;
+        margin-bottom: 70px;
+    }
+
+    .countdown-grid {
+        gap: 8px;
+        padding: 20px 16px;
+    }
+
+    .countdown-unit {
+        min-width: 48px;
+    }
+
+    .countdown-separator {
+        font-size: 20px;
+    }
+
+}

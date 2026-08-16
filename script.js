@@ -2361,9 +2361,142 @@ function smoothScrollTo(
 
 
 /* =========================================================
+   COUNTDOWN TIMER
+
+   Counts down to the event date/time set in the
+   data-event-datetime attribute on #countdownTimer.
+   Uses a plain setInterval (1x per second) — cheap enough
+   that it won't compete with video playback.
+========================================================= */
+
+function initCountdownTimer() {
+
+    const countdownEl =
+        document.getElementById("countdownTimer");
+
+
+    if (!countdownEl) {
+        return;
+    }
+
+
+    const targetDateString =
+        countdownEl.dataset.eventDatetime;
+
+
+    const targetDate =
+        new Date(targetDateString);
+
+
+    if (
+        !targetDateString ||
+        Number.isNaN(targetDate.getTime())
+    ) {
+
+        console.warn(
+            "Countdown: invalid event date/time."
+        );
+
+        return;
+
+    }
+
+
+    const daysEl =
+        document.getElementById("cdDays");
+
+    const hoursEl =
+        document.getElementById("cdHours");
+
+    const minutesEl =
+        document.getElementById("cdMinutes");
+
+    const secondsEl =
+        document.getElementById("cdSeconds");
+
+
+    function pad(number) {
+
+        return String(number)
+            .padStart(2, "0");
+
+    }
+
+
+    let countdownInterval = null;
+
+
+    function updateCountdown() {
+
+        const now =
+            new Date();
+
+        const diff =
+            targetDate.getTime() -
+            now.getTime();
+
+
+        if (diff <= 0) {
+
+            if (daysEl) daysEl.textContent = "00";
+            if (hoursEl) hoursEl.textContent = "00";
+            if (minutesEl) minutesEl.textContent = "00";
+            if (secondsEl) secondsEl.textContent = "00";
+
+            if (countdownInterval) {
+
+                clearInterval(countdownInterval);
+
+            }
+
+            return;
+
+        }
+
+
+        const totalSeconds =
+            Math.floor(diff / 1000);
+
+        const days =
+            Math.floor(totalSeconds / 86400);
+
+        const hours =
+            Math.floor(
+                (totalSeconds % 86400) / 3600
+            );
+
+        const minutes =
+            Math.floor(
+                (totalSeconds % 3600) / 60
+            );
+
+        const seconds =
+            totalSeconds % 60;
+
+
+        if (daysEl) daysEl.textContent = pad(days);
+        if (hoursEl) hoursEl.textContent = pad(hours);
+        if (minutesEl) minutesEl.textContent = pad(minutes);
+        if (secondsEl) secondsEl.textContent = pad(seconds);
+
+    }
+
+
+    updateCountdown();
+
+
+    countdownInterval =
+        setInterval(updateCountdown, 1000);
+
+}
+
+
+/* =========================================================
    START
 ========================================================= */
 
 loadGuests();
 
 prepareVideo();
+
+initCountdownTimer();
