@@ -96,42 +96,6 @@
         <span class="bubble"></span>
     </div>
 
-    <!-- =====================================================
-         FISH SILHOUETTES
-         Lightweight pure-CSS/SVG ambient motion, same pattern
-         as the bubble field, so it costs nothing extra on the
-         main thread and never competes with the video.
-    ====================================================== -->
-
-    <div class="fish-field" aria-hidden="true">
-
-        <svg class="fish fish-1" viewBox="0 0 64 32" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 16 C 14 2, 40 2, 54 12 C 58 8, 62 8, 62 8 C 60 12, 60 16, 60 16 C 60 16, 60 20, 62 24 C 62 24, 58 24, 54 20 C 40 30, 14 30, 2 16 Z" />
-        </svg>
-
-        <svg class="fish fish-2" viewBox="0 0 64 32" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 16 C 14 2, 40 2, 54 12 C 58 8, 62 8, 62 8 C 60 12, 60 16, 60 16 C 60 16, 60 20, 62 24 C 62 24, 58 24, 54 20 C 40 30, 14 30, 2 16 Z" />
-        </svg>
-
-        <svg class="fish fish-3" viewBox="0 0 64 32" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 16 C 14 2, 40 2, 54 12 C 58 8, 62 8, 62 8 C 60 12, 60 16, 60 16 C 60 16, 60 20, 62 24 C 62 24, 58 24, 54 20 C 40 30, 14 30, 2 16 Z" />
-        </svg>
-
-    </div>
-
-    <!-- =====================================================
-         CORAL SILHOUETTE
-         Sits along the very bottom of the viewport, behind
-         all content, to ground the "under the sea" theme.
-    ====================================================== -->
-
-    <div class="coral-bed" aria-hidden="true">
-        <svg viewBox="0 0 1200 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <path class="coral-shape coral-back" d="M0 140 L0 90 C 40 70, 60 100, 90 85 C 110 74, 100 40, 130 42 C 155 44, 150 80, 175 78 C 200 76, 195 30, 225 34 C 250 37, 245 75, 270 80 C 300 86, 310 50, 340 55 C 365 59, 355 95, 385 95 C 420 95, 415 60, 450 62 C 480 64, 470 100, 500 100 C 540 100, 545 55, 580 58 C 610 60, 600 92, 630 92 C 665 92, 665 45, 700 48 C 730 50, 720 88, 750 88 C 785 88, 790 40, 825 44 C 855 47, 845 85, 875 85 C 910 85, 915 50, 950 54 C 980 57, 970 92, 1000 92 C 1035 92, 1040 55, 1075 58 C 1105 60, 1095 90, 1125 90 C 1160 90, 1165 65, 1200 70 L1200 140 Z" />
-            <path class="coral-shape coral-front" d="M0 140 L0 110 C 30 100, 45 120, 70 112 C 90 106, 85 85, 110 86 C 135 87, 130 112, 155 112 C 185 112, 190 82, 220 85 C 245 87, 240 115, 265 115 C 295 115, 300 88, 330 90 C 355 92, 350 118, 375 118 C 410 118, 415 92, 445 94 C 470 96, 465 120, 490 120 C 525 120, 530 95, 560 97 C 585 99, 580 122, 605 122 C 640 122, 645 98, 675 100 C 700 102, 695 124, 720 124 C 755 124, 760 100, 790 102 C 815 104, 810 126, 835 126 C 870 126, 875 102, 905 104 C 930 106, 925 128, 950 128 C 985 128, 990 105, 1020 107 C 1045 109, 1040 130, 1065 130 C 1100 130, 1105 108, 1135 110 C 1160 112, 1155 132, 1200 132 L1200 140 Z" />
-        </svg>
-    </div>
-
     <video
         class="bg-video"
         id="bgVideo"
@@ -150,15 +114,6 @@
 
     <div class="ocean-overlay"></div>
     <div class="ocean-glow"></div>
-
-    <!-- =====================================================
-         CAUSTIC LIGHT LAYER
-         Purely decorative, pointer-events disabled, sits above
-         the video but below page content, animated with CSS
-         only (no assets) to mimic shifting underwater light.
-    ====================================================== -->
-
-    <div class="caustics-layer" aria-hidden="true"></div>
 
 
     <!-- =====================================================
@@ -510,15 +465,97 @@
 
             <!-- =================================================
                  PERSONALIZED GUEST MESSAGE
-                 (RSVP is rendered dynamically inside this block
-                 by script.js once a guest is matched — see
-                 showGuestMessage() in script.js)
             ================================================== -->
 
             <div
                 id="guestMessage"
                 class="guest-message"
                 aria-live="polite">
+            </div>
+
+
+            <!-- =================================================
+                 RSVP
+                 Hidden until the guest message is revealed
+            ================================================== -->
+
+            <div
+                id="guestRSVP"
+                class="guest-rsvp"
+                aria-hidden="true">
+
+                <div class="rsvp-divider"></div>
+
+                <p class="rsvp-label">
+                    RSVP
+                </p>
+
+                <h4 class="rsvp-title">
+                    Will you be joining us?
+                </h4>
+
+                <p class="rsvp-text">
+                    Please let us know if you’ll be able to
+                    celebrate with us. If you’ll be bringing
+                    someone with you, kindly include them in
+                    your confirmation so we can reserve enough
+                    seats for everyone.
+                </p>
+
+                <p class="rsvp-note">
+                    Due to limited seating, we kindly ask that
+                    you confirm the number of guests attending.
+                </p>
+
+
+                <div class="rsvp-confirm">
+
+                    <p class="rsvp-confirm-label">
+                        Please confirm with
+                    </p>
+
+
+                    <div class="rsvp-buttons">
+
+                        <a
+                            id="confirmShean"
+                            class="rsvp-button"
+                            href="#"
+                            target="_blank"
+                            rel="noopener noreferrer">
+
+                            <span class="rsvp-button-label">
+                                Confirm to
+                            </span>
+
+                            <strong>
+                                Shean
+                            </strong>
+
+                        </a>
+
+
+                        <a
+                            id="confirmLyne"
+                            class="rsvp-button"
+                            href="#"
+                            target="_blank"
+                            rel="noopener noreferrer">
+
+                            <span class="rsvp-button-label">
+                                Confirm to
+                            </span>
+
+                            <strong>
+                                Lyne
+                            </strong>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
             </div>
 
         </section>
