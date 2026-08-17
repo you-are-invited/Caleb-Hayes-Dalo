@@ -641,22 +641,6 @@ async function startInvitation() {
     invitationStarted = true;
 
 
-    /* =====================================================
-       START HERO ANIMATIONS
-       
-       IMPORTANT:
-       The CSS animation is paused while the loading
-       screen is visible.
-
-       This class allows the CSS animation to start
-       ONLY after VIEW INVITATION is clicked.
-    ===================================================== */
-
-    document.body.classList.add(
-        "invitation-started"
-    );
-
-
     if (viewInvitationBtn) {
 
         viewInvitationBtn.disabled = true;
@@ -1495,6 +1479,14 @@ if (revealBtn) {
    BACKGROUND SCROLL EFFECT
 ========================================================= */
 
+/*
+ * SIMPLIFIED VERSION
+ *
+ * Only one animation loop.
+ * No continuous background-position animation.
+ * No unnecessary calculations.
+ */
+
 let currentScroll = 0;
 
 let targetScroll = 0;
@@ -1808,9 +1800,9 @@ function startCinematicHero() {
 
     /* =====================================================
        AUTOMATIC SMOOTH SCROLL
-
+       
        ONLY THIS PART IS TIMED.
-
+       
        After 7 seconds, the page automatically
        scrolls down to the event details.
     ===================================================== */
