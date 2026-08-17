@@ -4921,47 +4921,47 @@ body::before {
 .hero .cinematic-title,
 .hero .hosted,
 .hero .scroll-indicator {
-    opacity: 0;
+    opacity: 0 ;
     transform: translateY(20px);
-    animation: fadeInUp 0.8s ease forwards;
+    animation: fadeInUp 0.8s ease forwards !important;
 }
 
 /* 2. Sunud-sunod na paglitaw na may 1-second na pagitan bawat isa */
 .hero .eyebrow {
-    animation-delay: 0.8s;
+    animation-delay: 0.8s !important;
 }
 
 .hero .small-line {
-    animation-delay: 0.12s;
+    animation-delay: 0.12s !important;
 }
 
 .hero .celebration-intro {
-    animation-delay: 2.3s;
+    animation-delay: 2.3s !important;
 }
 
 .hero .cinematic-name {
-    animation-delay: 4.1s;
+    animation-delay: 4.1s !important;
 }
 
 .hero .name-underline {
-    animation-delay: 4.2s;
+    animation-delay: 4.2s !important;
 }
 
 .hero .celebration-label {
-    animation-delay: 4.7s;
+    animation-delay: 4.7s !important;
 }
 
 .hero .cinematic-title {
-    animation-delay: 6.7s;
+    animation-delay: 7.1s !important;
 }
 
 .hero .hosted {
-    animation-delay: 8.8s;
+    animation-delay: 8.12s !important;
 }
 
 /* 3. Pinakahuli ang Arrow */
 .hero .scroll-indicator {
-    animation-delay: 9.1s;
+    animation-delay: 10.4s !important;
 }
 
 /* Keyframes para sa Fade In + Slide Up */
