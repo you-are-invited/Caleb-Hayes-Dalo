@@ -641,6 +641,25 @@ async function startInvitation() {
     invitationStarted = true;
 
 
+    /* =====================================================
+       FIX: STAGGER-ANIMATION TRIGGER
+
+       Idinadagdag ang class na ito sa <body> sa mismong
+       sandali ng pag-click sa "View Invitation" — hindi
+       pagka-load ng page. Ang CSS stagger animation
+       (fadeInUp na may animation-delay) sa style.css ay
+       naka-scope na sa "body.invitation-active", kaya ang
+       delay timers (0.8s, 4.1s, 7.1s, atbp.) ay magsisimula
+       mag-bilang lang mula rito — kahit gaano katagal
+       naghintay ang guest sa loading screen bago mag-click,
+       hindi na sila magiging out-of-sync.
+    ===================================================== */
+
+    document.body.classList.add(
+        "invitation-active"
+    );
+
+
     if (viewInvitationBtn) {
 
         viewInvitationBtn.disabled = true;

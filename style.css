@@ -4908,10 +4908,34 @@ body::before {
 
 }
 /* =====================================================
-   PURE CSS STAGGERED ANIMATION (1 second interval)
+   STAGGERED HERO TEXT ANIMATION
+   (FIXED VERSION)
+
+   ORIGINAL BUG:
+   Ang mga selector dati ay ".hero .eyebrow", ".hero
+   .cinematic-name", atbp — walang kinalaman sa kung
+   na-click na ba ang "View Invitation" button. Dahil
+   dun, ang animation-delay (0.8s, 4.1s, 7.1s, ... hanggang
+   10.4s) ay nagsisimula mag-bilang PAGKA-LOAD NG PAGE, kahit
+   naka-hide pa ang loading screen sa ibabaw nito.
+
+   Kung matagal bago i-click ng guest ang button, tapos na
+   ang lahat ng delay bago pa man makita ang hero — kaya
+   pagka-click, mukhang lahat sabay-sabay lumalabas imbes
+   na sunud-sunod.
+
+   FIX:
+   Ang lahat ng selector ay ginawang naka-scope sa ilalim ng
+   "body.invitation-active" — ang klase na idinadagdag lang
+   sa JS (script.js, startInvitation()) sa eksaktong sandali
+   ng pag-click sa button. Dahil dun, ang animation-delay
+   timers ay nagsisimula mag-bilang mula sa oras ng click,
+   hindi mula sa page load — kaya laging tama ang pagkakasunod
+   sunod ng paglabas ng bawat text, kahit gaano katagal
+   maghintay ang guest sa loading screen.
    ===================================================== */
 
-/* 1. I-hide muna lahat ng elements sa hero section */
+/* Default: hidden muna bago i-click ang "View Invitation" */
 .hero .eyebrow,
 .hero .small-line,
 .hero .celebration-intro,
@@ -4921,47 +4945,58 @@ body::before {
 .hero .cinematic-title,
 .hero .hosted,
 .hero .scroll-indicator {
-    opacity: 0 ;
+    opacity: 0;
     transform: translateY(20px);
+}
+
+/* Mag-a-animate lang sila kapag na-click na ang button */
+body.invitation-active .hero .eyebrow,
+body.invitation-active .hero .small-line,
+body.invitation-active .hero .celebration-intro,
+body.invitation-active .hero .cinematic-name,
+body.invitation-active .hero .name-underline,
+body.invitation-active .hero .celebration-label,
+body.invitation-active .hero .cinematic-title,
+body.invitation-active .hero .hosted,
+body.invitation-active .hero .scroll-indicator {
     animation: fadeInUp 0.8s ease forwards !important;
 }
 
-/* 2. Sunud-sunod na paglitaw na may 1-second na pagitan bawat isa */
-.hero .eyebrow {
+body.invitation-active .hero .eyebrow {
     animation-delay: 0.8s !important;
 }
 
-.hero .small-line {
+body.invitation-active .hero .small-line {
     animation-delay: 0.12s !important;
 }
 
-.hero .celebration-intro {
+body.invitation-active .hero .celebration-intro {
     animation-delay: 2.3s !important;
 }
 
-.hero .cinematic-name {
-    animation-delay: 4.1s !important;
+body.invitation-active .hero .cinematic-name {
+    animation-delay: 3.1s !important;
 }
 
-.hero .name-underline {
+body.invitation-active .hero .name-underline {
     animation-delay: 4.2s !important;
 }
 
-.hero .celebration-label {
+body.invitation-active .hero .celebration-label {
     animation-delay: 4.7s !important;
 }
 
-.hero .cinematic-title {
-    animation-delay: 7.1s !important;
+body.invitation-active .hero .cinematic-title {
+    animation-delay: 5.1s !important;
 }
 
-.hero .hosted {
-    animation-delay: 8.12s !important;
+body.invitation-active .hero .hosted {
+    animation-delay: 7.4s !important;
 }
 
-/* 3. Pinakahuli ang Arrow */
-.hero .scroll-indicator {
-    animation-delay: 10.4s !important;
+/* Pinakahuli ang Arrow */
+body.invitation-active .hero .scroll-indicator {
+    animation-delay: 8.7s !important;
 }
 
 /* Keyframes para sa Fade In + Slide Up */
