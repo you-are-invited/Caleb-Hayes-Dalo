@@ -1038,61 +1038,9 @@ async function startInvitation() {
        MUSIC
     ===================================================== */
 
-    if (music) {
-
-        try {
-
-            await music.play();
-
-            isPlaying = true;
 
 
-            if (musicText) {
-
-                musicText.textContent =
-                    "Pause";
-
-            }
-
-
-            if (musicBtn) {
-
-                musicBtn.classList.add(
-                    "playing"
-                );
-
-            }
-
-        } catch (error) {
-
-            console.log(
-                "Music requires another tap:",
-                error
-            );
-
-
-            isPlaying = false;
-
-
-            if (musicText) {
-
-                musicText.textContent =
-                    "Tap for music";
-
-            }
-
-
-            if (musicBtn) {
-
-                musicBtn.classList.remove(
-                    "playing"
-                );
-
-            }
-
-        }
-
-    }
+    
 
 
     /* =====================================================
@@ -1164,72 +1112,7 @@ if (viewInvitationBtn) {
    BACKGROUND MUSIC CONTROL
 ========================================================= */
 
-if (musicBtn) {
 
-    musicBtn.addEventListener(
-        "click",
-        async () => {
-
-            if (!music) {
-                return;
-            }
-
-
-            try {
-
-                if (!isPlaying) {
-
-                    await music.play();
-
-                    isPlaying = true;
-
-
-                    if (musicText) {
-
-                        musicText.textContent =
-                            "Pause";
-
-                    }
-
-
-                    musicBtn.classList.add(
-                        "playing"
-                    );
-
-                } else {
-
-                    music.pause();
-
-                    isPlaying = false;
-
-
-                    if (musicText) {
-
-                        musicText.textContent =
-                            "Tap for music";
-
-                    }
-
-
-                    musicBtn.classList.remove(
-                        "playing"
-                    );
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "Music could not be played:",
-                    error
-                );
-
-            }
-
-        }
-    );
-
-}
 
 
 /* =========================================================
