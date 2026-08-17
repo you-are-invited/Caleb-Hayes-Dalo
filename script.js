@@ -80,15 +80,9 @@ let videoLoadingFinished = false;
 
 let videoLoadFailed = false;
 
-/*
- * PERFORMANCE FIX:
- * The original code ran TWO separate polling timers at the
- * same time (one every 250ms, one every 1000ms) doing
- * overlapping work. That's double the timer callbacks,
- * double the buffered-range math, for no real benefit.
- * A single timer covers both jobs.
- */
-let videoPollTimer = null;
+let videoLoadCheckTimer = null;
+
+let videoProgressTimer = null;
 
 
 /*
@@ -131,6 +125,14 @@ function setLoadingStatus(message) {
 
 /* =========================================================
    ROTATING LOADING MESSAGES
+
+   The status text used to only change when a buffer
+   percentage threshold was crossed — for a short 10-second
+   video that happens almost instantly, so the same message
+   would sit on screen doing nothing for several seconds and
+   feel stuck. This rotates through a set of ocean-themed
+   phrases on a fixed timer instead, so there's always
+   something new to read while things load.
 ========================================================= */
 
 const LOADING_MESSAGES = [
@@ -272,6 +274,11 @@ function getBufferedSeconds() {
                 bgVideo.buffered.end(i);
 
 
+            /*
+             * Find the range containing
+             * the current playback position.
+             */
+
             if (
                 currentTime >= start &&
                 currentTime <= end
@@ -286,6 +293,11 @@ function getBufferedSeconds() {
 
         }
 
+
+        /*
+         * If currentTime is not inside a range,
+         * use the latest buffered range.
+         */
 
         return Math.max(
             0,
@@ -427,6 +439,11 @@ function updateVideoProgress() {
 
     if (bufferedPercentage > 0) {
 
+        /*
+         * Keep progress below 100 until
+         * the required buffer is actually ready.
+         */
+
         const visualProgress =
             Math.min(
                 95,
@@ -441,6 +458,12 @@ function updateVideoProgress() {
         setLoadingProgress(
             visualProgress
         );
+
+        /*
+         * Text itself is handled by the rotating
+         * loading-message system now — this only
+         * drives the progress bar fill.
+         */
 
     }
 
@@ -463,13 +486,24 @@ function markVideoReady() {
     videoBufferReady = true;
 
 
-    if (videoPollTimer) {
+    if (videoProgressTimer) {
 
         clearInterval(
-            videoPollTimer
+            videoProgressTimer
         );
 
-        videoPollTimer = null;
+        videoProgressTimer = null;
+
+    }
+
+
+    if (videoLoadCheckTimer) {
+
+        clearInterval(
+            videoLoadCheckTimer
+        );
+
+        videoLoadCheckTimer = null;
 
     }
 
@@ -528,6 +562,15 @@ function checkVideoBuffer() {
         getBufferedPercentage();
 
 
+    /*
+     * For a short 10-second video:
+     *
+     * - If almost the entire video is buffered,
+     *   allow it immediately.
+     *
+     * - Otherwise require at least the target amount.
+     */
+
     const enoughBuffer =
         (
             duration > 0 &&
@@ -556,6 +599,10 @@ function checkVideoBuffer() {
 
     }
 
+
+    /*
+     * Update visual loading.
+     */
 
     if (
         bufferedPercentage > 0
@@ -600,6 +647,12 @@ function prepareVideo() {
     startLoadingMessageRotation();
 
     setLoadingProgress(5);
+
+
+    /*
+     * IMPORTANT:
+     * Listeners are attached BEFORE load().
+     */
 
 
     /* =====================================================
@@ -662,6 +715,14 @@ function prepareVideo() {
         "canplay",
         () => {
 
+            /*
+             * DO NOT mark ready here.
+             *
+             * canplay only means the browser can
+             * start playback. It does NOT guarantee
+             * enough buffering for uninterrupted playback.
+             */
+
             videoMetadataReady = true;
 
             checkVideoBuffer();
@@ -677,6 +738,11 @@ function prepareVideo() {
     bgVideo.addEventListener(
         "canplaythrough",
         () => {
+
+            /*
+             * This is a stronger signal that the browser
+             * expects continuous playback.
+             */
 
             videoMetadataReady = true;
 
@@ -707,6 +773,40 @@ function prepareVideo() {
 
 
     /* =====================================================
+       WAITING
+    ===================================================== */
+
+    bgVideo.addEventListener(
+        "waiting",
+        () => {
+
+            /*
+             * The rotating loading message already
+             * covers this state — nothing to do here.
+             */
+
+        }
+    );
+
+
+    /* =====================================================
+       STALLED
+    ===================================================== */
+
+    bgVideo.addEventListener(
+        "stalled",
+        () => {
+
+            /*
+             * The rotating loading message already
+             * covers this state — nothing to do here.
+             */
+
+        }
+    );
+
+
+    /* =====================================================
        ERROR
     ===================================================== */
 
@@ -721,6 +821,10 @@ function prepareVideo() {
                 "Background video could not be loaded."
             );
 
+
+            /*
+             * We don't trap the user on the loading screen.
+             */
 
             if (!videoLoadingFinished) {
 
@@ -777,35 +881,59 @@ function prepareVideo() {
 
 
     /* =====================================================
-       SINGLE POLLING TIMER
-       (replaces the old two-timer setup: progress update,
-       buffer check, and slow-connection safety check are
-       all handled from one 300ms interval now)
+       CONTINUOUS BUFFER CHECK
     ===================================================== */
 
-    videoPollTimer =
+    videoProgressTimer =
         setInterval(() => {
-
-            if (videoLoadingFinished) {
-                return;
-            }
 
             updateVideoProgress();
 
             checkVideoBuffer();
 
+        }, 250);
+
+
+    /* =====================================================
+       VERY SLOW CONNECTION SAFETY
+    ===================================================== */
+
+    videoLoadCheckTimer =
+        setInterval(() => {
+
+            if (videoLoadingFinished) {
+
+                return;
+
+            }
+
+
+            /*
+             * If the browser has already loaded
+             * enough data, use it.
+             */
+
+            checkVideoBuffer();
+
+
+            /*
+             * If the browser reports that the whole
+             * video has been downloaded, definitely ready.
+             */
 
             const percentage =
                 getBufferedPercentage();
 
 
-            if (percentage >= 98) {
+            if (
+                percentage >= 98
+            ) {
 
                 markVideoReady();
 
             }
 
-        }, 300);
+        }, 1000);
 
 }
 
@@ -862,10 +990,26 @@ async function startInvitation() {
 
     if (bgVideo) {
 
+        /*
+         * IMPORTANT:
+         *
+         * DO NOT call:
+         * bgVideo.load()
+         *
+         * DO NOT reset currentTime unnecessarily.
+         *
+         * The video has already been preloaded.
+         */
+
         bgVideo.style.opacity = "1";
 
 
         try {
+
+            /*
+             * Make sure playback starts from
+             * the beginning only once.
+             */
 
             if (
                 bgVideo.currentTime > 0.05
@@ -1103,62 +1247,50 @@ const guestMessage =
 
 let guests = [];
 
-let guestsLoadPromise = null;
-
 
 /* =========================================================
    LOAD GUESTS
-
-   PERFORMANCE FIX: this used to fire immediately on page
-   load, competing with the video/font/fonts requests for
-   bandwidth right when it matters most (first paint). It
-   now only loads the first time someone actually uses the
-   guest-message form, and is cached after that.
 ========================================================= */
 
 async function loadGuests() {
 
-    if (guestsLoadPromise) {
-        return guestsLoadPromise;
-    }
+    try {
 
-    guestsLoadPromise = (async () => {
-
-        try {
-
-            const response =
-                await fetch(
-                    "./guests.json",
-                    {
-                        cache: "no-cache"
-                    }
-                );
+        const response =
+            await fetch(
+                "./guests.json",
+                {
+                    cache: "no-cache"
+                }
+            );
 
 
-            if (!response.ok) {
+        if (!response.ok) {
 
-                throw new Error(
-                    "Could not load guests.json"
-                );
-
-            }
-
-
-            guests =
-                await response.json();
-
-        } catch (error) {
-
-            console.error(
-                "Error loading guests.json:",
-                error
+            throw new Error(
+                "Could not load guests.json"
             );
 
         }
 
-    })();
 
-    return guestsLoadPromise;
+        guests =
+            await response.json();
+
+
+        console.log(
+            "Guest list loaded:",
+            guests
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error loading guests.json:",
+            error
+        );
+
+    }
 
 }
 
@@ -1525,7 +1657,7 @@ function showGuestChoices(matches) {
    REVEAL GUEST MESSAGE
 ========================================================= */
 
-async function revealGuestMessage() {
+function revealGuestMessage() {
 
     if (!guestName || !guestMessage) {
         return;
@@ -1580,13 +1712,6 @@ async function revealGuestMessage() {
     guestName.classList.remove(
         "name-required"
     );
-
-
-    /*
-     * Guests are loaded lazily on first use now,
-     * so make sure they're ready before searching.
-     */
-    await loadGuests();
 
 
     const matches =
@@ -1726,6 +1851,19 @@ if (revealBtn) {
 
 /* =========================================================
    BACKGROUND SCROLL EFFECT
+
+   PERFORMANCE FIX:
+   The old version ran requestAnimationFrame() forever,
+   60 times per second, for the entire lifetime of the page
+   — even while the user wasn't scrolling at all. That
+   constant work (trig math + DOM style writes every frame)
+   competes with the video decoder for the main thread and
+   is a common cause of video stutter, especially on phones.
+
+   Now the animation loop only runs while it still has
+   something to animate (i.e. while currentScroll hasn't
+   caught up to targetScroll yet), and stops itself once it
+   settles. It's restarted automatically on the next scroll.
 ========================================================= */
 
 let currentScroll = 0;
@@ -1756,6 +1894,11 @@ function updateBackgroundScroll() {
     }
 
 
+    /*
+     * Wake the animation loop back up if it had
+     * settled and stopped itself.
+     */
+
     if (bgAnimationFrameId === null) {
 
         bgAnimationFrameId =
@@ -1776,6 +1919,11 @@ function animateBackground() {
             currentScroll
         );
 
+
+    /*
+     * Close enough — snap to the target and stop
+     * the loop instead of running forever.
+     */
 
     if (distanceToTarget < 0.5) {
 
@@ -1864,24 +2012,6 @@ function animateBackground() {
         bgVideo.style.opacity =
             1 -
             smoothFade;
-
-
-        /*
-         * PERFORMANCE FIX:
-         * Once the video is fully faded out it is still
-         * decoding every frame in the background even
-         * though nothing is visible. Pausing it here saves
-         * CPU/battery for the rest of the page.
-         */
-        if (smoothFade >= 1 && !bgVideo.paused) {
-
-            bgVideo.pause();
-
-        } else if (smoothFade < 1 && bgVideo.paused && invitationStarted) {
-
-            bgVideo.play().catch(() => {});
-
-        }
 
     }
 
@@ -2282,6 +2412,11 @@ function smoothScrollTo(
 
 /* =========================================================
    COUNTDOWN TIMER
+
+   Counts down to the event date/time set in the
+   data-event-datetime attribute on #countdownTimer.
+   Uses a plain setInterval (1x per second) — cheap enough
+   that it won't compete with video playback.
 ========================================================= */
 
 function initCountdownTimer() {
@@ -2342,16 +2477,6 @@ function initCountdownTimer() {
 
 
     function updateCountdown() {
-
-        /*
-         * PERFORMANCE FIX: skip the DOM writes entirely
-         * when the tab/page isn't visible (e.g. phone
-         * screen off, switched tabs). No point re-painting
-         * a timer no one can see.
-         */
-        if (document.hidden) {
-            return;
-        }
 
         const now =
             new Date();
@@ -2417,39 +2542,10 @@ function initCountdownTimer() {
 
 
 /* =========================================================
-   PAUSE VIDEO WHEN TAB IS HIDDEN
-
-   PERFORMANCE FIX: if the person switches tabs or locks
-   their phone, the video was still decoding frames in the
-   background the whole time. Pausing on hide (and resuming
-   on show, if it was playing) saves real CPU/battery.
-========================================================= */
-
-document.addEventListener("visibilitychange", () => {
-
-    if (!bgVideo) {
-        return;
-    }
-
-    if (document.hidden) {
-
-        bgVideo.pause();
-
-    } else if (
-        invitationStarted &&
-        parseFloat(bgVideo.style.opacity || "1") > 0
-    ) {
-
-        bgVideo.play().catch(() => {});
-
-    }
-
-});
-
-
-/* =========================================================
    START
 ========================================================= */
+
+loadGuests();
 
 prepareVideo();
 

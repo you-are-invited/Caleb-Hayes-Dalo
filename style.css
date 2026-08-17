@@ -7,6 +7,11 @@
     --navy: #062c45;
     --deep-ocean: #021c2e;
 
+    /*
+       REFINED "UNDER THE SEA" PALETTE
+       Deeper, richer water tones instead of the
+       previous pastel/washed-out blues.
+    */
     --abyss: #041c30;
     --midwater: #0d3b5c;
     --lagoon: #4fb8c4;
@@ -31,6 +36,19 @@
 
 
 html {
+    /*
+       SCROLL FEEL FIX:
+       `scroll-behavior: smooth` makes the browser animate
+       EVERY scroll movement, including normal mouse-wheel
+       and trackpad scrolling — not just anchor jumps. That
+       fights against the user's own scroll input and is a
+       common cause of scrolling feeling "heavy" or laggy.
+
+       We only want smooth animation for the one deliberate
+       auto-scroll after the intro (handled by our own
+       smoothScrollTo() in script.js), so native scrolling
+       here is left as instant/normal.
+    */
     scroll-behavior: auto;
     width: 100%;
     max-width: 100%;
@@ -86,6 +104,9 @@ body.invitation-loading {
 /* =========================================================
    LOADING SCREEN
 ========================================================= */
+/* =========================================================
+   ELEGANT LOADING / ENTRY SCREEN
+========================================================= */
 
 .loading-screen {
     position: fixed;
@@ -103,10 +124,22 @@ body.invitation-loading {
 
     text-align: center;
 
+    /*
+       SOFT LUXURY BACKGROUND
+       Ivory → very pale blue → deep ocean edge
+    */
+    /* background-image:url(./background-image.jpg); */
     background-image: url("./background-image.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+
+    /* opacity: 1; */
+    /* visibility: visible; */
+/* 
+    transition:
+        opacity 1.2s cubic-bezier(.16,1,.3,1),
+        visibility 1.2s ease; */
 }
 
 
@@ -120,10 +153,6 @@ body.invitation-loading {
 
 /* =========================================================
    SOFT LIGHT EFFECTS
-   (blur radius reduced: large blurred areas are one of the
-   most GPU-expensive things a phone can paint. 18-20px
-   looks visually the same as 30px here but is noticeably
-   cheaper to render every animation frame.)
 ========================================================= */
 
 .loading-screen::before {
@@ -133,6 +162,8 @@ body.invitation-loading {
     inset: 0;
 
     pointer-events: none;
+
+  
 
     animation:
         loadingAmbient
@@ -165,7 +196,7 @@ body.invitation-loading {
             transparent 70%
         );
 
-    filter: blur(18px);
+    filter: blur(30px);
 
     pointer-events: none;
 
@@ -410,15 +441,7 @@ body.invitation-loading {
 
 
 /* =========================================================
-   CALEB HAYES (loading screen)
-
-   PERFORMANCE FIX: this used to declare `animation` TWICE
-   (a leftover from an earlier edit) — the second one always
-   won, so the first was dead weight, and the gradient swept
-   forever (infinite) for as long as the loading screen was
-   up. It's now written once, and the gradient sweep is
-   capped at a few passes (it settles on the final frame)
-   instead of animating forever.
+   CALEB HAYES
 ========================================================= */
 
 .loading-name {
@@ -438,6 +461,9 @@ body.invitation-loading {
 
     letter-spacing: .3px;
 
+    /*
+       Elegant champagne → ivory → ocean blue
+    */
     background:
         linear-gradient(
             110deg,
@@ -456,6 +482,12 @@ body.invitation-loading {
     background-clip: text;
 
     -webkit-text-fill-color: transparent;
+
+    animation:
+        loadingNameGradient
+        7s
+        ease-in-out
+        infinite;
 
     opacity: 0;
 
@@ -480,8 +512,7 @@ body.invitation-loading {
         7s
         ease-in-out
         1.8s
-        3
-        forwards;
+        infinite;
 }
 
 
@@ -739,18 +770,11 @@ body.invitation-loading {
 
 
 /* =========================================================
-   VIEW INVITATION BUTTON
-
-   PERFORMANCE / CLEANUP FIX: the original file defined
-   `.view-invitation-wrapper` and `.view-invitation-btn`
-   TWICE, back to back, with the second copy silently
-   overriding the first. That's not just wasted bytes —
-   the browser still has to parse and discard the dead
-   rules. Merged into one definition each below.
+   VIEW INVITATION
 ========================================================= */
 
 .view-invitation-wrapper {
-    margin-top: 28px;
+    margin-top: 30px;
 
     opacity: 0;
 
@@ -761,8 +785,8 @@ body.invitation-loading {
     pointer-events: none;
 
     transition:
-        opacity .8s ease,
-        transform .8s cubic-bezier(.16,1,.3,1);
+        opacity .9s ease,
+        transform .9s cubic-bezier(.16,1,.3,1);
 }
 
 
@@ -777,6 +801,10 @@ body.invitation-loading {
 }
 
 
+/* =========================================================
+   ELEGANT INVITATION BUTTON
+========================================================= */
+
 .view-invitation-btn {
     position: relative;
 
@@ -787,114 +815,114 @@ body.invitation-loading {
 
     gap: 13px;
 
-    min-width: 230px;
+    min-width: 220px;
 
-    padding: 15px 25px;
+    padding: 14px 24px;
 
-    border-radius: 50px;
+    border:
+        1px solid rgba(128,104,46,.62);
 
-    border: 1px solid rgba(234,217,169,.75);
+    border-radius: 3px;
 
     background:
-        linear-gradient(
-            135deg,
-            rgba(216,194,139,.22),
-            rgba(143,220,232,.13)
-        );
+        rgba(255,255,255,.32);
 
-    color: #fffdf7;
+    color:
+        #062c45;
 
-    font-family: var(--sans);
+    font-family:
+        var(--sans);
 
-    font-size: 9px;
+    font-size: 8px;
 
     font-weight: 600;
 
-    letter-spacing: 2.4px;
+    letter-spacing: 2.5px;
 
     cursor: pointer;
 
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.35),
-        0 0 18px rgba(143,220,232,.18);
+        inset 0 1px 0 rgba(255,255,255,.85),
+        0 8px 25px rgba(6,44,69,.10);
 
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter:
+        blur(10px);
 
-    animation:
-        viewInvitationPulse
-        2.4s
-        ease-in-out
-        infinite;
+    -webkit-backdrop-filter:
+        blur(10px);
 
     transition:
-        transform .35s ease,
-        background .35s ease,
-        box-shadow .35s ease;
+        transform .4s cubic-bezier(.16,1,.3,1),
+        background .4s ease,
+        box-shadow .4s ease,
+        border-color .4s ease;
+}
+
+
+.view-invitation-btn::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 4px;
+
+    border:
+        1px solid rgba(128,104,46,.14);
+
+    pointer-events: none;
 }
 
 
 .view-invitation-btn:hover {
     transform:
-        translateY(-2px)
-        scale(1.03);
+        translateY(-3px);
 
     background:
-        linear-gradient(
-            135deg,
-            rgba(216,194,139,.38),
-            rgba(143,220,232,.24)
-        );
+        rgba(255,255,255,.65);
+
+    border-color:
+        rgba(128,104,46,.85);
 
     box-shadow:
-        0 0 25px rgba(143,220,232,.32);
+        inset 0 1px 0 rgba(255,255,255,.95),
+        0 12px 30px rgba(6,44,69,.15),
+        0 0 18px rgba(216,194,139,.18);
 }
 
 
 .view-invitation-btn:active {
     transform:
-        translateY(0)
+        translateY(-1px)
         scale(.98);
 }
 
 
 .view-arrow {
-    font-size: 18px;
+    font-size: 17px;
+
     line-height: .7;
+
+    color:
+        #9c7d32;
 
     animation:
         viewArrowMove
-        1.5s
+        1.6s
         ease-in-out
         infinite;
-}
-
-
-@keyframes viewInvitationPulse {
-
-    0%,100% {
-        box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.35),
-            0 0 12px rgba(143,220,232,.12);
-    }
-
-    50% {
-        box-shadow:
-            inset 0 1px 0 rgba(255,255,255,.45),
-            0 0 25px rgba(143,220,232,.32);
-    }
-
 }
 
 
 @keyframes viewArrowMove {
 
     0%,100% {
-        transform: translateY(0);
+        transform:
+            translateY(0);
     }
 
     50% {
-        transform: translateY(4px);
+        transform:
+            translateY(4px);
     }
 
 }
@@ -1005,7 +1033,6 @@ body.invitation-loading {
         font-size: 7.5px;
 
         letter-spacing: 2.2px;
-        color:rgb(14, 5, 71);
     }
 
 
@@ -1013,6 +1040,161 @@ body.invitation-loading {
     .decor-bottom {
         width: 180px;
         height: 180px;
+    }
+
+}
+
+
+/* =========================================================
+   VIEW INVITATION BUTTON
+========================================================= */
+
+.view-invitation-wrapper {
+    margin-top: 28px;
+
+    opacity: 0;
+
+    transform:
+        translateY(12px)
+        scale(.96);
+
+    pointer-events: none;
+
+    transition:
+        opacity .8s ease,
+        transform .8s cubic-bezier(.16,1,.3,1);
+}
+
+
+.view-invitation-wrapper.ready {
+    opacity: 1;
+
+    transform:
+        translateY(0)
+        scale(1);
+
+    pointer-events: auto;
+}
+
+
+.view-invitation-btn {
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 13px;
+
+    min-width: 230px;
+
+    padding: 15px 25px;
+
+    border-radius: 50px;
+
+    border: 1px solid rgba(234,217,169,.75);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(216,194,139,.22),
+            rgba(143,220,232,.13)
+        );
+
+    color: #fffdf7;
+
+    font-family: var(--sans);
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+    letter-spacing: 2.4px;
+
+    cursor: pointer;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.35),
+        0 0 18px rgba(143,220,232,.18);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    animation:
+        viewInvitationPulse
+        2.4s
+        ease-in-out
+        infinite;
+
+    transition:
+        transform .35s ease,
+        background .35s ease,
+        box-shadow .35s ease;
+}
+
+
+.view-invitation-btn:hover {
+    transform:
+        translateY(-2px)
+        scale(1.03);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(216,194,139,.38),
+            rgba(143,220,232,.24)
+        );
+
+    box-shadow:
+        0 0 25px rgba(143,220,232,.32);
+}
+
+
+.view-invitation-btn:active {
+    transform:
+        translateY(0)
+        scale(.98);
+}
+
+
+.view-arrow {
+    font-size: 18px;
+    line-height: .7;
+
+    animation:
+        viewArrowMove
+        1.5s
+        ease-in-out
+        infinite;
+}
+
+
+@keyframes viewInvitationPulse {
+
+    0%,100% {
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.35),
+            0 0 12px rgba(143,220,232,.12);
+    }
+
+    50% {
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.45),
+            0 0 25px rgba(143,220,232,.32);
+    }
+
+}
+
+
+@keyframes viewArrowMove {
+
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(4px);
     }
 
 }
@@ -1034,6 +1216,11 @@ body.invitation-loading {
 
     pointer-events: none;
 
+    /*
+       Richer underwater gradient: sunlit surface at the
+       top fading into deeper, more saturated water tones
+       — replaces the previous pastel/washed-out blues.
+    */
     background:
         linear-gradient(
             160deg,
@@ -1051,14 +1238,6 @@ body.invitation-loading {
 
     background-position: 0% 0%;
 
-    /*
-       PERFORMANCE FIX: promotes this to its own compositor
-       layer so the scroll-driven transform/background-
-       position writes in script.js don't force a repaint
-       of everything behind/above it.
-    */
-    will-change: transform, background-position;
-
     transition:
         background-position .2s linear;
 }
@@ -1066,6 +1245,8 @@ body.invitation-loading {
 
 /* =========================================================
    FLOATING BUBBLES
+   Lightweight, pure-CSS ambient motion — no JS, so it
+   never competes with video playback for the main thread.
 ========================================================= */
 
 .bubble-field {
@@ -1105,10 +1286,6 @@ body.invitation-loading {
     animation-timing-function: ease-in;
 
     animation-iteration-count: infinite;
-
-    /* GPU-only properties (transform + opacity), cheap to
-       animate indefinitely — left as-is on purpose. */
-    will-change: transform, opacity;
 }
 
 
@@ -1226,6 +1403,8 @@ body.invitation-loading {
 
 /* =========================================================
    WAVE DIVIDER
+   Signature ocean motif used between major sections
+   instead of plain straight rule lines.
 ========================================================= */
 
 .wave-divider {
@@ -1276,6 +1455,19 @@ body.invitation-loading {
     object-fit: cover;
 
     z-index: -5;
+
+    /*
+       PERFORMANCE FIX:
+       CSS `filter` and `transform: scale()` on a <video>
+       force the browser to recompute/repaint every single
+       frame during playback, on top of decoding the video
+       itself. On lower-end phones this is the #1 cause of
+       stutter/lag on background videos.
+
+       The brightness/contrast/saturation look should be
+       baked into the video file itself (once, with ffmpeg)
+       instead of being applied live in the browser.
+    */
 
     opacity: 0;
 
@@ -1354,11 +1546,6 @@ body::before {
 
 /* =========================================================
    MUSIC BUTTON
-
-   PERFORMANCE FIX: the "look at me" pulse/ring animations
-   used to run infinitely for the entire visit. They now run
-   a handful of times (enough to catch the eye) and settle,
-   instead of burning battery in the background forever.
 ========================================================= */
 
 .music-button {
@@ -1400,9 +1587,9 @@ body::before {
 
     cursor: pointer;
 
-    backdrop-filter: blur(8px) saturate(125%);
+    backdrop-filter: blur(14px) saturate(125%);
     -webkit-backdrop-filter:
-        blur(8px) saturate(125%);
+        blur(14px) saturate(125%);
 
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.35),
@@ -1420,8 +1607,7 @@ body::before {
         musicAttention
         2.8s
         ease-in-out
-        6
-        forwards;
+        infinite;
 }
 
 
@@ -1450,7 +1636,7 @@ body::before {
         musicRing
         2.8s
         ease-out
-        6;
+        infinite;
 }
 
 
@@ -1668,7 +1854,7 @@ body::before {
 
     border-radius: 50%;
 
-    filter: blur(16px);
+    filter: blur(25px);
 }
 
 
@@ -1822,15 +2008,7 @@ body::before {
 
 
 /* =========================================================
-   CALEB HAYES (hero)
-
-   PERFORMANCE FIX: the animated gradient text used to sweep
-   forever (infinite), and every frame of that sweep forces
-   the browser to recompute the blurred halo + drop-shadow
-   filters sitting behind/around this text too — on a large
-   heading, that's one of the heaviest things on the whole
-   page. It now sweeps a handful of times and settles on a
-   still frame, instead of animating for the entire visit.
+   CALEB HAYES
 ========================================================= */
 
 .cinematic-name {
@@ -1877,6 +2055,12 @@ body::before {
     -webkit-text-stroke:
         .65px rgba(0,0,0,.62);
 
+    animation:
+        calebGradient
+        8s
+        ease-in-out
+        infinite;
+
     opacity: 0;
 
     transform:
@@ -1907,13 +2091,6 @@ body::before {
         drop-shadow(0 2px 2px rgba(0,0,0,.98))
         drop-shadow(0 4px 6px rgba(0,0,0,.78))
         drop-shadow(0 8px 14px rgba(0,0,0,.46));
-
-    animation:
-        calebGradient
-        8s
-        ease-in-out
-        3
-        forwards;
 }
 
 
@@ -1966,7 +2143,7 @@ body::before {
             transparent 72%
         );
 
-    filter: blur(18px);
+    filter: blur(28px);
 
     opacity: 0;
 
@@ -2215,12 +2392,6 @@ body::before {
 
 /* =========================================================
    SCROLL INDICATOR
-
-   PERFORMANCE FIX: the glow/bounce animation used to run
-   infinitely for the rest of the visit even after the
-   person scrolled past it and it was no longer visible.
-   Capped to a handful of loops so it stops once it has
-   done its job of catching the eye.
 ========================================================= */
 
 .scroll-indicator {
@@ -2332,18 +2503,17 @@ body::before {
 
 /* =========================================================
    EVENT DETAILS
-
-   PERFORMANCE FIX: backdrop-filter blur is one of the most
-   expensive things a browser can paint, especially while
-   this card is moving during scroll on top of an animated
-   video/gradient background. Blur radius reduced (visually
-   almost identical) and `contain` limits recalculation to
-   just this box instead of the whole page.
 ========================================================= */
 
 .event-details {
     position: relative;
 
+    /*
+       Limits repaint/layout recalculation to just this
+       element during scroll instead of the whole page —
+       helps the heavy blur/gradient card feel lighter
+       while scrolling.
+    */
     contain: layout paint style;
 
     width: 100%;
@@ -2368,6 +2538,10 @@ body::before {
 
     border-radius: 18px;
 
+    /*
+       "Glass suspended in water" — a cool teal tint
+       instead of a neutral white/gray glass panel.
+    */
     background:
         linear-gradient(
             135deg,
@@ -2377,10 +2551,10 @@ body::before {
         );
 
     backdrop-filter:
-        blur(6px) saturate(135%);
+        blur(10px) saturate(135%);
 
     -webkit-backdrop-filter:
-        blur(6px) saturate(135%);
+        blur(10px) saturate(135%);
 
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.5),
@@ -2475,13 +2649,6 @@ body::before {
 
 /* =========================================================
    INFO
-
-   PERFORMANCE FIX: content-visibility: auto lets the browser
-   skip layout/paint work for this section entirely while
-   it's off-screen (and restore it automatically as it
-   scrolls into view). Big win on a long single-page site
-   like this one. contain-intrinsic-size gives it a rough
-   placeholder height so the scrollbar doesn't jump.
 ========================================================= */
 
 .info-section {
@@ -2492,9 +2659,6 @@ body::before {
         0 auto 90px;
 
     text-align: center;
-
-    content-visibility: auto;
-    contain-intrinsic-size: 1px 480px;
 }
 
 
@@ -2598,9 +2762,6 @@ body::before {
 
     contain: layout paint style;
 
-    content-visibility: auto;
-    contain-intrinsic-size: 1px 620px;
-
     width: 100%;
     max-width: 650px;
 
@@ -2624,10 +2785,10 @@ body::before {
         1px solid rgba(191,242,232,.42);
 
     backdrop-filter:
-        blur(6px) saturate(135%);
+        blur(10px) saturate(135%);
 
     -webkit-backdrop-filter:
-        blur(6px) saturate(135%);
+        blur(10px) saturate(135%);
 
     border-radius: 18px;
 
@@ -2961,6 +3122,7 @@ body::before {
 
 /* =========================================================
    RSVP
+   ELEGANT / FORMAL INVITATION STYLE
 ========================================================= */
 
 .guest-rsvp {
@@ -3272,10 +3434,10 @@ body::before {
         0 8px 22px rgba(0,20,35,.07);
 
     backdrop-filter:
-        blur(6px);
+        blur(12px);
 
     -webkit-backdrop-filter:
-        blur(6px);
+        blur(12px);
 
     overflow: hidden;
 
@@ -3466,9 +3628,6 @@ body::before {
 
     padding:
         20px 20px 60px;
-
-    content-visibility: auto;
-    contain-intrinsic-size: 1px 420px;
 }
 
 
@@ -3803,11 +3962,7 @@ body::before {
 
 
 /* =========================================================
-   SCROLL ARROW ATTENTION
-
-   PERFORMANCE FIX: capped from "infinite" to a limited
-   number of loops (settles at rest afterward), same reason
-   as the other attention-grabbers above.
+   SCROLL ARROW
 ========================================================= */
 
 .scroll-indicator.scroll-ready .scroll-arrow {
@@ -3817,8 +3972,7 @@ body::before {
         arrowAttention
         1.5s
         ease-in-out
-        6
-        forwards;
+        infinite;
 }
 
 
@@ -4186,9 +4340,6 @@ body::before {
     margin: 0 auto;
     padding: 0 0 70px 0;
     text-align: center;
-
-    content-visibility: auto;
-    contain-intrinsic-size: 1px 780px;
 }
 
 .location-section .section-line {
@@ -4249,8 +4400,6 @@ body::before {
     max-width: 720px;
     margin: 0 auto;
 
-    contain: layout paint style;
-
     overflow: hidden;
 
     background: rgba(2, 28, 46, 0.78);
@@ -4261,8 +4410,8 @@ body::before {
     box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.3);
 
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 
@@ -4331,7 +4480,6 @@ body::before {
     height: 330px;
 
     overflow: hidden;
-    contain: strict;
 }
 
 .map-frame iframe {
@@ -4458,7 +4606,23 @@ body::before {
 
 /* =========================================================
    READABILITY FIX
+   The dark-navy body copy below was styled for the old,
+   mostly-white background. Now that .color-background is a
+   richer, darker ocean gradient, that same dark-navy text
+   sits directly on a mid-to-dark background in several
+   places (dress code, closing, location section, map card)
+   with no glass card behind it — hence low contrast.
+
+   Fix: for text that has NO card/backdrop behind it, switch
+   to light "pearl" type with a soft dark shadow, the same
+   technique already used for the hero text over the video.
+   Text that already sits inside a glass card (event details,
+   guest section, RSVP) keeps its dark navy — we just make
+   those cards themselves a bit lighter/more opaque so the
+   dark text stays legible against them.
 ========================================================= */
+
+/* -- un-carded text: dress code section -- */
 
 .info-section .section-label,
 .info-section h3,
@@ -4474,6 +4638,8 @@ body::before {
 
 }
 
+
+/* -- un-carded text: location / church section -- */
 
 .location-section .section-label,
 .location-section h3 {
@@ -4508,6 +4674,8 @@ body::before {
 }
 
 
+/* -- map card: light gold/pearl instead of dark navy on a dark card -- */
+
 .map-location-text span {
 
     color: rgba(234,217,169,.85) !important;
@@ -4526,6 +4694,8 @@ body::before {
 }
 
 
+/* -- un-carded text: closing section -- */
+
 .closing p,
 .closing h4,
 .closing strong,
@@ -4539,6 +4709,10 @@ body::before {
 
 }
 
+
+/* -- lighten the glass cards themselves so the dark navy
+      text they contain (event details, guest section,
+      RSVP, guest message) stays clearly readable -- */
 
 .event-details,
 .guest-section {
@@ -4596,9 +4770,6 @@ body::before {
 
     text-align: center;
 
-    content-visibility: auto;
-    contain-intrinsic-size: 1px 220px;
-
 }
 
 
@@ -4639,8 +4810,6 @@ body::before {
 
     padding: 26px 32px;
 
-    contain: layout paint style;
-
     border: 1px solid rgba(191,242,232,.42);
 
     border-radius: 16px;
@@ -4653,8 +4822,8 @@ body::before {
             rgba(191,242,232,.14)
         );
 
-    backdrop-filter: blur(6px) saturate(135%);
-    -webkit-backdrop-filter: blur(6px) saturate(135%);
+    backdrop-filter: blur(10px) saturate(135%);
+    -webkit-backdrop-filter: blur(10px) saturate(135%);
 
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.35),
@@ -4756,40 +4925,6 @@ body::before {
 
     .countdown-separator {
         font-size: 20px;
-    }
-
-}
-
-
-/* =========================================================
-   REDUCED MOTION
-   Extends the existing bubble-only rule to every decorative
-   "attention" animation on the page, for people who have
-   asked their OS/browser to minimize motion.
-========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-
-    .loading-screen::before,
-    .loading-screen::after,
-    .loading-ornament i,
-    .loading-name,
-    .view-invitation-btn,
-    .view-arrow,
-    .music-button,
-    .music-button::before,
-    .music-button.playing .music-icon,
-    .cinematic-name.show,
-    .cinematic-name.show::before,
-    .cinematic-title.show,
-    .scroll-arrow,
-    .scroll-indicator.scroll-ready .scroll-arrow,
-    .guest-form button.ready,
-    .guest-form input.input-pulse,
-    .loading-progress {
-
-        animation: none !important;
-
     }
 
 }
