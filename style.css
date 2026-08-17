@@ -4928,3 +4928,67 @@ body::before {
     }
 
 }
+/* =====================================================
+   PURE CSS STAGGERED ANIMATION (1 second interval)
+   ===================================================== */
+
+/* 1. I-hide muna lahat ng elements sa hero section */
+.hero .eyebrow,
+.hero .small-line,
+.hero .celebration-intro,
+.hero .cinematic-name,
+.hero .name-underline,
+.hero .celebration-label,
+.hero .cinematic-title,
+.hero .hosted,
+.hero .scroll-indicator {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+/* 2. Sunud-sunod na paglitaw na may 1-second na pagitan bawat isa */
+.hero .eyebrow {
+    animation-delay: 0.8s;
+}
+
+.hero .small-line {
+    animation-delay: 0.12s;
+}
+
+.hero .celebration-intro {
+    animation-delay: 2.3s;
+}
+
+.hero .cinematic-name {
+    animation-delay: 4.1s;
+}
+
+.hero .name-underline {
+    animation-delay: 4.2s;
+}
+
+.hero .celebration-label {
+    animation-delay: 4.7s;
+}
+
+.hero .cinematic-title {
+    animation-delay: 6.7s;
+}
+
+.hero .hosted {
+    animation-delay: 8.8s;
+}
+
+/* 3. Pinakahuli ang Arrow */
+.hero .scroll-indicator {
+    animation-delay: 9.1s;
+}
+
+/* Keyframes para sa Fade In + Slide Up */
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

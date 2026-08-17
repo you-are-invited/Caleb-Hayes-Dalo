@@ -125,14 +125,6 @@ function setLoadingStatus(message) {
 
 /* =========================================================
    ROTATING LOADING MESSAGES
-
-   The status text used to only change when a buffer
-   percentage threshold was crossed — for a short 10-second
-   video that happens almost instantly, so the same message
-   would sit on screen doing nothing for several seconds and
-   feel stuck. This rotates through a set of ocean-themed
-   phrases on a fixed timer instead, so there's always
-   something new to read while things load.
 ========================================================= */
 
 const LOADING_MESSAGES = [
@@ -274,11 +266,6 @@ function getBufferedSeconds() {
                 bgVideo.buffered.end(i);
 
 
-            /*
-             * Find the range containing
-             * the current playback position.
-             */
-
             if (
                 currentTime >= start &&
                 currentTime <= end
@@ -293,11 +280,6 @@ function getBufferedSeconds() {
 
         }
 
-
-        /*
-         * If currentTime is not inside a range,
-         * use the latest buffered range.
-         */
 
         return Math.max(
             0,
@@ -354,7 +336,6 @@ function getBufferedPercentage() {
 
         const currentTime =
             bgVideo.currentTime || 0;
-
 
         let bestEnd =
             currentTime;
@@ -439,11 +420,6 @@ function updateVideoProgress() {
 
     if (bufferedPercentage > 0) {
 
-        /*
-         * Keep progress below 100 until
-         * the required buffer is actually ready.
-         */
-
         const visualProgress =
             Math.min(
                 95,
@@ -458,12 +434,6 @@ function updateVideoProgress() {
         setLoadingProgress(
             visualProgress
         );
-
-        /*
-         * Text itself is handled by the rotating
-         * loading-message system now — this only
-         * drives the progress bar fill.
-         */
 
     }
 
@@ -562,15 +532,6 @@ function checkVideoBuffer() {
         getBufferedPercentage();
 
 
-    /*
-     * For a short 10-second video:
-     *
-     * - If almost the entire video is buffered,
-     *   allow it immediately.
-     *
-     * - Otherwise require at least the target amount.
-     */
-
     const enoughBuffer =
         (
             duration > 0 &&
@@ -599,10 +560,6 @@ function checkVideoBuffer() {
 
     }
 
-
-    /*
-     * Update visual loading.
-     */
 
     if (
         bufferedPercentage > 0
@@ -649,22 +606,11 @@ function prepareVideo() {
     setLoadingProgress(5);
 
 
-    /*
-     * IMPORTANT:
-     * Listeners are attached BEFORE load().
-     */
-
-
-    /* =====================================================
-       METADATA
-    ===================================================== */
-
     bgVideo.addEventListener(
         "loadedmetadata",
         () => {
 
             videoMetadataReady = true;
-
 
             setLoadingProgress(15);
 
@@ -691,10 +637,6 @@ function prepareVideo() {
     );
 
 
-    /* =====================================================
-       PROGRESS
-    ===================================================== */
-
     bgVideo.addEventListener(
         "progress",
         () => {
@@ -707,21 +649,9 @@ function prepareVideo() {
     );
 
 
-    /* =====================================================
-       CAN PLAY
-    ===================================================== */
-
     bgVideo.addEventListener(
         "canplay",
         () => {
-
-            /*
-             * DO NOT mark ready here.
-             *
-             * canplay only means the browser can
-             * start playback. It does NOT guarantee
-             * enough buffering for uninterrupted playback.
-             */
 
             videoMetadataReady = true;
 
@@ -731,18 +661,9 @@ function prepareVideo() {
     );
 
 
-    /* =====================================================
-       CAN PLAY THROUGH
-    ===================================================== */
-
     bgVideo.addEventListener(
         "canplaythrough",
         () => {
-
-            /*
-             * This is a stronger signal that the browser
-             * expects continuous playback.
-             */
 
             videoMetadataReady = true;
 
@@ -753,10 +674,6 @@ function prepareVideo() {
         }
     );
 
-
-    /* =====================================================
-       LOADED DATA
-    ===================================================== */
 
     bgVideo.addEventListener(
         "loadeddata",
@@ -772,43 +689,21 @@ function prepareVideo() {
     );
 
 
-    /* =====================================================
-       WAITING
-    ===================================================== */
-
     bgVideo.addEventListener(
         "waiting",
         () => {
 
-            /*
-             * The rotating loading message already
-             * covers this state — nothing to do here.
-             */
-
         }
     );
 
-
-    /* =====================================================
-       STALLED
-    ===================================================== */
 
     bgVideo.addEventListener(
         "stalled",
         () => {
 
-            /*
-             * The rotating loading message already
-             * covers this state — nothing to do here.
-             */
-
         }
     );
 
-
-    /* =====================================================
-       ERROR
-    ===================================================== */
 
     bgVideo.addEventListener(
         "error",
@@ -821,10 +716,6 @@ function prepareVideo() {
                 "Background video could not be loaded."
             );
 
-
-            /*
-             * We don't trap the user on the loading screen.
-             */
 
             if (!videoLoadingFinished) {
 
@@ -844,10 +735,6 @@ function prepareVideo() {
     );
 
 
-    /* =====================================================
-       START PRELOAD
-    ===================================================== */
-
     try {
 
         bgVideo.preload = "auto";
@@ -864,7 +751,6 @@ function prepareVideo() {
 
         videoLoadFailed = true;
 
-
         stopLoadingMessageRotation();
 
         setLoadingProgress(100);
@@ -880,10 +766,6 @@ function prepareVideo() {
     }
 
 
-    /* =====================================================
-       CONTINUOUS BUFFER CHECK
-    ===================================================== */
-
     videoProgressTimer =
         setInterval(() => {
 
@@ -894,32 +776,16 @@ function prepareVideo() {
         }, 250);
 
 
-    /* =====================================================
-       VERY SLOW CONNECTION SAFETY
-    ===================================================== */
-
     videoLoadCheckTimer =
         setInterval(() => {
 
             if (videoLoadingFinished) {
-
                 return;
-
             }
 
 
-            /*
-             * If the browser has already loaded
-             * enough data, use it.
-             */
-
             checkVideoBuffer();
 
-
-            /*
-             * If the browser reports that the whole
-             * video has been downloaded, definitely ready.
-             */
 
             const percentage =
                 getBufferedPercentage();
@@ -966,10 +832,6 @@ async function startInvitation() {
     }
 
 
-    /* =====================================================
-       HIDE LOADING SCREEN
-    ===================================================== */
-
     if (loadingScreen) {
 
         loadingScreen.classList.add(
@@ -990,26 +852,10 @@ async function startInvitation() {
 
     if (bgVideo) {
 
-        /*
-         * IMPORTANT:
-         *
-         * DO NOT call:
-         * bgVideo.load()
-         *
-         * DO NOT reset currentTime unnecessarily.
-         *
-         * The video has already been preloaded.
-         */
-
         bgVideo.style.opacity = "1";
 
 
         try {
-
-            /*
-             * Make sure playback starts from
-             * the beginning only once.
-             */
 
             if (
                 bgVideo.currentTime > 0.05
@@ -1127,10 +973,6 @@ async function startInvitation() {
 
     }
 
-
-    /* =====================================================
-       REMOVE LOADING SCREEN COMPLETELY
-    ===================================================== */
 
     setTimeout(() => {
 
@@ -1474,10 +1316,6 @@ function showGuestMessage(guest) {
             </div>
 
 
-            <!-- =================================================
-                 RSVP
-            ================================================== -->
-
             <div class="rsvp-section">
 
                 <div class="rsvp-divider"></div>
@@ -1808,6 +1646,7 @@ if (guestName) {
                     "name-required"
                 );
 
+
                 guestMessage.classList.remove(
                     "show"
                 );
@@ -1851,19 +1690,6 @@ if (revealBtn) {
 
 /* =========================================================
    BACKGROUND SCROLL EFFECT
-
-   PERFORMANCE FIX:
-   The old version ran requestAnimationFrame() forever,
-   60 times per second, for the entire lifetime of the page
-   — even while the user wasn't scrolling at all. That
-   constant work (trig math + DOM style writes every frame)
-   competes with the video decoder for the main thread and
-   is a common cause of video stutter, especially on phones.
-
-   Now the animation loop only runs while it still has
-   something to animate (i.e. while currentScroll hasn't
-   caught up to targetScroll yet), and stops itself once it
-   settles. It's restarted automatically on the next scroll.
 ========================================================= */
 
 let currentScroll = 0;
@@ -1894,11 +1720,6 @@ function updateBackgroundScroll() {
     }
 
 
-    /*
-     * Wake the animation loop back up if it had
-     * settled and stopped itself.
-     */
-
     if (bgAnimationFrameId === null) {
 
         bgAnimationFrameId =
@@ -1919,11 +1740,6 @@ function animateBackground() {
             currentScroll
         );
 
-
-    /*
-     * Close enough — snap to the target and stop
-     * the loop instead of running forever.
-     */
 
     if (distanceToTarget < 0.5) {
 
@@ -2153,6 +1969,16 @@ function startCinematicHero() {
         );
 
 
+    /*
+     * IMPORTANT:
+     *
+     * ALL HERO TEXT SHOWS IMMEDIATELY.
+     *
+     * No individual timing.
+     * No 500ms / 1500ms / 3000ms / 4800ms /
+     * 7000ms text delays.
+     */
+
     function reveal(element) {
 
         if (element) {
@@ -2166,68 +1992,43 @@ function startCinematicHero() {
     }
 
 
-    setTimeout(() => {
+    /* SHOW ALL HERO TEXT IMMEDIATELY */
 
-        reveal(eyebrow);
-        reveal(line);
+    reveal(eyebrow);
 
-    }, 500);
+    reveal(line);
 
+    reveal(intro);
 
-    setTimeout(() => {
+    reveal(name);
 
-        reveal(intro);
+    reveal(underline);
 
-    }, 600);
+    reveal(label);
 
+    reveal(title);
 
-    setTimeout(() => {
+    reveal(hosted);
 
-        reveal(name);
-        reveal(underline);
-
-    }, 1500);
+    reveal(scrollIndicator);
 
 
-    setTimeout(() => {
+    if (scrollIndicator) {
 
-        reveal(label);
+        scrollIndicator.classList.add(
+            "scroll-ready"
+        );
 
-    }, 3000);
-
-
-    setTimeout(() => {
-
-        reveal(title);
-
-    }, 4800);
-
-
-    setTimeout(() => {
-
-        reveal(hosted);
-
-    }, 7000);
-
-
-    setTimeout(() => {
-
-        reveal(scrollIndicator);
-
-
-        if (scrollIndicator) {
-
-            scrollIndicator.classList.add(
-                "scroll-ready"
-            );
-
-        }
-
-    }, 7000);
+    }
 
 
     /* =====================================================
        AUTOMATIC SMOOTH SCROLL
+       
+       ONLY THIS PART IS TIMED.
+       
+       After 7 seconds, the page automatically
+       scrolls down to the event details.
     ===================================================== */
 
     setTimeout(() => {
@@ -2412,17 +2213,14 @@ function smoothScrollTo(
 
 /* =========================================================
    COUNTDOWN TIMER
-
-   Counts down to the event date/time set in the
-   data-event-datetime attribute on #countdownTimer.
-   Uses a plain setInterval (1x per second) — cheap enough
-   that it won't compete with video playback.
 ========================================================= */
 
 function initCountdownTimer() {
 
     const countdownEl =
-        document.getElementById("countdownTimer");
+        document.getElementById(
+            "countdownTimer"
+        );
 
 
     if (!countdownEl) {
@@ -2453,16 +2251,24 @@ function initCountdownTimer() {
 
 
     const daysEl =
-        document.getElementById("cdDays");
+        document.getElementById(
+            "cdDays"
+        );
 
     const hoursEl =
-        document.getElementById("cdHours");
+        document.getElementById(
+            "cdHours"
+        );
 
     const minutesEl =
-        document.getElementById("cdMinutes");
+        document.getElementById(
+            "cdMinutes"
+        );
 
     const secondsEl =
-        document.getElementById("cdSeconds");
+        document.getElementById(
+            "cdSeconds"
+        );
 
 
     function pad(number) {
@@ -2481,6 +2287,7 @@ function initCountdownTimer() {
         const now =
             new Date();
 
+
         const diff =
             targetDate.getTime() -
             now.getTime();
@@ -2488,14 +2295,24 @@ function initCountdownTimer() {
 
         if (diff <= 0) {
 
-            if (daysEl) daysEl.textContent = "00";
-            if (hoursEl) hoursEl.textContent = "00";
-            if (minutesEl) minutesEl.textContent = "00";
-            if (secondsEl) secondsEl.textContent = "00";
+            if (daysEl)
+                daysEl.textContent = "00";
+
+            if (hoursEl)
+                hoursEl.textContent = "00";
+
+            if (minutesEl)
+                minutesEl.textContent = "00";
+
+            if (secondsEl)
+                secondsEl.textContent = "00";
+
 
             if (countdownInterval) {
 
-                clearInterval(countdownInterval);
+                clearInterval(
+                    countdownInterval
+                );
 
             }
 
@@ -2505,29 +2322,54 @@ function initCountdownTimer() {
 
 
         const totalSeconds =
-            Math.floor(diff / 1000);
+            Math.floor(
+                diff / 1000
+            );
+
 
         const days =
-            Math.floor(totalSeconds / 86400);
+            Math.floor(
+                totalSeconds / 86400
+            );
+
 
         const hours =
             Math.floor(
-                (totalSeconds % 86400) / 3600
+                (
+                    totalSeconds %
+                    86400
+                ) / 3600
             );
+
 
         const minutes =
             Math.floor(
-                (totalSeconds % 3600) / 60
+                (
+                    totalSeconds %
+                    3600
+                ) / 60
             );
+
 
         const seconds =
             totalSeconds % 60;
 
 
-        if (daysEl) daysEl.textContent = pad(days);
-        if (hoursEl) hoursEl.textContent = pad(hours);
-        if (minutesEl) minutesEl.textContent = pad(minutes);
-        if (secondsEl) secondsEl.textContent = pad(seconds);
+        if (daysEl)
+            daysEl.textContent =
+                pad(days);
+
+        if (hoursEl)
+            hoursEl.textContent =
+                pad(hours);
+
+        if (minutesEl)
+            minutesEl.textContent =
+                pad(minutes);
+
+        if (secondsEl)
+            secondsEl.textContent =
+                pad(seconds);
 
     }
 
@@ -2536,7 +2378,10 @@ function initCountdownTimer() {
 
 
     countdownInterval =
-        setInterval(updateCountdown, 1000);
+        setInterval(
+            updateCountdown,
+            1000
+        );
 
 }
 
