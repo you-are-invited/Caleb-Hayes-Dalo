@@ -50,33 +50,6 @@ document.body.classList.add(
 
 
 /* =========================================================
-   CONNECTION-AWARE LOADING
-   ---------------------------------------------------------
-   On slow / metered connections we don't want to force the
-   user to wait for a big video to buffer. We detect this
-   once up front and use it to shrink the buffer requirement
-   and the maximum time we're willing to make anyone wait.
-========================================================= */
-
-const networkInfo =
-    navigator.connection ||
-    navigator.mozConnection ||
-    navigator.webkitConnection ||
-    null;
-
-const isSlowConnection =
-    !!(
-        networkInfo &&
-        (
-            networkInfo.saveData === true ||
-            /^(slow-2g|2g|3g)$/.test(
-                networkInfo.effectiveType || ""
-            )
-        )
-    );
-
-
-/* =========================================================
    VIDEO INITIAL STATE
 ========================================================= */
 
@@ -109,7 +82,7 @@ let videoLoadFailed = false;
 
 let videoLoadCheckTimer = null;
 
-let maxWaitTimer = null;
+let videoProgressTimer = null;
 
 
 /*
@@ -117,27 +90,10 @@ let maxWaitTimer = null;
  * before allowing the invitation to start.
  *
  * Since your video is only around 10 seconds,
- * we aim to have a good chunk of it buffered — but not
- * so much that people on weak connections get stuck
- * staring at a loading screen.
+ * we aim to have almost the whole video buffered.
  */
 
-const REQUIRED_BUFFER_SECONDS =
-    isSlowConnection ? 1.5 : 3;
-
-/*
- * HARD SAFETY CAP.
- *
- * No matter how slow the connection is, or how far the
- * video is from "fully ready", the invitation must be
- * reachable within this many milliseconds. The video
- * keeps downloading in the background and will simply
- * fade in whenever it's actually ready (see the opacity
- * fade in startInvitation / animateBackground).
- */
-
-const MAX_LOADING_WAIT_MS =
-    isSlowConnection ? 2200 : 4500;
+const REQUIRED_BUFFER_SECONDS = 8;
 
 
 /* =========================================================
@@ -530,6 +486,17 @@ function markVideoReady() {
     videoBufferReady = true;
 
 
+    if (videoProgressTimer) {
+
+        clearInterval(
+            videoProgressTimer
+        );
+
+        videoProgressTimer = null;
+
+    }
+
+
     if (videoLoadCheckTimer) {
 
         clearInterval(
@@ -537,17 +504,6 @@ function markVideoReady() {
         );
 
         videoLoadCheckTimer = null;
-
-    }
-
-
-    if (maxWaitTimer) {
-
-        clearTimeout(
-            maxWaitTimer
-        );
-
-        maxWaitTimer = null;
 
     }
 
@@ -694,45 +650,6 @@ function prepareVideo() {
 
 
     /*
-     * SLOW CONNECTION FAST PATH:
-     *
-     * Don't even try to buffer the video before letting
-     * people in — on a weak connection that can take a
-     * very long time and the video isn't essential to
-     * using the invitation. We still start the download
-     * (it may finish later and fade in), but we stop
-     * blocking on it almost immediately.
-     */
-
-    if (isSlowConnection) {
-
-        try {
-
-            bgVideo.load();
-
-        } catch (error) {
-
-            console.warn(
-                "Could not start video preload:",
-                error
-            );
-
-        }
-
-
-        maxWaitTimer =
-            setTimeout(
-                markVideoReady,
-                MAX_LOADING_WAIT_MS
-            );
-
-
-        return;
-
-    }
-
-
-    /*
      * IMPORTANT:
      * Listeners are attached BEFORE load().
      */
@@ -856,6 +773,40 @@ function prepareVideo() {
 
 
     /* =====================================================
+       WAITING
+    ===================================================== */
+
+    bgVideo.addEventListener(
+        "waiting",
+        () => {
+
+            /*
+             * The rotating loading message already
+             * covers this state — nothing to do here.
+             */
+
+        }
+    );
+
+
+    /* =====================================================
+       STALLED
+    ===================================================== */
+
+    bgVideo.addEventListener(
+        "stalled",
+        () => {
+
+            /*
+             * The rotating loading message already
+             * covers this state — nothing to do here.
+             */
+
+        }
+    );
+
+
+    /* =====================================================
        ERROR
     ===================================================== */
 
@@ -877,7 +828,15 @@ function prepareVideo() {
 
             if (!videoLoadingFinished) {
 
-                markVideoReady();
+                stopLoadingMessageRotation();
+
+                setLoadingStatus(
+                    "Your invitation is ready."
+                );
+
+                setLoadingProgress(100);
+
+                showViewInvitation();
 
             }
 
@@ -902,9 +861,19 @@ function prepareVideo() {
             error
         );
 
+
         videoLoadFailed = true;
 
-        markVideoReady();
+
+        stopLoadingMessageRotation();
+
+        setLoadingProgress(100);
+
+        setLoadingStatus(
+            "Your invitation is ready."
+        );
+
+        showViewInvitation();
 
         return;
 
@@ -912,58 +881,59 @@ function prepareVideo() {
 
 
     /* =====================================================
-       SINGLE CONTINUOUS BUFFER CHECK
+       CONTINUOUS BUFFER CHECK
+    ===================================================== */
 
-       PERFORMANCE FIX: this used to be two separate
-       setInterval loops (one every 250ms, one every
-       1000ms) running at the same time. That's extra
-       main-thread work competing with video decode for
-       no real benefit — one loop covers both jobs.
+    videoProgressTimer =
+        setInterval(() => {
+
+            updateVideoProgress();
+
+            checkVideoBuffer();
+
+        }, 250);
+
+
+    /* =====================================================
+       VERY SLOW CONNECTION SAFETY
     ===================================================== */
 
     videoLoadCheckTimer =
         setInterval(() => {
 
             if (videoLoadingFinished) {
+
                 return;
+
             }
 
 
-            updateVideoProgress();
+            /*
+             * If the browser has already loaded
+             * enough data, use it.
+             */
 
             checkVideoBuffer();
 
+
+            /*
+             * If the browser reports that the whole
+             * video has been downloaded, definitely ready.
+             */
 
             const percentage =
                 getBufferedPercentage();
 
 
-            if (percentage >= 98) {
+            if (
+                percentage >= 98
+            ) {
 
                 markVideoReady();
 
             }
 
-        }, 400);
-
-
-    /* =====================================================
-       HARD SAFETY CAP
-
-       Whatever happens with buffering, never make anyone
-       wait longer than this for the invitation itself.
-    ===================================================== */
-
-    maxWaitTimer =
-        setTimeout(() => {
-
-            if (!videoLoadingFinished) {
-
-                markVideoReady();
-
-            }
-
-        }, MAX_LOADING_WAIT_MS);
+        }, 1000);
 
 }
 
@@ -1018,7 +988,7 @@ async function startInvitation() {
        VIDEO
     ===================================================== */
 
-    if (bgVideo && !videoLoadFailed) {
+    if (bgVideo) {
 
         /*
          * IMPORTANT:
@@ -1028,16 +998,18 @@ async function startInvitation() {
          *
          * DO NOT reset currentTime unnecessarily.
          *
-         * The video has already been preloaded (or is
-         * still downloading in the background on a slow
-         * connection — play() will simply start whenever
-         * enough of it is available).
+         * The video has already been preloaded.
          */
 
         bgVideo.style.opacity = "1";
 
 
         try {
+
+            /*
+             * Make sure playback starts from
+             * the beginning only once.
+             */
 
             if (
                 bgVideo.currentTime > 0.05
@@ -1275,69 +1247,50 @@ const guestMessage =
 
 let guests = [];
 
-let guestsLoaded = false;
-
-let guestsLoadPromise = null;
-
 
 /* =========================================================
    LOAD GUESTS
-
-   PERFORMANCE FIX: this used to fire immediately on page
-   load, competing with the video/font/image requests that
-   actually matter for the first paint. It's now lazy —
-   only fetched the first time someone actually tries to
-   reveal a message — and reveal() just awaits it if it's
-   still in flight.
 ========================================================= */
 
-function loadGuests() {
+async function loadGuests() {
 
-    if (guestsLoadPromise) {
-        return guestsLoadPromise;
-    }
+    try {
 
-
-    guestsLoadPromise = (async () => {
-
-        try {
-
-            const response =
-                await fetch(
-                    "./guests.json",
-                    {
-                        cache: "no-cache"
-                    }
-                );
+        const response =
+            await fetch(
+                "./guests.json",
+                {
+                    cache: "no-cache"
+                }
+            );
 
 
-            if (!response.ok) {
+        if (!response.ok) {
 
-                throw new Error(
-                    "Could not load guests.json"
-                );
-
-            }
-
-
-            guests =
-                await response.json();
-
-            guestsLoaded = true;
-
-        } catch (error) {
-
-            console.error(
-                "Error loading guests.json:",
-                error
+            throw new Error(
+                "Could not load guests.json"
             );
 
         }
 
-    })();
+
+        guests =
+            await response.json();
 
 
-    return guestsLoadPromise;
+        console.log(
+            "Guest list loaded:",
+            guests
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error loading guests.json:",
+            error
+        );
+
+    }
 
 }
 
@@ -1704,7 +1657,7 @@ function showGuestChoices(matches) {
    REVEAL GUEST MESSAGE
 ========================================================= */
 
-async function revealGuestMessage() {
+function revealGuestMessage() {
 
     if (!guestName || !guestMessage) {
         return;
@@ -1759,31 +1712,6 @@ async function revealGuestMessage() {
     guestName.classList.remove(
         "name-required"
     );
-
-
-    if (!guestsLoaded) {
-
-        guestMessage.innerHTML = `
-
-            <div class="message-divider"></div>
-
-            <div class="message-text">
-
-                <p class="message-paragraph">
-                    One moment...
-                </p>
-
-            </div>
-
-        `;
-
-        guestMessage.classList.add(
-            "show"
-        );
-
-        await loadGuests();
-
-    }
 
 
     const matches =
@@ -2616,6 +2544,8 @@ function initCountdownTimer() {
 /* =========================================================
    START
 ========================================================= */
+
+loadGuests();
 
 prepareVideo();
 

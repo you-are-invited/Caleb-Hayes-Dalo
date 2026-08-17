@@ -25,34 +25,6 @@
 
 
 /* =========================================================
-   PERFORMANCE: REDUCED MOTION
-   ---------------------------------------------------------
-   Added up front so it always wins. Cuts every infinite
-   decorative animation (glows, shimmers, pulses, bubbles)
-   down to effectively nothing for anyone who has asked
-   their OS/browser for reduced motion, and is also a big
-   win for low-end devices since those animations are the
-   main cause of jank when they run at the same time as
-   video/scroll work.
-========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-
-    *,
-    *::before,
-    *::after {
-
-        animation-duration: 0.001ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.001ms !important;
-        scroll-behavior: auto !important;
-
-    }
-
-}
-
-
-/* =========================================================
    RESET
 ========================================================= */
 
@@ -1430,25 +1402,6 @@ background-repeat: no-repeat;
 
 
 /* =========================================================
-   PERFORMANCE: FEWER BUBBLES ON SMALL SCREENS
-   ---------------------------------------------------------
-   8 blurred, endlessly-animating circles is cheap on a
-   desktop GPU but adds up on the low/mid-range phones this
-   invitation is mostly viewed on, especially while a video
-   is also decoding. Half of them is visually almost the
-   same and noticeably lighter on the main thread.
-========================================================= */
-
-@media (max-width: 600px) {
-
-    .bubble:nth-child(n + 5) {
-        display: none;
-    }
-
-}
-
-
-/* =========================================================
    WAVE DIVIDER
    Signature ocean motif used between major sections
    instead of plain straight rule lines.
@@ -2598,10 +2551,10 @@ body::before {
         );
 
     backdrop-filter:
-        blur(6px) saturate(120%);
+        blur(10px) saturate(135%);
 
     -webkit-backdrop-filter:
-        blur(6px) saturate(120%);
+        blur(10px) saturate(135%);
 
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.5),
@@ -2832,10 +2785,10 @@ body::before {
         1px solid rgba(191,242,232,.42);
 
     backdrop-filter:
-        blur(6px) saturate(120%);
+        blur(10px) saturate(135%);
 
     -webkit-backdrop-filter:
-        blur(6px) saturate(120%);
+        blur(10px) saturate(135%);
 
     border-radius: 18px;
 
@@ -3481,10 +3434,10 @@ body::before {
         0 8px 22px rgba(0,20,35,.07);
 
     backdrop-filter:
-        blur(6px);
+        blur(12px);
 
     -webkit-backdrop-filter:
-        blur(6px);
+        blur(12px);
 
     overflow: hidden;
 
@@ -4457,8 +4410,8 @@ body::before {
     box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.3);
 
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 
@@ -4869,8 +4822,8 @@ body::before {
             rgba(191,242,232,.14)
         );
 
-    backdrop-filter: blur(6px) saturate(120%);
-    -webkit-backdrop-filter: blur(6px) saturate(120%);
+    backdrop-filter: blur(10px) saturate(135%);
+    -webkit-backdrop-filter: blur(10px) saturate(135%);
 
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.35),
