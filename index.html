@@ -10,8 +10,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+    <!--
+        PERFORMANCE FIX:
+        Only the font weights actually used in style.css are
+        loaded now (400/500/600 for both families). The old
+        link also pulled 300 and 700, which are extra font
+        files the browser has to download before text can
+        render in its final look — unnecessary weight on a
+        slow connection.
+    -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600&display=swap"
         rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
@@ -123,7 +132,7 @@
     <audio
         id="bgMusic"
         loop
-        preload="auto">
+        preload="none">
 
         <source
             src="./music.mp4"
