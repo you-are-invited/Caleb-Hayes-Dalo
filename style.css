@@ -4,7 +4,7 @@
     --gold: #d8c28b;
     --gold-light: #ead9a9;
     --ocean-blue: #8fdce8;
-    --navy: #062c45 !important;
+    --navy: #062c45;
     --deep-ocean: #021c2e;
 
     /*
@@ -102,9 +102,6 @@ body.invitation-loading {
 
 
 /* =========================================================
-   LOADING SCREEN
-========================================================= */
-/* =========================================================
    ELEGANT LOADING / ENTRY SCREEN
 ========================================================= */
 
@@ -128,18 +125,10 @@ body.invitation-loading {
        SOFT LUXURY BACKGROUND
        Ivory → very pale blue → deep ocean edge
     */
-    /* background-image:url(./background-image.jpg); */
     background-image: url("./background-image.jpg");
-background-size: cover;
-background-position: center;
-background-repeat: no-repeat;
-
-    /* opacity: 1; */
-    /* visibility: visible; */
-/* 
-    transition:
-        opacity 1.2s cubic-bezier(.16,1,.3,1),
-        visibility 1.2s ease; */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 
@@ -162,8 +151,6 @@ background-repeat: no-repeat;
     inset: 0;
 
     pointer-events: none;
-
-  
 
     animation:
         loadingAmbient
@@ -483,12 +470,6 @@ background-repeat: no-repeat;
 
     -webkit-text-fill-color: transparent;
 
-    animation:
-        loadingNameGradient
-        7s
-        ease-in-out
-        infinite;
-
     opacity: 0;
 
     transform:
@@ -770,283 +751,10 @@ background-repeat: no-repeat;
 
 
 /* =========================================================
-   VIEW INVITATION
-========================================================= */
-
-.view-invitation-wrapper {
-    margin-top: 30px;
-
-    opacity: 0;
-
-    transform:
-        translateY(12px)
-        scale(.96);
-
-    pointer-events: none;
-
-    transition:
-        opacity .9s ease,
-        transform .9s cubic-bezier(.16,1,.3,1);
-}
-
-
-.view-invitation-wrapper.ready {
-    opacity: 1;
-
-    transform:
-        translateY(0)
-        scale(1);
-
-    pointer-events: auto;
-}
-
-
-/* =========================================================
-   ELEGANT INVITATION BUTTON
-========================================================= */
-
-.view-invitation-btn {
-    position: relative;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    gap: 13px;
-
-    min-width: 220px;
-
-    padding: 14px 24px;
-
-    border:
-        1px solid rgba(128,104,46,.62);
-
-    border-radius: 3px;
-
-    background:
-        rgba(255,255,255,.32);
-
-    color:
-        #062c45 !important;
-
-    font-family:
-        var(--sans);
-
-    font-size: 8px;
-
-    font-weight: 600;
-
-    letter-spacing: 2.5px;
-
-    cursor: pointer;
-
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.85),
-        0 8px 25px rgba(6,44,69,.10);
-
-    backdrop-filter:
-        blur(10px);
-
-    -webkit-backdrop-filter:
-        blur(10px);
-
-    transition:
-        transform .4s cubic-bezier(.16,1,.3,1),
-        background .4s ease,
-        box-shadow .4s ease,
-        border-color .4s ease;
-}
-
-
-.view-invitation-btn::before {
-    content: "";
-
-    position: absolute;
-
-    inset: 4px;
-
-    border:
-        1px solid rgba(128,104,46,.14);
-
-    pointer-events: none;
-}
-
-
-.view-invitation-btn:hover {
-    transform:
-        translateY(-3px);
-
-    background:
-        rgba(255,255,255,.65);
-
-    border-color:
-        rgba(128,104,46,.85);
-
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.95),
-        0 12px 30px rgba(6,44,69,.15),
-        0 0 18px rgba(216,194,139,.18);
-}
-
-
-.view-invitation-btn:active {
-    transform:
-        translateY(-1px)
-        scale(.98);
-}
-
-
-.view-arrow {
-    font-size: 17px;
-
-    line-height: .7;
-
-    color:
-        #9c7d32;
-
-    animation:
-        viewArrowMove
-        1.6s
-        ease-in-out
-        infinite;
-}
-
-
-@keyframes viewArrowMove {
-
-    0%,100% {
-        transform:
-            translateY(0);
-    }
-
-    50% {
-        transform:
-            translateY(4px);
-    }
-
-}
-
-
-/* =========================================================
-   GENERAL LOADING REVEAL
-========================================================= */
-
-@keyframes loadingFadeUp {
-
-    0% {
-        opacity: 0;
-
-        transform:
-            translateY(16px);
-    }
-
-    100% {
-        opacity: 1;
-
-        transform:
-            translateY(0);
-    }
-
-}
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 600px) {
-
-    .loading-content {
-        width: 88vw;
-    }
-
-
-    .loading-ornament {
-        margin-bottom: 20px;
-    }
-
-
-    .loading-ornament span {
-        width: 28px;
-    }
-
-
-    .loading-small {
-        font-size: 7px;
-
-        letter-spacing: 3.5px;
-
-        margin-bottom: 15px;
-        color: black;
-    }
-
-
-    .loading-name {
-        font-size:
-            clamp(55px, 16vw, 82px);
-
-        line-height: .92;
-    }
-
-
-    .loading-subtitle {
-        font-size: 15px;
-
-        margin-top: 13px;
-        color: black;
-    }
-
-
-    .loading-line {
-        margin:
-            21px auto 18px;
-    }
-
-
-    .loading-status {
-        font-size: 7px;
-
-        letter-spacing: 1.8px;
-        color: black;
-    }
-
-
-    .loading-bar {
-        width: 220px;
-
-        margin-top: 16px;
-    }
-
-
-    .view-invitation-wrapper {
-        margin-top: 26px;
-    }
-
-
-    .view-invitation-btn {
-        min-width: 205px;
-
-        padding:
-            13px 20px;
-
-        font-size: 7.5px;
-
-        letter-spacing: 2.2px;
-    }
-
-
-    .decor-top,
-    .decor-bottom {
-        width: 180px;
-        height: 180px;
-    }
-
-}
-
-
-/* =========================================================
    VIEW INVITATION BUTTON
+   (single definition — a duplicate, conflicting copy of
+   this block used to sit right after the progress bar and
+   was fully overridden by this one; removed for speed.)
 ========================================================= */
 
 .view-invitation-wrapper {
@@ -1201,6 +909,123 @@ background-repeat: no-repeat;
 
 
 /* =========================================================
+   GENERAL LOADING REVEAL
+========================================================= */
+
+@keyframes loadingFadeUp {
+
+    0% {
+        opacity: 0;
+
+        transform:
+            translateY(16px);
+    }
+
+    100% {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .loading-content {
+        width: 88vw;
+    }
+
+
+    .loading-ornament {
+        margin-bottom: 20px;
+    }
+
+
+    .loading-ornament span {
+        width: 28px;
+    }
+
+
+    .loading-small {
+        font-size: 7px;
+
+        letter-spacing: 3.5px;
+
+        margin-bottom: 15px;
+        color: black;
+    }
+
+
+    .loading-name {
+        font-size:
+            clamp(55px, 16vw, 82px);
+
+        line-height: .92;
+    }
+
+
+    .loading-subtitle {
+        font-size: 15px;
+
+        margin-top: 13px;
+        color: black;
+    }
+
+
+    .loading-line {
+        margin:
+            21px auto 18px;
+    }
+
+
+    .loading-status {
+        font-size: 7px;
+
+        letter-spacing: 1.8px;
+        color: black;
+    }
+
+
+    .loading-bar {
+        width: 220px;
+
+        margin-top: 16px;
+    }
+
+
+    .view-invitation-wrapper {
+        margin-top: 26px;
+    }
+
+
+    .view-invitation-btn {
+        min-width:
+            215px;
+
+        padding:
+            14px 20px;
+
+        font-size: 8px;
+        color:rgb(14, 5, 71);
+    }
+
+
+    .decor-top,
+    .decor-bottom {
+        width: 180px;
+        height: 180px;
+    }
+
+}
+
+
+/* =========================================================
    BACKGROUND
 ========================================================= */
 
@@ -1243,11 +1068,6 @@ background-repeat: no-repeat;
 }
 
 
-/* =========================================================
-   FLOATING BUBBLES
-   Lightweight, pure-CSS ambient motion — no JS, so it
-   never competes with video playback for the main thread.
-========================================================= */
 
 
 /* =========================================================
@@ -1732,7 +1552,7 @@ body::before {
     font-weight: 600;
 
     color:
-        #062c45 !important;
+        #062c45;
 
     line-height: 1.1;
 }
@@ -1749,7 +1569,7 @@ body::before {
     font-weight: 500;
 
     color:
-        #173e51 !important;
+        #173e51;
 }
 
 
@@ -1815,7 +1635,7 @@ body::before {
     font-weight: 700;
 
     color:
-        #173e51 !important;
+        #173e51;
 
     margin-bottom: 12px;
 }
@@ -1832,7 +1652,7 @@ body::before {
     font-weight: 600;
 
     color:
-        #062c45 !important;
+        #062c45;
 
     margin-bottom: 17px;
 }
@@ -1847,7 +1667,7 @@ body::before {
     line-height: 1.95;
 
     color:
-       #173e51 !important;
+       #173e51;
 
     font-weight: 500;
 }
@@ -1855,7 +1675,7 @@ body::before {
 
 .info-section b {
     color:
-        #062c45 !important;
+        #062c45;
 }
 
 
@@ -1935,7 +1755,7 @@ body::before {
     font-weight: 600;
 
     color:
-        #062c45 !important;
+        #062c45;
 
     margin-bottom: 14px;
 }
@@ -1948,7 +1768,7 @@ body::before {
         0 auto 30px;
 
     color:
-        #173e51 !important;
+        #173e51;
 
     font-family:
         var(--sans);
@@ -1994,7 +1814,7 @@ body::before {
     outline: none;
 
     color:
-        #062c45 !important;
+        #062c45;
 
     font-family:
         var(--sans);
@@ -2144,7 +1964,7 @@ body::before {
     font-weight: 600;
 
     color:
-        #062c45 !important;
+        #062c45;
 }
 
 
@@ -2246,58 +2066,9 @@ body::before {
 
 
 /* =========================================================
-   RSVP
+   RSVP (rendered dynamically by script.js inside the
+   guest message once a name is matched)
    ELEGANT / FORMAL INVITATION STYLE
-========================================================= */
-
-.guest-rsvp {
-    position: relative;
-
-    max-height: 0;
-
-    opacity: 0;
-
-    overflow: hidden;
-
-    visibility: hidden;
-
-    margin-top: 0;
-
-    transform:
-        translateY(18px);
-
-    transition:
-        max-height 1.1s cubic-bezier(.16,1,.3,1),
-        opacity .7s ease,
-        margin .8s ease,
-        transform .8s cubic-bezier(.16,1,.3,1),
-        visibility 0s linear 1.1s;
-}
-
-
-.guest-rsvp.show {
-    max-height: 1000px;
-
-    opacity: 1;
-
-    visibility: visible;
-
-    margin-top: 48px;
-
-    transform:
-        translateY(0);
-
-    transition:
-        max-height 1.1s cubic-bezier(.16,1,.3,1),
-        opacity .8s ease .12s,
-        margin .8s ease,
-        transform .8s cubic-bezier(.16,1,.3,1),
-        visibility 0s linear 0s;
-}
-
-
-/* =========================================================
-   RSVP DIVIDER
 ========================================================= */
 
 .rsvp-divider {
@@ -2403,7 +2174,7 @@ body::before {
     letter-spacing: .2px;
 
     color:
-        #062c45 !important;
+        #062c45;
 }
 
 
@@ -2455,7 +2226,7 @@ body::before {
     font-weight: 400;
 
     color:
-        #173e51 !important;
+        #173e51;
 }
 
 
@@ -2551,7 +2322,7 @@ body::before {
         );
 
     color:
-        #062c45 !important;
+        #062c45;
 
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,.7),
@@ -2713,7 +2484,7 @@ body::before {
     letter-spacing: .3px;
 
     color:
-        #062c45 !important;
+        #062c45;
 }
 
 
@@ -2782,7 +2553,7 @@ body::before {
     line-height: 1.5;
 
     color:
-        #062c45 !important;
+        #062c45;
 }
 
 
@@ -2799,7 +2570,7 @@ body::before {
     font-style: italic;
 
     color:
-        #173e51 !important;
+        #173e51;
 }
 
 
@@ -2810,7 +2581,7 @@ body::before {
     font-size: 23px;
 
     color:
-        #062c45 !important;
+        #062c45;
 }
 
 
@@ -2840,7 +2611,7 @@ body::before {
     letter-spacing: 1.8px;
 
     color:
-        #173e51 !important;
+        #173e51;
 }
 
 
@@ -3196,13 +2967,6 @@ body::before {
        ELEGANT RSVP MOBILE
     ====================================================== */
 
-    .guest-rsvp.show {
-        max-height: 1300px;
-
-        margin-top: 38px;
-    }
-
-
     .rsvp-divider {
         width: 90px;
 
@@ -3324,18 +3088,6 @@ body::before {
             2.5s;
     }
 
-
-    .view-invitation-btn {
-        min-width:
-            215px;
-
-        padding:
-            14px 20px;
-
-        font-size: 8px;
-        color:rgb(14, 5, 71);
-    }
-
 }
 
 
@@ -3402,7 +3154,7 @@ body::before {
     letter-spacing: 3px;
     text-transform: uppercase;
 
-     color: #062c45 !important;
+    color: #062c45;
 }
 
 .location-section h3 {
@@ -3412,7 +3164,7 @@ body::before {
     font-size: clamp(30px, 5vw, 44px);
     font-weight: 500;
 
-     color: #062c45 !important;
+    color: #062c45;
 
     text-shadow:
         0 2px 12px rgba(0, 0, 0, 0.35);
@@ -3503,7 +3255,7 @@ body::before {
     font-size: 10px;
     letter-spacing: 0.5px;
 
-     color: #062c45 !important;
+    color: rgba(234,217,169,.85);
 }
 
 
@@ -3603,8 +3355,7 @@ body::before {
         font-size: 12px;
         line-height: 1.85;
 
-        color:
-#062c45 !important;
+        color: #062c45;
     }
 
     .map-card-header {
@@ -3626,7 +3377,7 @@ body::before {
         font-size: 9px;
         line-height: 1.5;
 
-        color: rgba(234, 217, 169, 0.1);
+        color: rgba(234, 217, 169, 0.8);
     }
 
     .map-frame {
@@ -3644,44 +3395,16 @@ body::before {
 
 /* =========================================================
    READABILITY FIX
+   (un-carded text needs light/pearl tone; the glass cards
+   are lightened to keep the dark navy text inside them
+   readable)
 ========================================================= */
-
-/* -- un-carded text: dress code section -- */
 
 .info-section .section-label,
 .info-section h3,
 .info-section p:not(.section-label):not(.thank-you),
 .info-section b,
-.thank-you {
-
-    color: var(--pearl);
-
-
-}
-
-
-/* -- map card: light gold/pearl instead of dark navy on a dark card -- */
-
-.map-location-text span {
-
-    color: rgba(234,217,169,.85) !important;
-
-}
-
-
-@media (max-width: 600px) {
-
-    .map-location-text span {
-
-        color: rgba(234,217,169,.8) !important;
-
-    }
-
-}
-
-
-/* -- un-carded text: closing section -- */
-
+.thank-you,
 .closing p,
 .closing h4,
 .closing strong,
@@ -3689,14 +3412,8 @@ body::before {
 
     color: var(--pearl);
 
-  
-
 }
 
-
-/* -- lighten the glass cards themselves so the dark navy
-      text they contain (event details, guest section,
-      RSVP, guest message) stays clearly readable -- */
 
 .event-details,
 .guest-section {
@@ -3707,9 +3424,9 @@ body::before {
             rgba(246,240,226,.62),
             rgba(191,242,232,.38),
             rgba(246,240,226,.5)
-        ) !important;
+        );
 
-    border-color: rgba(246,240,226,.55) !important;
+    border-color: rgba(246,240,226,.55);
 
 }
 
