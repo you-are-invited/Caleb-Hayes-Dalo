@@ -641,25 +641,6 @@ async function startInvitation() {
     invitationStarted = true;
 
 
-    /* =====================================================
-       FIX: STAGGER-ANIMATION TRIGGER
-
-       Idinadagdag ang class na ito sa <body> sa mismong
-       sandali ng pag-click sa "View Invitation" — hindi
-       pagka-load ng page. Ang CSS stagger animation
-       (fadeInUp na may animation-delay) sa style.css ay
-       naka-scope na sa "body.invitation-active", kaya ang
-       delay timers (0.8s, 4.1s, 7.1s, atbp.) ay magsisimula
-       mag-bilang lang mula rito — kahit gaano katagal
-       naghintay ang guest sa loading screen bago mag-click,
-       hindi na sila magiging out-of-sync.
-    ===================================================== */
-
-    document.body.classList.add(
-        "invitation-active"
-    );
-
-
     if (viewInvitationBtn) {
 
         viewInvitationBtn.disabled = true;
@@ -773,10 +754,13 @@ async function startInvitation() {
 
 
     /* =====================================================
-       START HERO
+       AUTO-SCROLL DOWN AFTER A FEW SECONDS
+       Lets the guest see the background video on its own
+       first, then the page scrolls itself down to the
+       content below.
     ===================================================== */
 
-    startCinematicHero();
+    startAutoScroll();
 
 
     /* =====================================================
@@ -1710,121 +1694,24 @@ updateBackgroundScroll();
 
 
 /* =========================================================
-   CINEMATIC HERO
+   AUTOMATIC SMOOTH SCROLL
+
+   After a few seconds of just showing the background
+   video, the page automatically scrolls down to the
+   event details / content below.
 ========================================================= */
 
-let cinematicStarted = false;
+let autoScrollStarted = false;
 
 
-function startCinematicHero() {
+function startAutoScroll() {
 
-    if (cinematicStarted) {
+    if (autoScrollStarted) {
         return;
     }
 
+    autoScrollStarted = true;
 
-    cinematicStarted = true;
-
-
-    const eyebrow =
-        document.querySelector(
-            ".eyebrow-reveal"
-        );
-
-    const line =
-        document.querySelector(
-            ".line-reveal"
-        );
-
-    const intro =
-        document.querySelector(
-            ".intro-reveal"
-        );
-
-    const name =
-        document.querySelector(
-            ".cinematic-name"
-        );
-
-    const underline =
-        document.querySelector(
-            ".underline-reveal"
-        );
-
-    const label =
-        document.querySelector(
-            ".label-reveal"
-        );
-
-    const title =
-        document.querySelector(
-            ".cinematic-title"
-        );
-
-    const hosted =
-        document.querySelector(
-            ".hosted-reveal"
-        );
-
-    const scrollIndicator =
-        document.querySelector(
-            ".scroll-reveal"
-        );
-
-
-    /* =====================================================
-       REVEAL ALL HERO TEXT
-    ===================================================== */
-
-    function reveal(element) {
-
-        if (element) {
-
-            element.classList.add(
-                "show"
-            );
-
-        }
-
-    }
-
-
-    reveal(eyebrow);
-
-    reveal(line);
-
-    reveal(intro);
-
-    reveal(name);
-
-    reveal(underline);
-
-    reveal(label);
-
-    reveal(title);
-
-    reveal(hosted);
-
-    reveal(scrollIndicator);
-
-
-    if (scrollIndicator) {
-
-        scrollIndicator.classList.add(
-            "scroll-ready"
-        );
-
-    }
-
-
-    /* =====================================================
-       AUTOMATIC SMOOTH SCROLL
-       
-       ONLY THIS PART IS TIMED.
-       
-       After 7 seconds, the page automatically
-       scrolls down to the event details.
-    ===================================================== */
 
     setTimeout(() => {
 
